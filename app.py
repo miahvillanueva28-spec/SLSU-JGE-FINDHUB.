@@ -1,4 +1,3 @@
-
 import os
 import csv
 import io
@@ -43,7 +42,9 @@ UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.config["SECRET_KEY"] = (
+    os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -52,26 +53,55 @@ app.config["SESSION_COOKIE_SECURE"] = (
     os.environ.get("COOKIE_SECURE", "true").lower() == "true"
 )
 
+
 # --------------------------------------------------
-# DATABASE
+# DATABASE CONFIGURATION - FIXED FOR RENDER
 # --------------------------------------------------
 
 database_url = os.environ.get("DATABASE_URL", "").strip()
 
-if database_url.startswith("postgres://"):
-    database_url = database_url.replace(
-        "postgres://", "postgresql://", 1
-    )
+if database_url:
+    # Render may provide a URL starting with postgres://
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace(
+            "postgres://",
+            "postgresql+psycopg2://",
+            1,
+        )
 
-if database_url.startswith("postgresql+psycopg://"):
-    database_url = database_url.replace(
-        "postgresql+psycopg://", "postgresql://", 1
-    )
+    # Use psycopg2-binary, not the psycopg v3 driver.
+    elif database_url.startswith("postgresql+psycopg://"):
+        database_url = database_url.replace(
+            "postgresql+psycopg://",
+            "postgresql+psycopg2://",
+            1,
+        )
 
-if not database_url:
-    # Local development only.
-    # Render should have DATABASE_URL set to PostgreSQL.
+    elif database_url.startswith("postgresql://"):
+        database_url = database_url.replace(
+            "postgresql://",
+            "postgresql+psycopg2://",
+            1,
+        )
+
+    # Reject an incorrectly formatted database URL with a clear message.
+    if not database_url.startswith(
+        ("postgresql+psycopg2://", "sqlite:///")
+    ):
+        raise RuntimeError(
+            "Invalid DATABASE_URL format. "
+            "Set DATABASE_URL to your PostgreSQL Internal Database URL "
+            "in the Render Web Service environment variables."
+        )
+
+else:
+    # Local development fallback only.
+    # SQLite on Render Free is not reliable persistent storage.
     database_url = f"sqlite:///{DATA_DIR / 'findhub.db'}"
+    app.logger.warning(
+        "DATABASE_URL is not configured. Using SQLite fallback. "
+        "Do not use this fallback for persistent production data."
+    )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -133,9 +163,11 @@ class Report(db.Model):
 
     contact_name = db.Column(db.String(120), nullable=False)
     contact = db.Column(db.String(150), nullable=False)
-    contact_public = db.Column(db.Boolean, default=False, nullable=False)
+    contact_public = db.Column(
+        db.Boolean, default=False, nullable=False
+    )
 
-    # Stores a Cloudinary URL or a local uploaded filename.
+    # Cloudinary URL or local filename.
     photo = db.Column(db.String(1000), nullable=True)
 
     status = db.Column(db.String(30), default="Open", nullable=False)
@@ -175,7 +207,7 @@ class Claim(db.Model):
 
 
 # Create tables that do not yet exist.
-# This does NOT migrate or alter existing database tables.
+# This does not migrate or alter existing tables.
 with app.app_context():
     db.create_all()
 
@@ -204,7 +236,10 @@ def admin_required(view_function):
     @wraps(view_function)
     def wrapped_view(*args, **kwargs):
         if not session.get("admin_logged_in"):
-            flash("Please log in as an administrator first.", "warning")
+            flash(
+                "Please log in as an administrator first.",
+                "warning",
+            )
             return redirect(url_for("admin_login"))
         return view_function(*args, **kwargs)
 
@@ -236,7 +271,7 @@ def inject_photo_helper():
 
 
 def save_photo(file_storage):
-    """Save a photo to Cloudinary, or local disk for development."""
+    """Save to Cloudinary, or local disk for development."""
     if not file_storage or not file_storage.filename:
         return None
 
@@ -253,14 +288,15 @@ def save_photo(file_storage):
         )
         return result["secure_url"]
 
-    # Local disk is suitable for development, not persistent Render storage.
+    # Local disk is suitable for development, not persistent
+    # storage on Render Free.
     filename = f"{secrets.token_hex(12)}_{original_name}"
     file_storage.save(UPLOAD_FOLDER / filename)
     return filename
 
 
 def delete_photo(photo):
-    """Delete local files only. Cloudinary cleanup can be done separately."""
+    """Delete local files only."""
     if not photo or photo.startswith(("https://", "http://")):
         return
 
@@ -310,7 +346,9 @@ def home():
         )
 
     if status in REPORT_STATUSES:
-        reports_query = reports_query.filter(Report.status == status)
+        reports_query = reports_query.filter(
+            Report.status == status
+        )
 
     if query:
         search_term = f"%{query}%"
@@ -324,11 +362,17 @@ def home():
         )
 
     if sort == "oldest":
-        reports_query = reports_query.order_by(Report.created_at.asc())
+        reports_query = reports_query.order_by(
+            Report.created_at.asc()
+        )
     elif sort == "name":
-        reports_query = reports_query.order_by(Report.item_name.asc())
+        reports_query = reports_query.order_by(
+            Report.item_name.asc()
+        )
     else:
-        reports_query = reports_query.order_by(Report.created_at.desc())
+        reports_query = reports_query.order_by(
+            Report.created_at.desc()
+        )
 
     reports = reports_query.all()
 
@@ -393,7 +437,10 @@ def new_report():
         try:
             saved_photo = save_photo(photo_file)
         except ValueError:
-            flash("Use a PNG, JPG, JPEG, GIF, or WEBP image.", "danger")
+            flash(
+                "Use a PNG, JPG, JPEG, GIF, or WEBP image.",
+                "danger",
+            )
             return redirect(url_for("new_report"))
         except Exception:
             app.logger.exception("Photo upload failed")
@@ -423,11 +470,16 @@ def new_report():
         except Exception:
             db.session.rollback()
             app.logger.exception("Unable to save report")
-            flash("Unable to save your report. Please try again.", "danger")
+            flash(
+                "Unable to save your report. Please try again.",
+                "danger",
+            )
             return redirect(url_for("new_report"))
 
         flash("Your report was submitted successfully.", "success")
-        return redirect(url_for("report_detail", report_id=report.id))
+        return redirect(
+            url_for("report_detail", report_id=report.id)
+        )
 
     return render_template("report_form.html")
 
@@ -451,8 +503,13 @@ def submit_claim(report_id):
     report = db.get_or_404(Report, report_id)
 
     if report.status in {"Returned", "Archived"}:
-        flash("This report is no longer accepting claim requests.", "warning")
-        return redirect(url_for("report_detail", report_id=report.id))
+        flash(
+            "This report is no longer accepting claim requests.",
+            "warning",
+        )
+        return redirect(
+            url_for("report_detail", report_id=report.id)
+        )
 
     claimant_name = get_report_form_value("claimant_name")
     claimant_contact = get_report_form_value("claimant_contact")
@@ -463,7 +520,9 @@ def submit_claim(report_id):
             "Complete your name, contact details, and ownership proof.",
             "danger",
         )
-        return redirect(url_for("report_detail", report_id=report.id))
+        return redirect(
+            url_for("report_detail", report_id=report.id)
+        )
 
     claim = Claim(
         report_id=report.id,
@@ -480,10 +539,18 @@ def submit_claim(report_id):
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to save claim")
-        flash("Unable to submit your claim. Please try again.", "danger")
-        return redirect(url_for("report_detail", report_id=report.id))
+        flash(
+            "Unable to submit your claim. Please try again.",
+            "danger",
+        )
+        return redirect(
+            url_for("report_detail", report_id=report.id)
+        )
 
-    flash("Claim request submitted for administrator review.", "success")
+    flash(
+        "Claim request submitted for administrator review.",
+        "success",
+    )
     return redirect(url_for("report_detail", report_id=report.id))
 
 
@@ -493,7 +560,6 @@ def submit_claim(report_id):
 
 @app.route("/uploads/<path:filename>")
 def uploaded_photo(filename):
-    # Cloudinary URLs are returned directly by photo_src().
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
@@ -546,7 +612,9 @@ def admin_login():
 @app.route("/admin")
 @admin_required
 def admin_dashboard():
-    reports = Report.query.order_by(Report.created_at.desc()).all()
+    reports = Report.query.order_by(
+        Report.created_at.desc()
+    ).all()
 
     latest_claims = Claim.query.order_by(
         Claim.created_at.desc()
@@ -557,8 +625,12 @@ def admin_dashboard():
         "lost": Report.query.filter_by(report_type="Lost").count(),
         "found": Report.query.filter_by(report_type="Found").count(),
         "open": Report.query.filter_by(status="Open").count(),
-        "pending_claims": Claim.query.filter_by(status="Pending").count(),
-        "returned": Report.query.filter_by(status="Returned").count(),
+        "pending_claims": Claim.query.filter_by(
+            status="Pending"
+        ).count(),
+        "returned": Report.query.filter_by(
+            status="Returned"
+        ).count(),
     }
 
     return render_template(
@@ -633,7 +705,9 @@ def admin_delete_report(report_id):
 @app.route("/admin/claims")
 @admin_required
 def admin_claims():
-    claims = Claim.query.order_by(Claim.created_at.desc()).all()
+    claims = Claim.query.order_by(
+        Claim.created_at.desc()
+    ).all()
     return render_template("admin_claims.html", claims=claims)
 
 
@@ -658,6 +732,7 @@ def admin_update_claim_status(claim_id):
 
     if new_status == "Approved":
         claim.report.status = "Returned"
+
     elif new_status == "Rejected":
         other_pending_claims = Claim.query.filter(
             Claim.report_id == claim.report_id,
@@ -665,7 +740,10 @@ def admin_update_claim_status(claim_id):
             Claim.id != claim.id,
         ).count()
 
-        if other_pending_claims == 0 and claim.report.status == "Pending Claim":
+        if (
+            other_pending_claims == 0
+            and claim.report.status == "Pending Claim"
+        ):
             claim.report.status = "Open"
 
     try:
@@ -703,7 +781,9 @@ def export_reports():
         "Created At",
     ])
 
-    reports = Report.query.order_by(Report.created_at.desc()).all()
+    reports = Report.query.order_by(
+        Report.created_at.desc()
+    ).all()
 
     for report in reports:
         writer.writerow([
@@ -713,11 +793,17 @@ def export_reports():
             report.category,
             report.description,
             report.location,
-            report.incident_date.isoformat() if report.incident_date else "",
+            (
+                report.incident_date.isoformat()
+                if report.incident_date else ""
+            ),
             report.contact_name,
             report.contact,
             report.status,
-            report.created_at.isoformat() if report.created_at else "",
+            (
+                report.created_at.isoformat()
+                if report.created_at else ""
+            ),
         ])
 
     response = make_response(output.getvalue())
@@ -745,7 +831,10 @@ def admin_logout():
 
 @app.errorhandler(413)
 def file_too_large(_error):
-    flash("The uploaded file is too large. Maximum size is 5 MB.", "danger")
+    flash(
+        "The uploaded file is too large. Maximum size is 5 MB.",
+        "danger",
+    )
     return redirect(request.referrer or url_for("new_report"))
 
 
