@@ -319,35 +319,57 @@ def get_report_form_value(name, default=""):
     return (request.form.get(name, default) or "").strip()
 
 
+
 # --------------------------------------------------
 # HOME AND SEARCH
 # --------------------------------------------------
 
 @app.route("/")
 def home():
+    # Read and normalize search filters.
+    query = request.args.get("q", "").strip()[:100]
     report_type = request.args.get("type", "").strip()
     category = request.args.get("category", "").strip()
     status = request.args.get("status", "").strip()
-    query = request.args.get("q", "").strip()
     sort = request.args.get("sort", "newest").strip()
 
+    # Get available categories from existing reports.
+    categories = [
+        row[0]
+        for row in (
+            db.session.query(Report.category)
+            .filter(
+                Report.category.isnot(None),
+                Report.category != "",
+            )
+            .distinct()
+            .order_by(Report.category.asc())
+            .all()
+        )
+    ]
+
+    # Start with all reports.
     reports_query = Report.query
 
+    # Filter by Lost or Found.
     if report_type in {"Lost", "Found"}:
         reports_query = reports_query.filter(
             Report.report_type == report_type
         )
 
-    if category:
+    # Filter by category.
+    if category and category in categories:
         reports_query = reports_query.filter(
             Report.category == category
         )
 
+    # Filter by report status.
     if status in REPORT_STATUSES:
         reports_query = reports_query.filter(
             Report.status == status
         )
 
+    # Search item name, category, location, and description.
     if query:
         search_term = f"%{query}%"
 
@@ -360,32 +382,59 @@ def home():
             )
         )
 
+    # Sort the filtered results.
     if sort == "oldest":
         reports_query = reports_query.order_by(
-            Report.created_at.asc()
+            Report.created_at.asc(),
+            Report.id.asc(),
         )
     elif sort == "name":
         reports_query = reports_query.order_by(
-            Report.item_name.asc()
+            Report.item_name.asc(),
+            Report.id.asc(),
         )
     else:
+        sort = "newest"
         reports_query = reports_query.order_by(
-            Report.created_at.desc()
+            Report.created_at.desc(),
+            Report.id.desc(),
         )
 
     reports = reports_query.all()
 
+    # Calculate statistics from all reports,
+    # not just the filtered search results.
+    total_reports = Report.query.count()
+    total_lost = Report.query.filter_by(
+        report_type="Lost"
+    ).count()
+    total_found = Report.query.filter_by(
+        report_type="Found"
+    ).count()
+    total_open = Report.query.filter_by(
+        status="Open"
+    ).count()
+
     stats = {
-        "total": Report.query.count(),
-        "lost": Report.query.filter_by(report_type="Lost").count(),
-        "found": Report.query.filter_by(report_type="Found").count(),
-        "open": Report.query.filter_by(status="Open").count(),
+        "total": total_reports,
+        "lost": total_lost,
+        "found": total_found,
+        "open": total_open,
     }
 
     return render_template(
         "home.html",
         reports=reports,
+        categories=categories,
         stats=stats,
+
+        # Statistics names for compatibility with home.html.
+        total_reports=total_reports,
+        total_lost=total_lost,
+        total_found=total_found,
+        total_open=total_open,
+
+        # Current filter values.
         query=query,
         selected_type=report_type,
         selected_category=category,
