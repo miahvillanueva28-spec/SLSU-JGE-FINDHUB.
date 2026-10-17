@@ -1,6 +1,8 @@
+
 /* ==========================================
    SLSU JGE FINDHUB
-   Blue & White Theme + Dark Mode
+   White Theme + Dark Mode
+   Campus Background Zoom Fix
 ========================================== */
 
 :root {
@@ -48,7 +50,9 @@ html[data-theme="dark"] {
     --hover-bg: rgba(75, 155, 255, 0.13);
 }
 
-/* GENERAL */
+/* ==========================================
+   GENERAL
+========================================== */
 
 *,
 *::before,
@@ -57,19 +61,42 @@ html[data-theme="dark"] {
 }
 
 html {
+    min-height: 100%;
     scroll-behavior: smooth;
     scroll-padding-top: 20px;
+    background-color: #eaf1ec;
 }
 
 body {
+    position: relative;
+    isolation: isolate;
     margin: 0;
     min-height: 100vh;
     font-family: Arial, Helvetica, sans-serif;
     color: var(--text);
-    background-color: transparent;
+    background: transparent !important;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     transition: color .2s ease;
+}
+
+/*
+   Campus background layer.
+   Palitan ang path kung iba ang filename.
+   contain = ipinapakita ang buong larawan.
+*/
+html body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background-color: #eaf1ec;
+    background-image: url("/static/images/campus.jpg");
+    background-position: center center;
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 img {
@@ -112,7 +139,9 @@ textarea:focus-visible {
     margin: 0 auto;
 }
 
-/* NAVIGATION */
+/* ==========================================
+   NAVIGATION
+========================================== */
 
 .navbar {
     background: var(--nav-bg);
@@ -170,7 +199,9 @@ textarea:focus-visible {
     color: var(--primary-dark);
 }
 
-/* DARK MODE TOGGLE BUTTON */
+/* ==========================================
+   DARK MODE TOGGLE
+========================================== */
 
 .theme-toggle {
     display: inline-flex;
@@ -205,10 +236,12 @@ html[data-theme="dark"] .theme-toggle:hover {
     color: #172b45;
 }
 
-/* HERO SECTION */
+/* ==========================================
+   HERO SECTION
+========================================== */
 
 .hero {
-    padding: 48px 0;
+    padding: 48px 24px;
     color: var(--text);
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -234,7 +267,9 @@ html[data-theme="dark"] .theme-toggle:hover {
     max-width: 680px;
 }
 
-/* CARDS AND PANELS */
+/* ==========================================
+   CARDS AND PANELS
+========================================== */
 
 .card,
 .panel,
@@ -304,7 +339,9 @@ html[data-theme="dark"] .theme-toggle:hover {
     color: var(--text);
 }
 
-/* PHOTOS */
+/* ==========================================
+   PHOTOS
+========================================== */
 
 .report-photo {
     display: block;
@@ -336,7 +373,9 @@ html[data-theme="dark"] .theme-toggle:hover {
     cursor: zoom-in;
 }
 
-/* STATISTICS */
+/* ==========================================
+   STATISTICS
+========================================== */
 
 .stats-grid,
 .stats {
@@ -368,7 +407,9 @@ html[data-theme="dark"] .theme-toggle:hover {
     display: block;
 }
 
-/* FORMS */
+/* ==========================================
+   FORMS
+========================================== */
 
 .form-group {
     margin-bottom: 18px;
@@ -440,7 +481,9 @@ input[type="file"] {
     font-size: .9rem;
 }
 
-/* BUTTONS */
+/* ==========================================
+   BUTTONS
+========================================== */
 
 .btn,
 .button,
@@ -480,8 +523,6 @@ input[type="reset"]:hover,
     box-shadow: 0 5px 14px rgba(7, 86, 166, .20);
     transform: translateY(-1px);
 }
-
-/* Keep theme button's dedicated colors */
 
 .theme-toggle {
     background: var(--primary);
@@ -555,7 +596,9 @@ html[data-theme="dark"] .secondary:hover {
     font-size: .85rem;
 }
 
-/* STATUS BADGES */
+/* ==========================================
+   STATUS BADGES
+========================================== */
 
 .badge,
 .tag {
@@ -596,7 +639,9 @@ html[data-theme="dark"] .returned {
     color: #d5dfed;
 }
 
-/* SEARCH AND FILTERS */
+/* ==========================================
+   SEARCH AND FILTERS
+========================================== */
 
 .search-form,
 .filter-grid {
@@ -609,7 +654,9 @@ html[data-theme="dark"] .returned {
     align-items: end;
 }
 
-/* ALERTS */
+/* ==========================================
+   ALERTS AND FLASH MESSAGES
+========================================== */
 
 .alert,
 .flash {
@@ -643,7 +690,9 @@ html[data-theme="dark"] .returned {
     color: var(--text);
 }
 
-/* TABLES */
+/* ==========================================
+   TABLES
+========================================== */
 
 .table-wrap {
     overflow-x: auto;
@@ -683,7 +732,9 @@ tbody tr:hover {
     gap: 8px;
 }
 
-/* EMPTY STATE */
+/* ==========================================
+   EMPTY STATE
+========================================== */
 
 .empty-state {
     text-align: center;
@@ -691,7 +742,9 @@ tbody tr:hover {
     color: var(--muted);
 }
 
-/* FOOTER */
+/* ==========================================
+   FOOTER
+========================================== */
 
 .site-footer {
     margin-top: 48px;
@@ -712,7 +765,9 @@ tbody tr:hover {
     color: var(--primary-dark);
 }
 
-/* TOAST NOTIFICATIONS */
+/* ==========================================
+   TOAST NOTIFICATIONS
+========================================== */
 
 .toast-container {
     position: fixed;
@@ -764,7 +819,9 @@ tbody tr:hover {
     }
 }
 
-/* IMAGE PREVIEW MODAL */
+/* ==========================================
+   IMAGE PREVIEW MODAL
+========================================== */
 
 .image-modal {
     display: none;
@@ -804,7 +861,9 @@ tbody tr:hover {
     background: rgba(255, 255, 255, .15);
 }
 
-/* LOADING SPINNER */
+/* ==========================================
+   LOADING SPINNER
+========================================== */
 
 .spinner {
     display: inline-block;
@@ -822,7 +881,9 @@ tbody tr:hover {
     }
 }
 
-/* SKELETON LOADING */
+/* ==========================================
+   SKELETON LOADING
+========================================== */
 
 .skeleton {
     background: linear-gradient(
@@ -846,7 +907,9 @@ tbody tr:hover {
     }
 }
 
-/* DARK MODE SURFACE FIXES */
+/* ==========================================
+   DARK MODE FIXES
+========================================== */
 
 html[data-theme="dark"] body {
     color: var(--text);
@@ -976,11 +1039,14 @@ html[data-theme="dark"] a:hover {
     color: #b5d7ff;
 }
 
-/* TABLET AND MOBILE */
+/* ==========================================
+   TABLET AND MOBILE
+========================================== */
 
 @media (max-width: 800px) {
-    body {
-        background-attachment: scroll;
+    html body::before {
+        background-size: contain;
+        background-position: center center;
     }
 
     .navbar-inner {
@@ -994,7 +1060,7 @@ html[data-theme="dark"] a:hover {
     }
 
     .hero {
-        padding: 32px 0;
+        padding: 32px 20px;
     }
 
     .card,
@@ -1081,7 +1147,9 @@ html[data-theme="dark"] a:hover {
     }
 }
 
-/* REDUCED MOTION */
+/* ==========================================
+   REDUCED MOTION
+========================================== */
 
 @media (prefers-reduced-motion: reduce) {
     html {
