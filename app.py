@@ -129,8 +129,8 @@ CAMPUS_LOGO = (
 )
 
 CAMPUS_PHOTO = (
-    "https://www.slsu.edu.ph/wp-content/uploads/2023/05/"
-    "Campuses/SLSU%20JGE%20Tagkawayan/JGE%20bldg.jpg"
+    "https://www.slsu.edu.ph/wp-content/uploads/"
+    "elementor/thumbs/JGE%20bldg-q6759ky68kjrv7f9iklhioqfdjrgb6067ofnjh7qns.jpg"
 )
 
 
@@ -623,7 +623,7 @@ def admin_login():
 
 
 # --------------------------------------------------
-# ADMIN DASHBOARD - CORRECTED
+# ADMIN DASHBOARD
 # --------------------------------------------------
 
 @app.route("/admin")
