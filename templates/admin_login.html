@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% block title %}Admin Login | FindHub{% endblock %}
 
@@ -13,7 +14,7 @@
     Sign in to review reports, update item statuses, and verify claims.
   </p>
 
-  <form method="POST">
+  <form method="POST" action="{{ url_for('admin_login') }}">
     <label for="username">Username</label>
     <input
       id="username"
