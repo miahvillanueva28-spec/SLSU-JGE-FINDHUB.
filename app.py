@@ -1,3 +1,4 @@
+
 import os
 import csv
 import io
@@ -20,7 +21,6 @@ from flask import (
     session,
     send_from_directory,
     make_response,
-    abort,
 )
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
@@ -55,13 +55,12 @@ app.config["SESSION_COOKIE_SECURE"] = (
 
 
 # --------------------------------------------------
-# DATABASE CONFIGURATION - FIXED FOR RENDER
+# DATABASE CONFIGURATION
 # --------------------------------------------------
 
 database_url = os.environ.get("DATABASE_URL", "").strip()
 
 if database_url:
-    # Render may provide a URL starting with postgres://
     if database_url.startswith("postgres://"):
         database_url = database_url.replace(
             "postgres://",
@@ -69,7 +68,6 @@ if database_url:
             1,
         )
 
-    # Use psycopg2-binary, not the psycopg v3 driver.
     elif database_url.startswith("postgresql+psycopg://"):
         database_url = database_url.replace(
             "postgresql+psycopg://",
@@ -84,23 +82,22 @@ if database_url:
             1,
         )
 
-    # Reject an incorrectly formatted database URL with a clear message.
     if not database_url.startswith(
         ("postgresql+psycopg2://", "sqlite:///")
     ):
         raise RuntimeError(
             "Invalid DATABASE_URL format. "
-            "Set DATABASE_URL to your PostgreSQL Internal Database URL "
-            "in the Render Web Service environment variables."
+            "Configure DATABASE_URL in Render Environment Variables."
         )
 
 else:
-    # Local development fallback only.
-    # SQLite on Render Free is not reliable persistent storage.
+    # Local development fallback.
+    # SQLite on Render Free is not persistent storage.
     database_url = f"sqlite:///{DATA_DIR / 'findhub.db'}"
+
     app.logger.warning(
         "DATABASE_URL is not configured. Using SQLite fallback. "
-        "Do not use this fallback for persistent production data."
+        "Do not rely on this for persistent production data."
     )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
@@ -241,6 +238,7 @@ def admin_required(view_function):
                 "warning",
             )
             return redirect(url_for("admin_login"))
+
         return view_function(*args, **kwargs)
 
     return wrapped_view
@@ -292,6 +290,7 @@ def save_photo(file_storage):
     # storage on Render Free.
     filename = f"{secrets.token_hex(12)}_{original_name}"
     file_storage.save(UPLOAD_FOLDER / filename)
+
     return filename
 
 
@@ -352,6 +351,7 @@ def home():
 
     if query:
         search_term = f"%{query}%"
+
         reports_query = reports_query.filter(
             or_(
                 Report.item_name.ilike(search_term),
@@ -407,11 +407,14 @@ def new_report():
         category = get_report_form_value("category")
         description = get_report_form_value("description")
         location = get_report_form_value("location")
+
         incident_date = parse_incident_date(
             get_report_form_value("incident_date")
         )
+
         contact_name = get_report_form_value("contact_name")
         contact = get_report_form_value("contact")
+
         contact_public = request.form.get("contact_public") in {
             "1", "true", "on", "yes"
         }
@@ -436,12 +439,14 @@ def new_report():
 
         try:
             saved_photo = save_photo(photo_file)
+
         except ValueError:
             flash(
                 "Use a PNG, JPG, JPEG, GIF, or WEBP image.",
                 "danger",
             )
             return redirect(url_for("new_report"))
+
         except Exception:
             app.logger.exception("Photo upload failed")
             flash(
@@ -467,6 +472,7 @@ def new_report():
         try:
             db.session.add(report)
             db.session.commit()
+
         except Exception:
             db.session.rollback()
             app.logger.exception("Unable to save report")
@@ -477,6 +483,7 @@ def new_report():
             return redirect(url_for("new_report"))
 
         flash("Your report was submitted successfully.", "success")
+
         return redirect(
             url_for("report_detail", report_id=report.id)
         )
@@ -491,7 +498,11 @@ def new_report():
 @app.route("/report/<int:report_id>")
 def report_detail(report_id):
     report = db.get_or_404(Report, report_id)
-    return render_template("report_detail.html", report=report)
+
+    return render_template(
+        "report_detail.html",
+        report=report,
+    )
 
 
 # --------------------------------------------------
@@ -536,6 +547,7 @@ def submit_claim(report_id):
         db.session.add(claim)
         report.status = "Pending Claim"
         db.session.commit()
+
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to save claim")
@@ -551,7 +563,10 @@ def submit_claim(report_id):
         "Claim request submitted for administrator review.",
         "success",
     )
-    return redirect(url_for("report_detail", report_id=report.id))
+
+    return redirect(
+        url_for("report_detail", report_id=report.id)
+    )
 
 
 # --------------------------------------------------
@@ -597,7 +612,9 @@ def admin_login():
             session.clear()
             session["admin_logged_in"] = True
             session["admin_username"] = expected_username
+
             flash("Welcome to the admin dashboard.", "success")
+
             return redirect(url_for("admin_dashboard"))
 
         flash("Invalid username or password.", "danger")
@@ -606,7 +623,7 @@ def admin_login():
 
 
 # --------------------------------------------------
-# ADMIN DASHBOARD
+# ADMIN DASHBOARD - CORRECTED
 # --------------------------------------------------
 
 @app.route("/admin")
@@ -616,26 +633,50 @@ def admin_dashboard():
         Report.created_at.desc()
     ).all()
 
+    lost_reports = [
+        report for report in reports
+        if report.report_type == "Lost"
+    ]
+
+    found_reports = [
+        report for report in reports
+        if report.report_type == "Found"
+    ]
+
     latest_claims = Claim.query.order_by(
         Claim.created_at.desc()
     ).limit(6).all()
 
     stats = {
-        "total": Report.query.count(),
-        "lost": Report.query.filter_by(report_type="Lost").count(),
-        "found": Report.query.filter_by(report_type="Found").count(),
-        "open": Report.query.filter_by(status="Open").count(),
+        "all": len(reports),
+        "total": len(reports),
+        "lost": len(lost_reports),
+        "found": len(found_reports),
+        "open": sum(
+            1 for report in reports
+            if report.status == "Open"
+        ),
+        "claims": Claim.query.filter_by(
+            status="Pending"
+        ).count(),
         "pending_claims": Claim.query.filter_by(
             status="Pending"
         ).count(),
-        "returned": Report.query.filter_by(
-            status="Returned"
-        ).count(),
+        "reports_pending_claim": sum(
+            1 for report in reports
+            if report.status == "Pending Claim"
+        ),
+        "returned": sum(
+            1 for report in reports
+            if report.status == "Returned"
+        ),
     }
 
     return render_template(
         "admin_dashboard.html",
         reports=reports,
+        lost_reports=lost_reports,
+        found_reports=found_reports,
         claims=latest_claims,
         latest_claims=latest_claims,
         stats=stats,
@@ -664,6 +705,7 @@ def admin_update_report_status(report_id):
     try:
         db.session.commit()
         flash("Report status updated.", "success")
+
     except Exception:
         db.session.rollback()
         app.logger.exception("Report status update failed")
@@ -688,8 +730,11 @@ def admin_delete_report(report_id):
     try:
         db.session.delete(report)
         db.session.commit()
+
         delete_photo(photo)
+
         flash("Report deleted.", "success")
+
     except Exception:
         db.session.rollback()
         app.logger.exception("Report deletion failed")
@@ -708,7 +753,11 @@ def admin_claims():
     claims = Claim.query.order_by(
         Claim.created_at.desc()
     ).all()
-    return render_template("admin_claims.html", claims=claims)
+
+    return render_template(
+        "admin_claims.html",
+        claims=claims,
+    )
 
 
 # --------------------------------------------------
@@ -749,6 +798,7 @@ def admin_update_claim_status(claim_id):
     try:
         db.session.commit()
         flash("Claim status updated.", "success")
+
     except Exception:
         db.session.rollback()
         app.logger.exception("Claim status update failed")
@@ -807,10 +857,12 @@ def export_reports():
         ])
 
     response = make_response(output.getvalue())
+
     response.headers["Content-Type"] = "text/csv; charset=utf-8"
     response.headers["Content-Disposition"] = (
         "attachment; filename=findhub_reports.csv"
     )
+
     return response
 
 
@@ -822,6 +874,7 @@ def export_reports():
 def admin_logout():
     session.clear()
     flash("You have been logged out.", "success")
+
     return redirect(url_for("home"))
 
 
@@ -835,7 +888,10 @@ def file_too_large(_error):
         "The uploaded file is too large. Maximum size is 5 MB.",
         "danger",
     )
-    return redirect(request.referrer or url_for("new_report"))
+
+    return redirect(
+        request.referrer or url_for("new_report")
+    )
 
 
 @app.after_request
@@ -846,6 +902,7 @@ def add_security_headers(response):
     response.headers["Permissions-Policy"] = (
         "camera=(), microphone=(), geolocation=()"
     )
+
     return response
 
 
