@@ -31,6 +31,7 @@
       scroll-padding-top: 20px;
     }
 
+    /* Page background */
     body {
       margin: 0;
       min-height: 100vh;
@@ -38,14 +39,20 @@
       flex-direction: column;
       font-family: Arial, Helvetica, sans-serif;
       color: var(--ink);
-      background:
+
+      background-color: #edf4ee;
+      background-image:
         linear-gradient(
           135deg,
-          rgba(3, 35, 23, .24),
-          rgba(3, 35, 23, .36)
+          rgba(3, 35, 23, .32),
+          rgba(3, 35, 23, .44)
         ),
-        url("{{ campus_photo }}") center center / cover fixed no-repeat;
-      background-color: #edf4ee;
+        url("{{ campus_photo }}");
+      background-position: center center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
@@ -994,7 +1001,6 @@
     }
   </style>
 
-  <!-- Additional CSS file -->
   <link
     rel="stylesheet"
     href="{{ url_for('static', filename='style.css') }}"
@@ -1032,7 +1038,6 @@
     </div>
   </header>
 
-  <!-- Flask flash messages -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       <div class="container" style="margin-bottom: 0">
@@ -1056,7 +1061,6 @@
     <p>&copy; {{ today.year }} SLSU JGE FindHub</p>
   </footer>
 
-  <!-- Toast notifications container -->
   <div
     id="toast-container"
     class="toast-container"
@@ -1064,7 +1068,6 @@
     aria-atomic="true"
   ></div>
 
-  <!-- Image preview modal -->
   <div
     id="image-modal"
     class="image-modal"
@@ -1087,7 +1090,6 @@
     >
   </div>
 
-  <!-- FindHub JavaScript -->
   <script
     src="{{ url_for('static', filename='script.js') }}"
     defer
