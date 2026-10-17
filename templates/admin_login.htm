@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Admin Login | FindHub{% endblock %}
+
+{% block content %}
+<section class="panel" style="max-width:560px;margin:auto">
+  <div class="sticker-row">
+    <span class="sticker"><span>🔐</span>Admin only</span>
+    <span class="sticker"><span>🛠️</span>Manage reports</span>
+  </div>
+
+  <h2>🔐 Administrator Login</h2>
+  <p class="help">
+    Sign in to review reports, update item statuses, and verify claims.
+  </p>
+
+  <form method="POST">
+    <label for="username">Username</label>
+    <input
+      id="username"
+      name="username"
+      autocomplete="username"
+      required
+    >
+
+    <label for="password">Password</label>
+    <input
+      id="password"
+      name="password"
+      type="password"
+      autocomplete="current-password"
+      required
+    >
+
+    <div class="card-actions">
+      <button type="submit">Log In</button>
+      <a class="button secondary" href="{{ url_for('home') }}">Back Home</a>
+    </div>
+  </form>
+
+  <p class="help">
+    Configure ADMIN_USERNAME, ADMIN_PASSWORD, and SECRET_KEY in your
+    Render Environment Variables. Never store admin credentials in source code.
+  </p>
+</section>
+{% endblock %}
