@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en" data-theme="light">
 <head>
@@ -74,6 +75,7 @@
       scroll-padding-top: 20px;
     }
 
+    /* BODY AND CAMPUS BACKGROUND */
     body {
       margin: 0;
       min-height: 100vh;
@@ -89,16 +91,23 @@
           rgba(3, 35, 23, .35)
         ),
         url("{{ campus_photo }}");
+
+      /*
+        Use the full viewport width to reduce excessive zoom.
+        The photo keeps its original proportions.
+      */
       background-position: center center;
-      background-size: cover;
+      background-size: 100% auto;
       background-repeat: no-repeat;
       background-attachment: fixed;
+
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       transition: background-color var(--transition),
                   color var(--transition);
     }
 
+    /* DARK MODE BACKGROUND */
     html[data-theme="dark"] body {
       background-color: var(--page-bg);
       background-image:
@@ -108,6 +117,10 @@
           rgba(2, 10, 5, .92)
         ),
         url("{{ campus_photo }}");
+      background-position: center center;
+      background-size: 100% auto;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
 
     a {
@@ -1146,8 +1159,11 @@
         width: 94%;
       }
 
-      body {
+      body,
+      html[data-theme="dark"] body {
         background-attachment: scroll;
+        background-size: auto 100vh;
+        background-position: center top;
       }
     }
 
@@ -1423,3 +1439,4 @@
   </script>
 </body>
 </html>
+```
