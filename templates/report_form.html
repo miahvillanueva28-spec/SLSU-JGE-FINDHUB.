@@ -1,4 +1,4 @@
-```html
+
 {% extends "base.html" %}
 {% block title %}Submit a Report | FindHub{% endblock %}
 
@@ -18,10 +18,11 @@
 
   <form method="POST" enctype="multipart/form-data">
     <div class="form-grid">
+
       <div>
         <label for="report_type">Report type *</label>
         <select id="report_type" name="report_type" required>
-          <option value="">Choose Lost or Found</option>
+          <option value="" disabled selected>Choose Lost or Found</option>
           <option value="Lost">🔎 I lost an item</option>
           <option value="Found">✨ I found an item</option>
         </select>
@@ -41,11 +42,27 @@
       <div>
         <label for="category">Category *</label>
         <select id="category" name="category" required>
-          {% for c in categories %}
-            <option value="{{ c }}" {% if c == 'Other' %}selected{% endif %}>
-              {{ c }}
-            </option>
-          {% endfor %}
+          <option value="" disabled selected>Select a category</option>
+          <option value="Electronics">📱 Electronics</option>
+          <option value="IDs and Documents">🪪 IDs and Documents</option>
+          <option value="Wallets and Money">👛 Wallets and Money</option>
+          <option value="Bags">🎒 Bags</option>
+          <option value="Clothing">👕 Clothing</option>
+          <option value="School Supplies">✏️ School Supplies</option>
+          <option value="Books and Notebooks">📚 Books and Notebooks</option>
+          <option value="Keys">🔑 Keys</option>
+          <option value="Jewelry and Accessories">💍 Jewelry and Accessories</option>
+          <option value="Eyeglasses">👓 Eyeglasses</option>
+          <option value="Umbrellas">☂️ Umbrellas</option>
+          <option value="Water Bottles and Tumblers">🥤 Water Bottles and Tumblers</option>
+          <option value="Food and Containers">🍱 Food and Containers</option>
+          <option value="Personal Items">🧴 Personal Items</option>
+          <option value="Sports Equipment">⚽ Sports Equipment</option>
+          <option value="Computer Accessories">💻 Computer Accessories</option>
+          <option value="Headphones and Earphones">🎧 Headphones and Earphones</option>
+          <option value="Watches">⌚ Watches</option>
+          <option value="Cash">💵 Cash</option>
+          <option value="Others">📦 Others</option>
         </select>
       </div>
 
@@ -129,6 +146,7 @@
           </span>
         </label>
       </div>
+
     </div>
 
     <p class="help">
@@ -162,4 +180,3 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 {% endblock %}
-```
