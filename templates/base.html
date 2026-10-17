@@ -1,4 +1,4 @@
-
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -31,7 +31,7 @@
       scroll-padding-top: 20px;
     }
 
-    /* Page background */
+    /* SLSU JGE CAMPUS BACKGROUND */
     body {
       margin: 0;
       min-height: 100vh;
@@ -44,10 +44,10 @@
       background-image:
         linear-gradient(
           135deg,
-          rgba(3, 35, 23, .32),
-          rgba(3, 35, 23, .44)
+          rgba(3, 35, 23, .30),
+          rgba(3, 35, 23, .40)
         ),
-        url("{{ campus_photo }}");
+        url("https://www.slsu.edu.ph/wp-content/uploads/elementor/thumbs/JGE%20bldg-q6759ky68kjrv7f9iklhioqfdjrgb6067ofnjh7qns.jpg");
       background-position: center center;
       background-size: cover;
       background-repeat: no-repeat;
@@ -75,7 +75,7 @@
       color: var(--deep);
     }
 
-    /* Header */
+    /* HEADER */
     .site-header {
       position: relative;
       z-index: 10;
@@ -137,7 +137,7 @@
       color: rgba(255, 255, 255, .83);
     }
 
-    /* Navigation */
+    /* NAVIGATION */
     nav {
       display: flex;
       gap: 7px;
@@ -173,7 +173,7 @@
       transform: translateY(0) scale(.98);
     }
 
-    /* Main layout */
+    /* MAIN LAYOUT */
     .container {
       width: 92%;
       max-width: 1050px;
@@ -185,9 +185,9 @@
       animation: contentEnter .55s ease both;
     }
 
-    /* General panels */
+    /* PANELS */
     .panel {
-      background: rgba(255, 255, 255, .86);
+      background: rgba(255, 255, 255, .88);
       border: 1px solid rgba(255, 255, 255, .72);
       border-radius: var(--radius);
       padding: 16px;
@@ -202,12 +202,12 @@
       border-color: white;
     }
 
-    /* Hero */
+    /* HERO */
     .hero {
       width: 92%;
       max-width: 1050px;
       margin: 20px auto 16px;
-      background: rgba(235, 246, 238, .88);
+      background: rgba(235, 246, 238, .90);
       border: 1px solid rgba(255, 255, 255, .78);
       border-radius: 15px;
       padding: 25px 20px;
@@ -232,7 +232,7 @@
       font-size: 14px;
     }
 
-    /* Buttons */
+    /* BUTTONS */
     .button, button {
       display: inline-block;
       border: 1px solid transparent;
@@ -294,7 +294,7 @@
       box-shadow: none;
     }
 
-    /* Category stickers */
+    /* CATEGORY STICKERS */
     .sticker-row {
       display: flex;
       justify-content: center;
@@ -330,7 +330,7 @@
       font-size: 16px;
     }
 
-    /* Flash messages */
+    /* FLASH MESSAGES */
     .flash {
       border-radius: 9px;
       padding: 11px 13px;
@@ -358,7 +358,7 @@
       border-left-color: #b42332;
     }
 
-    /* Headings and form fields */
+    /* HEADINGS AND FORM FIELDS */
     h2, h3 {
       color: var(--green);
     }
@@ -452,7 +452,7 @@
       line-height: 1.6;
     }
 
-    /* Search filters */
+    /* SEARCH FILTERS */
     .filter-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -460,7 +460,7 @@
       align-items: end;
     }
 
-    /* Statistics */
+    /* STATISTICS */
     .stats {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -474,7 +474,7 @@
       min-height: 88px;
       padding: 14px;
       border-radius: 12px;
-      background: rgba(255, 255, 255, .88);
+      background: rgba(255, 255, 255, .90);
       border: 1px solid rgba(255, 255, 255, .70);
       box-shadow: var(--shadow);
       display: flex;
@@ -500,7 +500,7 @@
       margin-top: 5px;
     }
 
-    /* Report cards */
+    /* REPORT CARDS */
     .report-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -513,7 +513,7 @@
       height: 100%;
       overflow: hidden;
       border-radius: 12px;
-      background: rgba(255, 255, 255, .90);
+      background: rgba(255, 255, 255, .92);
       border: 1px solid rgba(255, 255, 255, .72);
       box-shadow: var(--shadow);
       display: flex;
@@ -607,17 +607,17 @@
       padding-top: 12px;
     }
 
-    /* Empty state */
+    /* EMPTY STATE */
     .empty-state {
       text-align: center;
       padding: 25px 16px;
-      background: rgba(255, 255, 255, .88);
+      background: rgba(255, 255, 255, .90);
       border: 1px solid rgba(255, 255, 255, .65);
       border-radius: 12px;
       box-shadow: var(--shadow);
     }
 
-    /* Detail view */
+    /* DETAIL VIEW */
     .detail-photo {
       max-width: 100%;
       max-height: 300px;
@@ -634,7 +634,7 @@
       gap: 18px;
     }
 
-    /* Tables */
+    /* TABLES */
     .table-wrap {
       overflow-x: auto;
       border-radius: 9px;
@@ -644,7 +644,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      background: rgba(255, 255, 255, .94);
+      background: rgba(255, 255, 255, .96);
       font-size: 13px;
     }
 
@@ -684,7 +684,7 @@
       min-width: 110px;
     }
 
-    /* Toast notifications */
+    /* TOAST NOTIFICATIONS */
     .toast-container {
       position: fixed;
       top: 18px;
@@ -724,7 +724,7 @@
       transition: opacity .25s ease, transform .25s ease;
     }
 
-    /* Image preview modal */
+    /* IMAGE PREVIEW MODAL */
     .image-modal {
       display: none;
       position: fixed;
@@ -768,7 +768,7 @@
       transform: none;
     }
 
-    /* Loading spinner */
+    /* LOADING SPINNER */
     .spinner {
       display: inline-block;
       width: 18px;
@@ -780,7 +780,7 @@
       vertical-align: middle;
     }
 
-    /* Loading skeleton */
+    /* LOADING SKELETON */
     .skeleton {
       background: linear-gradient(
         90deg,
@@ -797,7 +797,7 @@
       height: 220px;
     }
 
-    /* Footer */
+    /* FOOTER */
     .site-footer {
       text-align: center;
       padding: 18px 12px;
@@ -815,7 +815,7 @@
       margin: 5px 0;
     }
 
-    /* Animations */
+    /* ANIMATIONS */
     @keyframes headerEnter {
       from { opacity: 0; transform: translateY(-8px); }
       to { opacity: 1; transform: translateY(0); }
@@ -844,7 +844,7 @@
       to { background-position: -200% 0; }
     }
 
-    /* Accessible keyboard focus */
+    /* ACCESSIBLE KEYBOARD FOCUS */
     a:focus-visible,
     button:focus-visible,
     input:focus-visible,
@@ -854,7 +854,7 @@
       outline-offset: 3px;
     }
 
-    /* Tablet */
+    /* TABLET */
     @media (max-width: 800px) {
       .header-inner {
         align-items: flex-start;
@@ -888,7 +888,7 @@
       }
     }
 
-    /* Mobile */
+    /* MOBILE */
     @media (max-width: 500px) {
       .brand h1 {
         font-size: 18px;
@@ -984,7 +984,7 @@
       }
     }
 
-    /* Respect reduced-motion preferences */
+    /* REDUCED MOTION */
     @media (prefers-reduced-motion: reduce) {
       html {
         scroll-behavior: auto;
@@ -1096,3 +1096,4 @@
   ></script>
 </body>
 </html>
+```
