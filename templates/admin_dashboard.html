@@ -4,6 +4,14 @@
 
 {% block content %}
 
+{% set total_reports = stats.total|default(0) %}
+{% set lost_total = stats.lost|default(0) %}
+{% set found_total = stats.found|default(0) %}
+{% set open_total = stats.open|default(0) %}
+{% set pending_claims_total = stats.pending_claims|default(0) %}
+{% set pending_reports_total = stats.reports_pending_claim|default(0) %}
+{% set returned_total = stats.returned|default(0) %}
+
 <section class="panel">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div>
@@ -22,37 +30,37 @@
   <div class="stats">
     <div class="stat">
       <span>📚 Active Reports</span>
-      <strong>{{ stats.total }}</strong>
+      <strong>{{ total_reports }}</strong>
     </div>
 
     <div class="stat">
       <span>🔎 Lost Reports</span>
-      <strong>{{ stats.lost }}</strong>
+      <strong>{{ lost_total }}</strong>
     </div>
 
     <div class="stat">
       <span>🎒 Found Reports</span>
-      <strong>{{ stats.found }}</strong>
+      <strong>{{ found_total }}</strong>
     </div>
 
     <div class="stat">
       <span>📌 Open Reports</span>
-      <strong>{{ stats.open }}</strong>
+      <strong>{{ open_total }}</strong>
     </div>
 
     <div class="stat">
       <span>🤝 Pending Claim Requests</span>
-      <strong>{{ stats.pending_claims }}</strong>
+      <strong>{{ pending_claims_total }}</strong>
     </div>
 
     <div class="stat">
       <span>⏳ Reports Awaiting Claims</span>
-      <strong>{{ stats.reports_pending_claim }}</strong>
+      <strong>{{ pending_reports_total }}</strong>
     </div>
 
     <div class="stat">
       <span>✅ Returned Items</span>
-      <strong>{{ stats.returned }}</strong>
+      <strong>{{ returned_total }}</strong>
     </div>
   </div>
 
@@ -67,13 +75,12 @@
   </div>
 </section>
 
-
 <!-- LOST REPORTS -->
 <section class="panel">
   <h2>🔎 Lost Item Reports</h2>
 
   <p class="help">
-    Total Lost Reports: {{ stats.lost }}
+    Total Lost Reports: {{ lost_reports|length }}
   </p>
 
   {% if lost_reports %}
@@ -107,14 +114,19 @@
               <p><strong>Location:</strong> {{ r.location }}</p>
               <p><strong>Date lost:</strong> {{ r.incident_date }}</p>
               <p class="help">
-                Posted: {{ r.created_at.strftime('%b %d, %Y') }}
+                Posted:
+                {% if r.created_at %}
+                  {{ r.created_at.strftime('%b %d, %Y') }}
+                {% else %}
+                  N/A
+                {% endif %}
               </p>
 
               {% if r.photo %}
                 <a
                   href="{{ photo_src(r.photo) }}"
                   target="_blank"
-                  rel="noopener"
+                  rel="noopener noreferrer"
                 >View Photo</a>
               {% endif %}
             </td>
@@ -134,7 +146,7 @@
                   {% for s in ['Open', 'Pending Claim', 'Returned', 'Archived'] %}
                     <option
                       value="{{ s }}"
-                      {% if r.status == s %}selected{% endif %}
+                      {% if (r.status or '')|lower == s|lower %}selected{% endif %}
                     >{{ s }}</option>
                   {% endfor %}
                 </select>
@@ -142,7 +154,7 @@
                 <button class="small" type="submit">Save Status</button>
               </form>
 
-              <p class="help">Current: {{ r.status }}</p>
+              <p class="help">Current: {{ r.status or 'N/A' }}</p>
             </td>
 
             <td>
@@ -170,13 +182,12 @@
   {% endif %}
 </section>
 
-
 <!-- FOUND REPORTS -->
 <section class="panel">
   <h2>🎒 Found Item Reports</h2>
 
   <p class="help">
-    Total Found Reports: {{ stats.found }}
+    Total Found Reports: {{ found_reports|length }}
   </p>
 
   {% if found_reports %}
@@ -210,14 +221,19 @@
               <p><strong>Location:</strong> {{ r.location }}</p>
               <p><strong>Date found:</strong> {{ r.incident_date }}</p>
               <p class="help">
-                Posted: {{ r.created_at.strftime('%b %d, %Y') }}
+                Posted:
+                {% if r.created_at %}
+                  {{ r.created_at.strftime('%b %d, %Y') }}
+                {% else %}
+                  N/A
+                {% endif %}
               </p>
 
               {% if r.photo %}
                 <a
                   href="{{ photo_src(r.photo) }}"
                   target="_blank"
-                  rel="noopener"
+                  rel="noopener noreferrer"
                 >View Photo</a>
               {% endif %}
             </td>
@@ -237,7 +253,7 @@
                   {% for s in ['Open', 'Pending Claim', 'Returned', 'Archived'] %}
                     <option
                       value="{{ s }}"
-                      {% if r.status == s %}selected{% endif %}
+                      {% if (r.status or '')|lower == s|lower %}selected{% endif %}
                     >{{ s }}</option>
                   {% endfor %}
                 </select>
@@ -245,7 +261,7 @@
                 <button class="small" type="submit">Save Status</button>
               </form>
 
-              <p class="help">Current: {{ r.status }}</p>
+              <p class="help">Current: {{ r.status or 'N/A' }}</p>
             </td>
 
             <td>
@@ -273,15 +289,14 @@
   {% endif %}
 </section>
 
-
 <!-- LATEST CLAIM REQUESTS -->
 <section class="panel">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
     <div>
       <h2>🤝 Latest Claim Requests</h2>
       <p class="help">
-        Pending requests: {{ stats.pending_claims }}
-        · Reports marked Pending Claim: {{ stats.reports_pending_claim }}
+        Pending requests: {{ pending_claims_total }}
+        · Reports marked Pending Claim: {{ pending_reports_total }}
       </p>
     </div>
 
@@ -327,14 +342,14 @@
             </td>
 
             <td>
-              {% if c.status|lower == 'pending' %}
+              {% if (c.status or '')|lower == 'pending' %}
                 <span class="tag pending">Pending</span>
-              {% elif c.status|lower == 'approved' %}
+              {% elif (c.status or '')|lower == 'approved' %}
                 <span class="tag returned">Approved</span>
-              {% elif c.status|lower == 'rejected' %}
+              {% elif (c.status or '')|lower == 'rejected' %}
                 <span class="tag">Rejected</span>
               {% else %}
-                <span class="tag">{{ c.status }}</span>
+                <span class="tag">{{ c.status or 'N/A' }}</span>
               {% endif %}
             </td>
           </tr>
