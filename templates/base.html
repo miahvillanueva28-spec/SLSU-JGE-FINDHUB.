@@ -31,7 +31,7 @@
       scroll-padding-top: 20px;
     }
 
-    /* SLSU JGE CAMPUS BACKGROUND */
+    /* CAMPUS BACKGROUND */
     body {
       margin: 0;
       min-height: 100vh;
@@ -39,20 +39,18 @@
       flex-direction: column;
       font-family: Arial, Helvetica, sans-serif;
       color: var(--ink);
-
       background-color: #edf4ee;
       background-image:
         linear-gradient(
           135deg,
-          rgba(3, 35, 23, .30),
-          rgba(3, 35, 23, .40)
+          rgba(3, 35, 23, .25),
+          rgba(3, 35, 23, .35)
         ),
         url("{{ campus_photo }}");
       background-position: center center;
       background-size: cover;
       background-repeat: no-repeat;
       background-attachment: fixed;
-
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
@@ -129,6 +127,7 @@
       font-size: 21px;
       line-height: 1.25;
       letter-spacing: .2px;
+      color: white;
     }
 
     .brand p {
@@ -185,14 +184,16 @@
       animation: contentEnter .55s ease both;
     }
 
-    /* PANELS */
+    /* TRANSPARENT PANELS */
     .panel {
-      background: rgba(255, 255, 255, .88);
+      background: rgba(255, 255, 255, .58) !important;
       border: 1px solid rgba(255, 255, 255, .72);
       border-radius: var(--radius);
       padding: 16px;
       box-shadow: var(--shadow);
       margin-bottom: 15px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       transition: box-shadow var(--transition),
                   border-color var(--transition);
     }
@@ -207,7 +208,7 @@
       width: 92%;
       max-width: 1050px;
       margin: 20px auto 16px;
-      background: rgba(235, 246, 238, .90);
+      background: rgba(255, 255, 255, .62) !important;
       border: 1px solid rgba(255, 255, 255, .78);
       border-radius: 15px;
       padding: 25px 20px;
@@ -233,7 +234,10 @@
     }
 
     /* BUTTONS */
-    .button, button {
+    .button,
+    button,
+    input[type="submit"],
+    input[type="button"] {
       display: inline-block;
       border: 1px solid transparent;
       border-radius: 8px;
@@ -254,19 +258,24 @@
                   transform var(--transition);
     }
 
-    .button:hover, button:hover {
+    .button:hover,
+    button:hover,
+    input[type="submit"]:hover,
+    input[type="button"]:hover {
       background: var(--deep);
       color: white;
       box-shadow: 0 6px 15px rgba(0, 60, 35, .20);
       transform: translateY(-2px);
     }
 
-    .button:active, button:active {
+    .button:active,
+    button:active {
       transform: translateY(0) scale(.98);
     }
 
     .secondary {
       background: #66766c !important;
+      color: white !important;
     }
 
     .secondary:hover {
@@ -275,6 +284,7 @@
 
     .danger {
       background: #b42332 !important;
+      color: white !important;
     }
 
     .danger:hover {
@@ -309,8 +319,8 @@
       gap: 6px;
       padding: 7px 11px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, .90);
-      border: 1px solid #d6e9db;
+      background: rgba(255, 255, 255, .72);
+      border: 1px solid rgba(214, 233, 219, .9);
       box-shadow: 0 2px 5px rgba(0, 0, 0, .05);
       font-weight: bold;
       font-size: 12px;
@@ -351,7 +361,8 @@
       border-left-color: #d49b00;
     }
 
-    .flash.danger, .flash.error {
+    .flash.danger,
+    .flash.error {
       background: #f8d7da;
       color: #842029;
       border-color: rgba(180, 35, 50, .15);
@@ -359,7 +370,8 @@
     }
 
     /* HEADINGS AND FORM FIELDS */
-    h2, h3 {
+    h2,
+    h3 {
       color: var(--green);
     }
 
@@ -380,7 +392,9 @@
       font-size: 13px;
     }
 
-    input, select, textarea {
+    input,
+    select,
+    textarea {
       width: 100%;
       padding: 10px;
       border: 1px solid #c8d5cc;
@@ -394,18 +408,23 @@
                   background-color var(--transition);
     }
 
-    input:hover, select:hover, textarea:hover {
+    input:hover,
+    select:hover,
+    textarea:hover {
       border-color: #9ab7a3;
     }
 
-    input:focus, select:focus, textarea:focus {
+    input:focus,
+    select:focus,
+    textarea:focus {
       border-color: var(--bright);
       box-shadow: 0 0 0 3px rgba(8, 118, 71, .13);
       background: #fff;
       outline: none;
     }
 
-    input::placeholder, textarea::placeholder {
+    input::placeholder,
+    textarea::placeholder {
       color: #7c8980;
       opacity: 1;
     }
@@ -415,7 +434,8 @@
       resize: vertical;
     }
 
-    input[type="checkbox"], input[type="radio"] {
+    input[type="checkbox"],
+    input[type="radio"] {
       width: auto;
       accent-color: var(--bright);
     }
@@ -474,13 +494,15 @@
       min-height: 88px;
       padding: 14px;
       border-radius: 12px;
-      background: rgba(255, 255, 255, .90);
+      background: rgba(255, 255, 255, .58) !important;
       border: 1px solid rgba(255, 255, 255, .70);
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       justify-content: center;
       font-size: 13px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       transition: box-shadow var(--transition),
                   transform var(--transition),
                   border-color var(--transition);
@@ -513,11 +535,13 @@
       height: 100%;
       overflow: hidden;
       border-radius: 12px;
-      background: rgba(255, 255, 255, .92);
+      background: rgba(255, 255, 255, .58) !important;
       border: 1px solid rgba(255, 255, 255, .72);
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       transition: box-shadow var(--transition),
                   transform var(--transition),
                   border-color var(--transition);
@@ -529,12 +553,13 @@
       border-color: white;
     }
 
-    .report-photo, .placeholder-photo {
+    .report-photo,
+    .placeholder-photo {
       width: 100%;
       height: 145px;
       flex-shrink: 0;
       object-fit: cover;
-      background: rgba(232, 238, 233, .85);
+      background: rgba(232, 238, 233, .65);
     }
 
     .report-photo {
@@ -558,6 +583,7 @@
       display: flex;
       flex-direction: column;
       flex: 1;
+      background: transparent !important;
     }
 
     .report-content h3 {
@@ -611,10 +637,27 @@
     .empty-state {
       text-align: center;
       padding: 25px 16px;
-      background: rgba(255, 255, 255, .90);
+      background: rgba(255, 255, 255, .58) !important;
       border: 1px solid rgba(255, 255, 255, .65);
       border-radius: 12px;
       box-shadow: var(--shadow);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    /* OTHER COMMON BOX CLASSES */
+    .card,
+    .form-container,
+    .form-box,
+    .auth-card,
+    .login-box,
+    .register-box,
+    .content-box,
+    .table-container {
+      background-color: rgba(255, 255, 255, .58) !important;
+      border-color: rgba(255, 255, 255, .72);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
     }
 
     /* DETAIL VIEW */
@@ -623,7 +666,7 @@
       max-height: 300px;
       object-fit: contain;
       border-radius: 9px;
-      background: rgba(238, 242, 238, .85);
+      background: rgba(238, 242, 238, .65);
       box-shadow: 0 3px 10px rgba(0, 35, 20, .08);
       cursor: zoom-in;
     }
@@ -644,11 +687,12 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      background: rgba(255, 255, 255, .96);
+      background: rgba(255, 255, 255, .78) !important;
       font-size: 13px;
     }
 
-    th, td {
+    th,
+    td {
       text-align: left;
       padding: 10px;
       border-bottom: 1px solid #e1e8e3;
@@ -656,7 +700,7 @@
     }
 
     th {
-      background: rgba(234, 244, 237, .97);
+      background: rgba(234, 244, 237, .82) !important;
       color: var(--green);
       font-weight: bold;
       white-space: nowrap;
@@ -844,7 +888,7 @@
       to { background-position: -200% 0; }
     }
 
-    /* ACCESSIBLE KEYBOARD FOCUS */
+    /* KEYBOARD FOCUS */
     a:focus-visible,
     button:focus-visible,
     input:focus-visible,
@@ -960,7 +1004,8 @@
         height: 175px;
       }
 
-      th, td {
+      th,
+      td {
         padding: 8px;
       }
 
@@ -1005,6 +1050,48 @@
     rel="stylesheet"
     href="{{ url_for('static', filename='style.css') }}"
   >
+
+  <!-- Final overrides so the external stylesheet cannot make these boxes opaque -->
+  <style>
+    .panel,
+    .stat,
+    .report-card,
+    .empty-state,
+    .card,
+    .form-container,
+    .form-box,
+    .auth-card,
+    .login-box,
+    .register-box,
+    .content-box,
+    .table-container {
+      background-color: rgba(255, 255, 255, .58) !important;
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+    }
+
+    .hero {
+      background-color: rgba(255, 255, 255, .62) !important;
+    }
+
+    .report-content {
+      background: transparent !important;
+    }
+
+    table {
+      background-color: rgba(255, 255, 255, .78) !important;
+    }
+
+    th {
+      background-color: rgba(234, 244, 237, .82) !important;
+    }
+
+    input,
+    select,
+    textarea {
+      background-color: rgba(255, 255, 255, .96);
+    }
+  </style>
 
   {% block head %}{% endblock %}
 </head>
