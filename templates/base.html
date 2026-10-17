@@ -1,4 +1,4 @@
-```html
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -233,16 +233,22 @@
       font-size: 14px;
     }
 
-    /* BUTTONS */
+    /* DEFAULT BUTTONS */
     .button,
+    a.button,
     button,
     input[type="submit"],
-    input[type="button"] {
+    input[type="button"],
+    input[type="reset"],
+    .card-actions button,
+    .card-actions .button {
       display: inline-block;
-      border: 1px solid transparent;
+      border: 1px solid #075c3b;
       border-radius: 8px;
-      background: var(--bright);
-      color: white;
+      background: #087647;
+      background-color: #087647;
+      background-image: none;
+      color: #ffffff;
       padding: 10px 14px;
       font-weight: bold;
       text-decoration: none;
@@ -258,37 +264,71 @@
                   transform var(--transition);
     }
 
+    /* BUTTON HOVER */
     .button:hover,
+    a.button:hover,
     button:hover,
     input[type="submit"]:hover,
-    input[type="button"]:hover {
-      background: var(--deep);
-      color: white;
+    input[type="button"]:hover,
+    input[type="reset"]:hover,
+    .card-actions button:hover,
+    .card-actions .button:hover {
+      background: #063f2a;
+      background-color: #063f2a;
+      background-image: none;
+      border-color: #063f2a;
+      color: #ffffff;
       box-shadow: 0 6px 15px rgba(0, 60, 35, .20);
       transform: translateY(-2px);
     }
 
     .button:active,
-    button:active {
+    button:active,
+    input[type="submit"]:active,
+    input[type="button"]:active {
       transform: translateY(0) scale(.98);
     }
 
-    .secondary {
+    /* SECONDARY BUTTONS: GRAY */
+    .secondary,
+    .button.secondary,
+    button.secondary,
+    input.secondary {
       background: #66766c !important;
-      color: white !important;
+      background-color: #66766c !important;
+      background-image: none !important;
+      border-color: #56665c !important;
+      color: #ffffff !important;
     }
 
-    .secondary:hover {
+    .secondary:hover,
+    .button.secondary:hover,
+    button.secondary:hover {
       background: #4e5d54 !important;
+      background-color: #4e5d54 !important;
+      border-color: #4e5d54 !important;
+      color: #ffffff !important;
     }
 
-    .danger {
+    /* DANGER BUTTONS: RED */
+    .danger,
+    .button.danger,
+    button.danger,
+    input.danger {
       background: #b42332 !important;
-      color: white !important;
+      background-color: #b42332 !important;
+      background-image: none !important;
+      border-color: #941d29 !important;
+      color: #ffffff !important;
     }
 
-    .danger:hover {
+    .danger:hover,
+    .button.danger:hover,
+    button.danger:hover {
       background: #8e1725 !important;
+      background-color: #8e1725 !important;
+      border-color: #8e1725 !important;
+      color: #ffffff !important;
     }
 
     .small {
@@ -297,6 +337,7 @@
     }
 
     button:disabled,
+    input:disabled,
     .button[aria-disabled="true"] {
       opacity: .55;
       cursor: not-allowed;
@@ -406,6 +447,15 @@
       transition: border-color var(--transition),
                   box-shadow var(--transition),
                   background-color var(--transition);
+    }
+
+    /* Keep button inputs from inheriting form-field styles */
+    input[type="submit"],
+    input[type="button"],
+    input[type="reset"] {
+      width: auto;
+      background: #087647;
+      color: #ffffff;
     }
 
     input:hover,
@@ -1051,8 +1101,8 @@
     href="{{ url_for('static', filename='style.css') }}"
   >
 
-  <!-- Final overrides so the external stylesheet cannot make these boxes opaque -->
   <style>
+    /* TRANSPARENT PANELS: final base styles */
     .panel,
     .stat,
     .report-card,
@@ -1086,7 +1136,7 @@
       background-color: rgba(234, 244, 237, .82) !important;
     }
 
-    input,
+    input:not([type="submit"]):not([type="button"]):not([type="reset"]),
     select,
     textarea {
       background-color: rgba(255, 255, 255, .96);
@@ -1094,6 +1144,107 @@
   </style>
 
   {% block head %}{% endblock %}
+
+  <!-- FINAL BUTTON OVERRIDES: placed after child-template head styles -->
+  <style id="final-button-overrides">
+    button:not(.secondary):not(.danger),
+    input[type="submit"]:not(.secondary):not(.danger),
+    input[type="button"]:not(.secondary):not(.danger),
+    input[type="reset"]:not(.secondary):not(.danger),
+    a.button:not(.secondary):not(.danger),
+    .button:not(.secondary):not(.danger),
+    .card-actions button:not(.secondary):not(.danger),
+    .card-actions .button:not(.secondary):not(.danger) {
+      background: #087647 !important;
+      background-color: #087647 !important;
+      background-image: none !important;
+      color: #ffffff !important;
+      border-color: #075c3b !important;
+      opacity: 1;
+    }
+
+    button:not(.secondary):not(.danger):hover,
+    input[type="submit"]:not(.secondary):not(.danger):hover,
+    input[type="button"]:not(.secondary):not(.danger):hover,
+    input[type="reset"]:not(.secondary):not(.danger):hover,
+    a.button:not(.secondary):not(.danger):hover,
+    .button:not(.secondary):not(.danger):hover,
+    .card-actions button:not(.secondary):not(.danger):hover,
+    .card-actions .button:not(.secondary):not(.danger):hover {
+      background: #063f2a !important;
+      background-color: #063f2a !important;
+      background-image: none !important;
+      color: #ffffff !important;
+      border-color: #063f2a !important;
+    }
+
+    button.secondary,
+    input.secondary,
+    a.button.secondary,
+    .button.secondary,
+    .secondary {
+      background: #66766c !important;
+      background-color: #66766c !important;
+      background-image: none !important;
+      color: #ffffff !important;
+      border-color: #56665c !important;
+    }
+
+    button.secondary:hover,
+    a.button.secondary:hover,
+    .button.secondary:hover,
+    .secondary:hover {
+      background: #4e5d54 !important;
+      background-color: #4e5d54 !important;
+      color: #ffffff !important;
+    }
+
+    button.danger,
+    input.danger,
+    a.button.danger,
+    .button.danger,
+    .danger {
+      background: #b42332 !important;
+      background-color: #b42332 !important;
+      background-image: none !important;
+      color: #ffffff !important;
+      border-color: #941d29 !important;
+    }
+
+    button.danger:hover,
+    a.button.danger:hover,
+    .button.danger:hover,
+    .danger:hover {
+      background: #8e1725 !important;
+      background-color: #8e1725 !important;
+      color: #ffffff !important;
+      border-color: #8e1725 !important;
+    }
+
+    button:disabled,
+    input[type="submit"]:disabled,
+    input[type="button"]:disabled,
+    input[type="reset"]:disabled {
+      opacity: .55 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+    }
+
+    /* Keep image-preview close button dark/transparent */
+    #image-modal-close {
+      background: transparent !important;
+      background-color: transparent !important;
+      border-color: transparent !important;
+      color: #ffffff !important;
+      box-shadow: none !important;
+    }
+
+    #image-modal-close:hover {
+      background: rgba(255, 255, 255, .15) !important;
+      background-color: rgba(255, 255, 255, .15) !important;
+      transform: none !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -1183,4 +1334,3 @@
   ></script>
 </body>
 </html>
-```
