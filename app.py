@@ -367,21 +367,18 @@ def get_report_form_value(name, default=""):
     return (request.form.get(name, default) or "").strip()
 
 
-
 # --------------------------------------------------
 # HOME AND SEARCH
 # --------------------------------------------------
 
 @app.route("/")
 def home():
-    # Read and normalize search filters.
     query = request.args.get("q", "").strip()[:100]
     report_type = request.args.get("type", "").strip()
     category = request.args.get("category", "").strip()
     status = request.args.get("status", "").strip()
     sort = request.args.get("sort", "newest").strip()
 
-    # Get available categories from existing reports.
     categories = [
         row[0]
         for row in (
@@ -396,28 +393,23 @@ def home():
         )
     ]
 
-    # Start with all reports.
     reports_query = Report.query
 
-    # Filter by Lost or Found.
     if report_type in {"Lost", "Found"}:
         reports_query = reports_query.filter(
             Report.report_type == report_type
         )
 
-    # Filter by category.
     if category and category in categories:
         reports_query = reports_query.filter(
             Report.category == category
         )
 
-    # Filter by report status.
     if status in REPORT_STATUSES:
         reports_query = reports_query.filter(
             Report.status == status
         )
 
-    # Search item name, category, location, and description.
     if query:
         search_term = f"%{query}%"
 
@@ -430,7 +422,6 @@ def home():
             )
         )
 
-    # Sort the filtered results.
     if sort == "oldest":
         reports_query = reports_query.order_by(
             Report.created_at.asc(),
@@ -450,8 +441,6 @@ def home():
 
     reports = reports_query.all()
 
-    # Calculate statistics from all reports,
-    # not just the filtered search results.
     total_reports = Report.query.count()
     total_lost = Report.query.filter_by(
         report_type="Lost"
@@ -475,14 +464,10 @@ def home():
         reports=reports,
         categories=categories,
         stats=stats,
-
-        # Statistics names for compatibility with home.html.
         total_reports=total_reports,
         total_lost=total_lost,
         total_found=total_found,
         total_open=total_open,
-
-        # Current filter values.
         query=query,
         selected_type=report_type,
         selected_category=category,
@@ -857,20 +842,36 @@ def admin_update_report_status(report_id):
 @admin_required
 def admin_delete_report(report_id):
     report = db.get_or_404(Report, report_id)
+
+    report_id_to_delete = report.id
     photo = report.photo
 
     try:
+        # The Report model's cascade setting deletes associated claims.
         db.session.delete(report)
         db.session.commit()
 
+        # Delete local photos after the database deletion succeeds.
+        # Cloudinary URLs are intentionally skipped by delete_photo().
         delete_photo(photo)
 
-        flash("Report deleted.", "success")
+        flash(
+            f"Report #{report_id_to_delete} deleted successfully.",
+            "success",
+        )
 
     except Exception:
         db.session.rollback()
-        app.logger.exception("Report deletion failed")
-        flash("Unable to delete report.", "danger")
+
+        app.logger.exception(
+            "Failed to delete report #%s",
+            report_id_to_delete,
+        )
+
+        flash(
+            "Unable to delete report. Please check the Render logs.",
+            "danger",
+        )
 
     return redirect(url_for("admin_dashboard"))
 
@@ -937,6 +938,7 @@ def admin_update_claim_status(claim_id):
                     "was approved. The item is marked as returned."
                 )
                 notification_type = "success"
+
             elif new_status == "Rejected":
                 notification_title = "Claim Rejected"
                 notification_message = (
@@ -944,6 +946,7 @@ def admin_update_claim_status(claim_id):
                     "was rejected."
                 )
                 notification_type = "warning"
+
             else:
                 notification_title = "Claim Status Updated"
                 notification_message = (
@@ -999,6 +1002,7 @@ def mark_notification_read(notification_id):
     try:
         db.session.commit()
         flash("Notification marked as read.", "success")
+
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to mark notification as read")
@@ -1017,6 +1021,7 @@ def mark_all_notifications_read():
         )
         db.session.commit()
         flash("All notifications marked as read.", "success")
+
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to mark all notifications as read")
