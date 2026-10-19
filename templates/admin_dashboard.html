@@ -26,7 +26,6 @@
     </a>
   </div>
 
-  <!-- DASHBOARD STATISTICS -->
   <div class="stats">
     <div class="stat">
       <span>📚 Active Reports</span>
@@ -113,6 +112,7 @@
               <span class="tag">Lost</span>
               <p><strong>Location:</strong> {{ r.location }}</p>
               <p><strong>Date lost:</strong> {{ r.incident_date }}</p>
+
               <p class="help">
                 Posted:
                 {% if r.created_at %}
@@ -220,6 +220,7 @@
               <span class="tag found">Found</span>
               <p><strong>Location:</strong> {{ r.location }}</p>
               <p><strong>Date found:</strong> {{ r.incident_date }}</p>
+
               <p class="help">
                 Posted:
                 {% if r.created_at %}
@@ -328,6 +329,7 @@
                 <span class="help">
                   {{ c.report.report_type }} · Report #{{ c.report.id }}
                 </span><br>
+
                 <a href="{{ url_for('report_detail', report_id=c.report.id) }}">
                   View Report
                 </a>
