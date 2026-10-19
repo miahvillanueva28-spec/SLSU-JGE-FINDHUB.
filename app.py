@@ -202,10 +202,40 @@ class Claim(db.Model):
     )
 
 
+class Notification(db.Model):
+    """Persistent in-app notifications visible to administrators."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    notification_type = db.Column(
+        db.String(30), nullable=False, default="info"
+    )
+    report_id = db.Column(db.Integer, nullable=True)
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(
+        db.DateTime, default=datetime.utcnow, nullable=False
+    )
+
+
 # Create tables that do not yet exist.
 # This does not migrate or alter existing tables.
 with app.app_context():
     db.create_all()
+
+
+@app.context_processor
+def inject_notification_count():
+    unread_notification_count = 0
+
+    if session.get("admin_logged_in"):
+        unread_notification_count = Notification.query.filter_by(
+            is_read=False
+        ).count()
+
+    return {
+        "unread_notification_count": unread_notification_count
+    }
 
 
 # --------------------------------------------------
@@ -226,6 +256,24 @@ CLAIM_STATUSES = {
     "Approved",
     "Rejected",
 }
+
+
+def create_notification(
+    title,
+    message,
+    notification_type="info",
+    report_id=None,
+):
+    """Add a notification to the current database transaction."""
+    notification = Notification(
+        title=title,
+        message=message,
+        notification_type=notification_type,
+        report_id=report_id,
+        is_read=False,
+    )
+    db.session.add(notification)
+    return notification
 
 
 def admin_required(view_function):
@@ -519,6 +567,18 @@ def new_report():
 
         try:
             db.session.add(report)
+            db.session.flush()
+
+            create_notification(
+                title="New Lost and Found Report",
+                message=(
+                    f"A new {report.report_type.lower()} report was submitted: "
+                    f"{report.item_name}."
+                ),
+                notification_type="report",
+                report_id=report.id,
+            )
+
             db.session.commit()
 
         except Exception:
@@ -594,6 +654,18 @@ def submit_claim(report_id):
     try:
         db.session.add(claim)
         report.status = "Pending Claim"
+        db.session.flush()
+
+        create_notification(
+            title="New Item Claim",
+            message=(
+                f"{claim.claimant_name} submitted a claim for "
+                f'"{report.item_name}" (report #{report.id}).'
+            ),
+            notification_type="claim",
+            report_id=report.id,
+        )
+
         db.session.commit()
 
     except Exception:
@@ -748,9 +820,21 @@ def admin_update_report_status(report_id):
         flash("Invalid report status.", "danger")
         return redirect(url_for("admin_dashboard"))
 
+    old_status = report.status
     report.status = new_status
 
     try:
+        if old_status != new_status:
+            create_notification(
+                title="Item Status Updated",
+                message=(
+                    f'"{report.item_name}" (report #{report.id}) '
+                    f"changed from {old_status} to {new_status}."
+                ),
+                notification_type="status",
+                report_id=report.id,
+            )
+
         db.session.commit()
         flash("Report status updated.", "success")
 
@@ -825,6 +909,7 @@ def admin_update_claim_status(claim_id):
         flash("Invalid claim status.", "danger")
         return redirect(url_for("admin_claims"))
 
+    old_claim_status = claim.status
     claim.status = new_status
 
     if new_status == "Approved":
@@ -844,6 +929,35 @@ def admin_update_claim_status(claim_id):
             claim.report.status = "Open"
 
     try:
+        if old_claim_status != new_status:
+            if new_status == "Approved":
+                notification_title = "Claim Approved"
+                notification_message = (
+                    f'Claim #{claim.id} for "{claim.report.item_name}" '
+                    "was approved. The item is marked as returned."
+                )
+                notification_type = "success"
+            elif new_status == "Rejected":
+                notification_title = "Claim Rejected"
+                notification_message = (
+                    f'Claim #{claim.id} for "{claim.report.item_name}" '
+                    "was rejected."
+                )
+                notification_type = "warning"
+            else:
+                notification_title = "Claim Status Updated"
+                notification_message = (
+                    f"Claim #{claim.id} status changed to {new_status}."
+                )
+                notification_type = "claim"
+
+            create_notification(
+                title=notification_title,
+                message=notification_message,
+                notification_type=notification_type,
+                report_id=claim.report_id,
+            )
+
         db.session.commit()
         flash("Claim status updated.", "success")
 
@@ -853,6 +967,62 @@ def admin_update_claim_status(claim_id):
         flash("Unable to update claim status.", "danger")
 
     return redirect(url_for("admin_claims"))
+
+
+# --------------------------------------------------
+# ADMIN: NOTIFICATIONS
+# --------------------------------------------------
+
+@app.route("/notifications")
+@admin_required
+def notifications_page():
+    notifications = Notification.query.order_by(
+        Notification.created_at.desc(),
+        Notification.id.desc(),
+    ).all()
+
+    return render_template(
+        "notifications.html",
+        notifications=notifications,
+    )
+
+
+@app.route(
+    "/notifications/<int:notification_id>/read",
+    methods=["POST"],
+)
+@admin_required
+def mark_notification_read(notification_id):
+    notification = db.get_or_404(Notification, notification_id)
+    notification.is_read = True
+
+    try:
+        db.session.commit()
+        flash("Notification marked as read.", "success")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Unable to mark notification as read")
+        flash("Unable to update notification.", "danger")
+
+    return redirect(url_for("notifications_page"))
+
+
+@app.route("/notifications/read-all", methods=["POST"])
+@admin_required
+def mark_all_notifications_read():
+    try:
+        Notification.query.filter_by(is_read=False).update(
+            {"is_read": True},
+            synchronize_session=False,
+        )
+        db.session.commit()
+        flash("All notifications marked as read.", "success")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Unable to mark all notifications as read")
+        flash("Unable to update notifications.", "danger")
+
+    return redirect(url_for("notifications_page"))
 
 
 # --------------------------------------------------
