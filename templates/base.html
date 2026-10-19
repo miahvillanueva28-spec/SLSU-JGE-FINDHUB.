@@ -1,4 +1,4 @@
-
+```html
 <!doctype html>
 <html lang="en" data-theme="light">
 <head>
@@ -322,8 +322,7 @@
       backdrop-filter: blur(7px);
       -webkit-backdrop-filter: blur(7px);
     }
-
-    .hero h2 {
+        .hero h2 {
       color: var(--green);
       font-size: clamp(24px, 3vw, 33px);
       line-height: 1.2;
@@ -639,6 +638,7 @@
       margin: 4px 0;
       overflow-wrap: anywhere;
     }
+        }
 
     .tag {
       display: inline-flex;
@@ -1053,6 +1053,100 @@
       }
     }
   </style>
+        .stats, .report-grid, .filter-grid,
+      .form-grid, .detail-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .full {
+        grid-column: auto;
+      }
+
+      input:not([type="checkbox"]):not([type="radio"]),
+      select, textarea {
+        min-height: 46px;
+        font-size: 16px;
+      }
+
+      .button, a.button, button:not(#theme-toggle):not(.menu-toggle),
+      input[type="submit"], input[type="button"], input[type="reset"] {
+        min-height: 46px;
+      }
+
+      .stat {
+        min-height: 74px;
+      }
+
+      .report-photo, .placeholder-photo {
+        height: 175px;
+      }
+
+      .inline-form {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .inline-form select {
+        width: 100%;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+
+      .toast-container {
+        top: 10px;
+        right: 10px;
+        width: calc(100vw - 20px);
+      }
+
+      .image-modal {
+        padding: 12px;
+      }
+
+      .image-modal img {
+        max-height: 80vh;
+      }
+
+      .site-footer {
+        padding: 16px 12px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .brand h1 {
+        font-size: 15px;
+      }
+
+      .brand p {
+        font-size: 9px;
+      }
+
+      .menu-toggle {
+        padding: 8px 10px;
+      }
+
+      .container, .hero {
+        width: 96%;
+      }
+
+      .panel, .card {
+        padding: 11px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   {% block head %}{% endblock %}
@@ -1099,6 +1193,12 @@
 
         {% if admin_logged_in %}
           <a href="{{ url_for('admin_dashboard') }}">🛠️ Admin Dashboard</a>
+          <a href="{{ url_for('notifications_page') }}">
+            🔔 Notifications
+            {% if unread_notification_count|default(0) > 0 %}
+              ({{ unread_notification_count }})
+            {% endif %}
+          </a>
           <a href="{{ url_for('admin_logout') }}">🚪 Log Out</a>
         {% else %}
           <a href="{{ url_for('admin_login') }}">🔐 Admin Login</a>
