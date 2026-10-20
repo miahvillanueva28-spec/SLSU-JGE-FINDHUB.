@@ -898,4 +898,51 @@ html[data-theme="dark"] header.site-header {
   color: #f2fff5;
   border-color: rgba(255, 255, 255, 0.14);
 }
+/* FindHub campus background */
+body {
+    background-image:
+        linear-gradient(
+            rgba(7, 55, 35, 0.42),
+            rgba(7, 55, 35, 0.52)
+        ),
+        url("/static/images/campus-bg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
 
+/* Transparent glass panels */
+.panel,
+.card,
+.search-panel,
+.report-card,
+.home-stats,
+.stat {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    border-radius: 16px;
+}
+
+/* Green buttons */
+button,
+.btn,
+input[type="submit"],
+a.btn,
+button[type="submit"] {
+    background-color: #087443;
+    color: #fff;
+    border: 1px solid #087443;
+    border-radius: 10px;
+}
+
+button:hover,
+.btn:hover,
+input[type="submit"]:hover,
+a.btn:hover {
+    background-color: #055c34;
+    color: #fff;
+}
