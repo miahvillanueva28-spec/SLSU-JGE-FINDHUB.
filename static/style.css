@@ -946,3 +946,28 @@ a.btn:hover {
     background-color: #055c34;
     color: #fff;
 }
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    background-image:
+        linear-gradient(
+            rgba(7, 40, 28, 0.35),
+            rgba(7, 40, 28, 0.45)
+        ),
+        url("/static/images/campus-bg.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+@media (max-width: 768px) {
+    body {
+        background-attachment: scroll;
+    }
+}
+
