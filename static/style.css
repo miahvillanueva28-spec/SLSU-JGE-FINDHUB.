@@ -787,3 +787,28 @@ hr {
         animation-duration: 0.01ms !important;
     }
 }
+
+/* Restore FindHub background image */
+body {
+    background-color: var(--page);
+    background-image:
+        linear-gradient(
+            rgba(244, 248, 245, 0.84),
+            rgba(244, 248, 245, 0.90)
+        ),
+        url("/static/images/campus-bg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-blend-mode: normal;
+}
+
+html[data-theme="dark"] body {
+    background-image:
+        linear-gradient(
+            rgba(16, 26, 20, 0.88),
+            rgba(16, 26, 20, 0.92)
+        ),
+        url("/static/images/campus-bg.jpg");
+}
