@@ -1,3 +1,4 @@
+
 import os
 import csv
 import io
@@ -31,19 +32,32 @@ from werkzeug.utils import secure_filename
 # --------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent
+IS_VERCEL = os.environ.get("VERCEL", "").lower() == "1"
 
+# Local development only. Vercel does not provide persistent
+# local filesystem storage for application uploads.
 DATA_DIR = Path(
-    os.environ.get("DATA_DIR", str(BASE_DIR / "data"))
+    os.environ.get(
+        "DATA_DIR",
+        "/tmp/findhub" if IS_VERCEL else str(BASE_DIR / "data"),
+    )
 ).resolve()
 
 UPLOAD_FOLDER = DATA_DIR / "uploads"
-UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+
+if not IS_VERCEL:
+    UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = (
-    os.environ.get("SECRET_KEY") or secrets.token_hex(32)
-)
+secret_key = os.environ.get("SECRET_KEY", "").strip()
+
+if IS_VERCEL and not secret_key:
+    raise RuntimeError(
+        "SECRET_KEY must be configured in Vercel Environment Variables."
+    )
+
+app.config["SECRET_KEY"] = secret_key or secrets.token_hex(32)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -59,49 +73,54 @@ app.config["SESSION_COOKIE_SECURE"] = (
 
 database_url = os.environ.get("DATABASE_URL", "").strip()
 
-if database_url:
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace(
-            "postgres://",
-            "postgresql+psycopg2://",
-            1,
-        )
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace(
+        "postgres://",
+        "postgresql+psycopg2://",
+        1,
+    )
+elif database_url.startswith("postgresql://"):
+    database_url = database_url.replace(
+        "postgresql://",
+        "postgresql+psycopg2://",
+        1,
+    )
+elif database_url.startswith("postgresql+psycopg://"):
+    database_url = database_url.replace(
+        "postgresql+psycopg://",
+        "postgresql+psycopg2://",
+        1,
+    )
 
-    elif database_url.startswith("postgresql+psycopg://"):
-        database_url = database_url.replace(
-            "postgresql+psycopg://",
-            "postgresql+psycopg2://",
-            1,
-        )
-
-    elif database_url.startswith("postgresql://"):
-        database_url = database_url.replace(
-            "postgresql://",
-            "postgresql+psycopg2://",
-            1,
-        )
-
-    if not database_url.startswith(
-        ("postgresql+psycopg2://", "sqlite:///")
-    ):
+if not database_url:
+    if IS_VERCEL:
         raise RuntimeError(
-            "Invalid DATABASE_URL format. "
-            "Configure DATABASE_URL in Render Environment Variables."
+            "DATABASE_URL is missing. Configure a PostgreSQL database "
+            "and add DATABASE_URL in Vercel Environment Variables."
         )
 
-else:
-    # Local development fallback.
-    # SQLite on Render Free is not persistent storage.
     database_url = f"sqlite:///{DATA_DIR / 'findhub.db'}"
-
     app.logger.warning(
-        "DATABASE_URL is not configured. Using SQLite fallback. "
-        "Do not rely on this for persistent production data."
+        "DATABASE_URL is missing. Using local SQLite for development only."
+    )
+
+if not database_url.startswith(
+    ("postgresql+psycopg2://", "sqlite:///")
+):
+    raise RuntimeError(
+        "Unsupported DATABASE_URL. Use PostgreSQL or SQLite locally."
+    )
+
+if IS_VERCEL and database_url.startswith("sqlite:///"):
+    raise RuntimeError(
+        "SQLite is not suitable for persistent Vercel production data. "
+        "Configure PostgreSQL using DATABASE_URL."
     )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
+    "pool_recycle": 300,
 }
 
 db = SQLAlchemy(app)
@@ -116,6 +135,11 @@ USE_CLOUDINARY = bool(CLOUDINARY_URL)
 
 if USE_CLOUDINARY:
     cloudinary.config(cloudinary_url=CLOUDINARY_URL)
+
+if IS_VERCEL and not USE_CLOUDINARY:
+    app.logger.warning(
+        "CLOUDINARY_URL is missing. Photo uploads will not work on Vercel."
+    )
 
 
 # --------------------------------------------------
@@ -163,7 +187,7 @@ class Report(db.Model):
         db.Boolean, default=False, nullable=False
     )
 
-    # Cloudinary URL or local filename.
+    # Cloudinary URL or a legacy local filename.
     photo = db.Column(db.String(1000), nullable=True)
 
     status = db.Column(db.String(30), default="Open", nullable=False)
@@ -203,8 +227,6 @@ class Claim(db.Model):
 
 
 class Notification(db.Model):
-    """Persistent in-app notifications visible to administrators."""
-
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     message = db.Column(db.Text, nullable=False)
@@ -218,24 +240,20 @@ class Notification(db.Model):
     )
 
 
-# Create tables that do not yet exist.
-# This does not migrate or alter existing tables.
+# Create missing tables. Existing tables are not migrated.
+# For production, ensure DATABASE_URL points to the intended database.
 with app.app_context():
     db.create_all()
 
 
 @app.context_processor
 def inject_notification_count():
-    unread_notification_count = 0
+    count = 0
 
     if session.get("admin_logged_in"):
-        unread_notification_count = Notification.query.filter_by(
-            is_read=False
-        ).count()
+        count = Notification.query.filter_by(is_read=False).count()
 
-    return {
-        "unread_notification_count": unread_notification_count
-    }
+    return {"unread_notification_count": count}
 
 
 # --------------------------------------------------
@@ -251,11 +269,7 @@ REPORT_STATUSES = {
     "Archived",
 }
 
-CLAIM_STATUSES = {
-    "Pending",
-    "Approved",
-    "Rejected",
-}
+CLAIM_STATUSES = {"Pending", "Approved", "Rejected"}
 
 
 def create_notification(
@@ -264,7 +278,6 @@ def create_notification(
     notification_type="info",
     report_id=None,
 ):
-    """Add a notification to the current database transaction."""
     notification = Notification(
         title=title,
         message=message,
@@ -300,13 +313,13 @@ def allowed_file(filename):
 
 
 def photo_src(photo):
-    """Return the URL used to display an uploaded photo."""
     if not photo:
         return None
 
     if photo.startswith(("https://", "http://")):
         return photo
 
+    # Legacy local uploads may not exist after moving to Vercel.
     return url_for("uploaded_photo", filename=photo)
 
 
@@ -316,7 +329,6 @@ def inject_photo_helper():
 
 
 def save_photo(file_storage):
-    """Save to Cloudinary, or local disk for development."""
     if not file_storage or not file_storage.filename:
         return None
 
@@ -325,25 +337,39 @@ def save_photo(file_storage):
     if not allowed_file(original_name):
         raise ValueError("Unsupported photo format.")
 
-    if USE_CLOUDINARY:
-        result = cloudinary.uploader.upload(
-            file_storage,
-            folder="slsu-jge-findhub",
-            resource_type="image",
-        )
-        return result["secure_url"]
+    if not USE_CLOUDINARY:
+        if IS_VERCEL:
+            raise RuntimeError(
+                "Photo storage is not configured. Set CLOUDINARY_URL "
+                "in Vercel Environment Variables."
+            )
 
-    # Local disk is suitable for development, not persistent
-    # storage on Render Free.
-    filename = f"{secrets.token_hex(12)}_{original_name}"
-    file_storage.save(UPLOAD_FOLDER / filename)
+        filename = f"{secrets.token_hex(12)}_{original_name}"
+        file_storage.save(UPLOAD_FOLDER / filename)
+        return filename
 
-    return filename
+    result = cloudinary.uploader.upload(
+        file_storage,
+        folder="slsu-jge-findhub",
+        resource_type="image",
+    )
+
+    photo_url = result.get("secure_url")
+
+    if not photo_url:
+        raise RuntimeError("Cloudinary did not return a secure photo URL.")
+
+    return photo_url
 
 
 def delete_photo(photo):
-    """Delete local files only."""
+    # Do not remove remote images automatically.
+    # Cloudinary URLs are retained unless a separate deletion workflow
+    # using the Cloudinary public_id is implemented.
     if not photo or photo.startswith(("https://", "http://")):
+        return
+
+    if IS_VERCEL:
         return
 
     filename = Path(photo).name
@@ -412,7 +438,6 @@ def home():
 
     if query:
         search_term = f"%{query}%"
-
         reports_query = reports_query.filter(
             or_(
                 Report.item_name.ilike(search_term),
@@ -424,33 +449,24 @@ def home():
 
     if sort == "oldest":
         reports_query = reports_query.order_by(
-            Report.created_at.asc(),
-            Report.id.asc(),
+            Report.created_at.asc(), Report.id.asc()
         )
     elif sort == "name":
         reports_query = reports_query.order_by(
-            Report.item_name.asc(),
-            Report.id.asc(),
+            Report.item_name.asc(), Report.id.asc()
         )
     else:
         sort = "newest"
         reports_query = reports_query.order_by(
-            Report.created_at.desc(),
-            Report.id.desc(),
+            Report.created_at.desc(), Report.id.desc()
         )
 
     reports = reports_query.all()
 
     total_reports = Report.query.count()
-    total_lost = Report.query.filter_by(
-        report_type="Lost"
-    ).count()
-    total_found = Report.query.filter_by(
-        report_type="Found"
-    ).count()
-    total_open = Report.query.filter_by(
-        status="Open"
-    ).count()
+    total_lost = Report.query.filter_by(report_type="Lost").count()
+    total_found = Report.query.filter_by(report_type="Found").count()
+    total_open = Report.query.filter_by(status="Open").count()
 
     stats = {
         "total": total_reports,
@@ -488,11 +504,9 @@ def new_report():
         category = get_report_form_value("category")
         description = get_report_form_value("description")
         location = get_report_form_value("location")
-
         incident_date = parse_incident_date(
             get_report_form_value("incident_date")
         )
-
         contact_name = get_report_form_value("contact_name")
         contact = get_report_form_value("contact")
 
@@ -516,22 +530,18 @@ def new_report():
             flash("Please complete all required fields.", "danger")
             return redirect(url_for("new_report"))
 
-        photo_file = request.files.get("photo")
-
         try:
-            saved_photo = save_photo(photo_file)
-
+            saved_photo = save_photo(request.files.get("photo"))
         except ValueError:
             flash(
                 "Use a PNG, JPG, JPEG, GIF, or WEBP image.",
                 "danger",
             )
             return redirect(url_for("new_report"))
-
         except Exception:
             app.logger.exception("Photo upload failed")
             flash(
-                "Photo upload failed. Check the photo storage configuration.",
+                "Photo upload failed. Check the Cloudinary configuration.",
                 "danger",
             )
             return redirect(url_for("new_report"))
@@ -576,10 +586,7 @@ def new_report():
             return redirect(url_for("new_report"))
 
         flash("Your report was submitted successfully.", "success")
-
-        return redirect(
-            url_for("report_detail", report_id=report.id)
-        )
+        return redirect(url_for("report_detail", report_id=report.id))
 
     return render_template("report_form.html")
 
@@ -591,11 +598,7 @@ def new_report():
 @app.route("/report/<int:report_id>")
 def report_detail(report_id):
     report = db.get_or_404(Report, report_id)
-
-    return render_template(
-        "report_detail.html",
-        report=report,
-    )
+    return render_template("report_detail.html", report=report)
 
 
 # --------------------------------------------------
@@ -611,9 +614,7 @@ def submit_claim(report_id):
             "This report is no longer accepting claim requests.",
             "warning",
         )
-        return redirect(
-            url_for("report_detail", report_id=report.id)
-        )
+        return redirect(url_for("report_detail", report_id=report.id))
 
     claimant_name = get_report_form_value("claimant_name")
     claimant_contact = get_report_form_value("claimant_contact")
@@ -624,9 +625,7 @@ def submit_claim(report_id):
             "Complete your name, contact details, and ownership proof.",
             "danger",
         )
-        return redirect(
-            url_for("report_detail", report_id=report.id)
-        )
+        return redirect(url_for("report_detail", report_id=report.id))
 
     claim = Claim(
         report_id=report.id,
@@ -656,30 +655,26 @@ def submit_claim(report_id):
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to save claim")
-        flash(
-            "Unable to submit your claim. Please try again.",
-            "danger",
-        )
-        return redirect(
-            url_for("report_detail", report_id=report.id)
-        )
+        flash("Unable to submit your claim. Please try again.", "danger")
+        return redirect(url_for("report_detail", report_id=report.id))
 
-    flash(
-        "Claim request submitted for administrator review.",
-        "success",
-    )
-
-    return redirect(
-        url_for("report_detail", report_id=report.id)
-    )
+    flash("Claim request submitted for administrator review.", "success")
+    return redirect(url_for("report_detail", report_id=report.id))
 
 
 # --------------------------------------------------
-# SERVE LOCAL PHOTOS
+# LEGACY LOCAL PHOTO ROUTE
 # --------------------------------------------------
 
 @app.route("/uploads/<path:filename>")
 def uploaded_photo(filename):
+    if IS_VERCEL:
+        return (
+            "This photo uses legacy local storage. "
+            "Restore it to Cloudinary and update its database URL.",
+            404,
+        )
+
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 
@@ -719,7 +714,6 @@ def admin_login():
             session["admin_username"] = expected_username
 
             flash("Welcome to the admin dashboard.", "success")
-
             return redirect(url_for("admin_dashboard"))
 
         flash("Invalid username or password.", "danger")
@@ -734,18 +728,13 @@ def admin_login():
 @app.route("/admin")
 @admin_required
 def admin_dashboard():
-    reports = Report.query.order_by(
-        Report.created_at.desc()
-    ).all()
+    reports = Report.query.order_by(Report.created_at.desc()).all()
 
     lost_reports = [
-        report for report in reports
-        if report.report_type == "Lost"
+        report for report in reports if report.report_type == "Lost"
     ]
-
     found_reports = [
-        report for report in reports
-        if report.report_type == "Found"
+        report for report in reports if report.report_type == "Found"
     ]
 
     latest_claims = Claim.query.order_by(
@@ -757,23 +746,14 @@ def admin_dashboard():
         "total": len(reports),
         "lost": len(lost_reports),
         "found": len(found_reports),
-        "open": sum(
-            1 for report in reports
-            if report.status == "Open"
-        ),
-        "claims": Claim.query.filter_by(
-            status="Pending"
-        ).count(),
-        "pending_claims": Claim.query.filter_by(
-            status="Pending"
-        ).count(),
+        "open": sum(1 for r in reports if r.status == "Open"),
+        "claims": Claim.query.filter_by(status="Pending").count(),
+        "pending_claims": Claim.query.filter_by(status="Pending").count(),
         "reports_pending_claim": sum(
-            1 for report in reports
-            if report.status == "Pending Claim"
+            1 for r in reports if r.status == "Pending Claim"
         ),
         "returned": sum(
-            1 for report in reports
-            if report.status == "Returned"
+            1 for r in reports if r.status == "Returned"
         ),
     }
 
@@ -792,10 +772,7 @@ def admin_dashboard():
 # ADMIN: UPDATE REPORT STATUS
 # --------------------------------------------------
 
-@app.route(
-    "/admin/report/<int:report_id>/status",
-    methods=["POST"],
-)
+@app.route("/admin/report/<int:report_id>/status", methods=["POST"])
 @admin_required
 def admin_update_report_status(report_id):
     report = db.get_or_404(Report, report_id)
@@ -835,24 +812,17 @@ def admin_update_report_status(report_id):
 # ADMIN: DELETE REPORT
 # --------------------------------------------------
 
-@app.route(
-    "/admin/report/<int:report_id>/delete",
-    methods=["POST"],
-)
+@app.route("/admin/report/<int:report_id>/delete", methods=["POST"])
 @admin_required
 def admin_delete_report(report_id):
     report = db.get_or_404(Report, report_id)
-
     report_id_to_delete = report.id
     photo = report.photo
 
     try:
-        # The Report model's cascade setting deletes associated claims.
         db.session.delete(report)
         db.session.commit()
 
-        # Delete local photos after the database deletion succeeds.
-        # Cloudinary URLs are intentionally skipped by delete_photo().
         delete_photo(photo)
 
         flash(
@@ -862,14 +832,11 @@ def admin_delete_report(report_id):
 
     except Exception:
         db.session.rollback()
-
         app.logger.exception(
-            "Failed to delete report #%s",
-            report_id_to_delete,
+            "Failed to delete report #%s", report_id_to_delete
         )
-
         flash(
-            "Unable to delete report. Please check the Render logs.",
+            "Unable to delete report. Please check the deployment logs.",
             "danger",
         )
 
@@ -883,24 +850,15 @@ def admin_delete_report(report_id):
 @app.route("/admin/claims")
 @admin_required
 def admin_claims():
-    claims = Claim.query.order_by(
-        Claim.created_at.desc()
-    ).all()
-
-    return render_template(
-        "admin_claims.html",
-        claims=claims,
-    )
+    claims = Claim.query.order_by(Claim.created_at.desc()).all()
+    return render_template("admin_claims.html", claims=claims)
 
 
 # --------------------------------------------------
 # ADMIN: UPDATE CLAIM STATUS
 # --------------------------------------------------
 
-@app.route(
-    "/admin/claim/<int:claim_id>/status",
-    methods=["POST"],
-)
+@app.route("/admin/claim/<int:claim_id>/status", methods=["POST"])
 @admin_required
 def admin_update_claim_status(claim_id):
     claim = db.get_or_404(Claim, claim_id)
@@ -932,31 +890,31 @@ def admin_update_claim_status(claim_id):
     try:
         if old_claim_status != new_status:
             if new_status == "Approved":
-                notification_title = "Claim Approved"
-                notification_message = (
+                title = "Claim Approved"
+                message = (
                     f'Claim #{claim.id} for "{claim.report.item_name}" '
                     "was approved. The item is marked as returned."
                 )
                 notification_type = "success"
 
             elif new_status == "Rejected":
-                notification_title = "Claim Rejected"
-                notification_message = (
+                title = "Claim Rejected"
+                message = (
                     f'Claim #{claim.id} for "{claim.report.item_name}" '
                     "was rejected."
                 )
                 notification_type = "warning"
 
             else:
-                notification_title = "Claim Status Updated"
-                notification_message = (
+                title = "Claim Status Updated"
+                message = (
                     f"Claim #{claim.id} status changed to {new_status}."
                 )
                 notification_type = "claim"
 
             create_notification(
-                title=notification_title,
-                message=notification_message,
+                title=title,
+                message=message,
                 notification_type=notification_type,
                 report_id=claim.report_id,
             )
@@ -1002,7 +960,6 @@ def mark_notification_read(notification_id):
     try:
         db.session.commit()
         flash("Notification marked as read.", "success")
-
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to mark notification as read")
@@ -1021,7 +978,6 @@ def mark_all_notifications_read():
         )
         db.session.commit()
         flash("All notifications marked as read.", "success")
-
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to mark all notifications as read")
@@ -1054,9 +1010,7 @@ def export_reports():
         "Created At",
     ])
 
-    reports = Report.query.order_by(
-        Report.created_at.desc()
-    ).all()
+    reports = Report.query.order_by(Report.created_at.desc()).all()
 
     for report in reports:
         writer.writerow([
@@ -1066,21 +1020,14 @@ def export_reports():
             report.category,
             report.description,
             report.location,
-            (
-                report.incident_date.isoformat()
-                if report.incident_date else ""
-            ),
+            report.incident_date.isoformat() if report.incident_date else "",
             report.contact_name,
             report.contact,
             report.status,
-            (
-                report.created_at.isoformat()
-                if report.created_at else ""
-            ),
+            report.created_at.isoformat() if report.created_at else "",
         ])
 
-    response = make_response(output.getvalue())
-
+    response = make_response("\ufeff" + output.getvalue())
     response.headers["Content-Type"] = "text/csv; charset=utf-8"
     response.headers["Content-Disposition"] = (
         "attachment; filename=findhub_reports.csv"
@@ -1097,7 +1044,6 @@ def export_reports():
 def admin_logout():
     session.clear()
     flash("You have been logged out.", "success")
-
     return redirect(url_for("home"))
 
 
@@ -1111,10 +1057,7 @@ def file_too_large(_error):
         "The uploaded file is too large. Maximum size is 5 MB.",
         "danger",
     )
-
-    return redirect(
-        request.referrer or url_for("new_report")
-    )
+    return redirect(request.referrer or url_for("new_report"))
 
 
 @app.after_request
@@ -1125,7 +1068,6 @@ def add_security_headers(response):
     response.headers["Permissions-Policy"] = (
         "camera=(), microphone=(), geolocation=()"
     )
-
     return response
 
 
