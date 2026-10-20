@@ -1,30 +1,33 @@
 
 /* ==========================================
-   SLSU JGE FINDHUB - MAIN STYLESHEET
+   SLSU JGE FINDHUB - COMPLETE STYLESHEET
    ========================================== */
 
 :root {
     color-scheme: light;
-    --primary: #176b45;
-    --primary-dark: #105336;
-    --primary-soft: #e7f4ec;
+    --primary: #087443;
+    --primary-dark: #055c34;
+    --primary-light: #15965a;
+    --primary-soft: #e0f2e7;
     --accent: #e4b64f;
-    --page: #f4f8f5;
+    --page: #edf5ef;
     --surface: #ffffff;
     --surface-alt: #edf4ef;
     --text: #1c2d23;
     --muted: #647369;
     --border: #d7e3da;
     --danger: #b42318;
-    --success: #176b45;
-    --shadow: 0 8px 28px rgba(20, 55, 35, 0.09);
+    --success: #087443;
+    --shadow: 0 8px 28px rgba(10, 45, 28, 0.12);
     --radius: 16px;
+    --glass: rgba(255, 255, 255, 0.78);
 }
 
 html[data-theme="dark"] {
     color-scheme: dark;
     --primary: #69c394;
     --primary-dark: #8ed9ad;
+    --primary-light: #91dfb2;
     --primary-soft: #203a2d;
     --page: #101a14;
     --surface: #18251d;
@@ -35,9 +38,12 @@ html[data-theme="dark"] {
     --danger: #ff8a80;
     --success: #7ed5a1;
     --shadow: 0 8px 28px rgba(0, 0, 0, 0.24);
+    --glass: rgba(20, 38, 27, 0.84);
 }
 
-/* General */
+/* ==========================================
+   RESET AND GENERAL
+   ========================================== */
 
 * {
     box-sizing: border-box;
@@ -45,17 +51,29 @@ html[data-theme="dark"] {
 
 html {
     scroll-behavior: smooth;
+    min-height: 100%;
 }
 
 body {
     margin: 0;
-    background: var(--page);
+    min-height: 100vh;
+    background-color: var(--page);
+    background-image:
+        linear-gradient(
+            rgba(7, 55, 35, 0.40),
+            rgba(7, 55, 35, 0.52)
+        ),
+        url("/static/images/campus-bg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: var(--text);
     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
         "Segoe UI", sans-serif;
     font-size: 16px;
     line-height: 1.6;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 img {
@@ -91,6 +109,31 @@ textarea:focus-visible {
     outline-offset: 3px;
 }
 
+h1,
+h2,
+h3,
+h4 {
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+}
+
+h1 {
+    font-size: clamp(1.8rem, 4vw, 2.7rem);
+}
+
+h2 {
+    font-size: clamp(1.35rem, 3vw, 1.9rem);
+}
+
+p {
+    margin-top: 0;
+}
+
+.muted,
+.text-muted {
+    color: var(--muted);
+}
+
 .skip-link {
     position: absolute;
     top: -60px;
@@ -105,15 +148,19 @@ textarea:focus-visible {
     top: 12px;
 }
 
-/* Header and navigation */
+/* ==========================================
+   HEADER AND NAVIGATION
+   ========================================== */
 
 .site-header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 3px 14px rgba(15, 50, 30, 0.04);
+    background: var(--glass);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 3px 14px rgba(15, 50, 30, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
 
 .header-inner {
@@ -210,6 +257,7 @@ textarea:focus-visible {
 .menu-toggle {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 7px;
     padding: 9px 12px;
     border: 1px solid var(--border);
@@ -228,7 +276,6 @@ textarea:focus-visible {
     height: 42px;
     padding: 9px;
     flex-direction: column;
-    justify-content: center;
     gap: 5px;
 }
 
@@ -237,10 +284,12 @@ textarea:focus-visible {
     width: 100%;
     height: 2px;
     border-radius: 2px;
-    background: var(--text);
+    background: currentColor;
 }
 
-/* Main layout and footer */
+/* ==========================================
+   PAGE LAYOUT AND FOOTER
+   ========================================== */
 
 .page-container {
     width: min(1160px, calc(100% - 40px));
@@ -249,9 +298,11 @@ textarea:focus-visible {
 }
 
 .site-footer {
-    border-top: 1px solid var(--border);
-    background: var(--surface);
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    background: var(--glass);
     color: var(--muted);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .footer-inner {
@@ -274,56 +325,42 @@ textarea:focus-visible {
     color: var(--text);
 }
 
-h1,
-h2,
-h3,
-h4 {
-    line-height: 1.25;
-    letter-spacing: -0.025em;
-}
-
-h1 {
-    font-size: clamp(1.8rem, 4vw, 2.7rem);
-}
-
-h2 {
-    font-size: clamp(1.35rem, 3vw, 1.9rem);
-}
-
-p {
-    margin-top: 0;
-}
-
-.muted,
-.text-muted {
-    color: var(--muted);
-}
-
-/* Cards and grids */
+/* ==========================================
+   GLASS PANELS AND CARDS
+   ========================================== */
 
 .card,
 .panel,
 .stat-card,
 .report-card,
 .form-card,
-.dashboard-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
+.dashboard-card,
+.search-panel,
+.home-stats,
+.stat,
+.empty-state {
+    background: var(--glass);
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.65);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .card,
 .panel,
 .form-card,
-.dashboard-card {
+.dashboard-card,
+.search-panel {
     padding: clamp(18px, 3vw, 28px);
 }
 
 .card-grid,
 .reports-grid,
 .stats-grid,
-.dashboard-grid {
+.dashboard-grid,
+.report-grid {
     display: grid;
     grid-template-columns: repeat(
         auto-fit,
@@ -332,11 +369,13 @@ p {
     gap: 18px;
 }
 
-.stat-card {
+.stat-card,
+.stat {
     padding: 22px;
 }
 
-.stat-card .stat-value {
+.stat-card .stat-value,
+.stat .stat-value {
     display: block;
     color: var(--primary);
     font-size: 2rem;
@@ -344,7 +383,8 @@ p {
     line-height: 1.15;
 }
 
-.stat-card .stat-label {
+.stat-card .stat-label,
+.stat .stat-label {
     color: var(--muted);
     font-weight: 600;
 }
@@ -357,7 +397,8 @@ p {
     padding: 18px;
 }
 
-.report-card .report-image {
+.report-card .report-image,
+.report-photo {
     display: block;
     width: 100%;
     aspect-ratio: 16 / 10;
@@ -370,7 +411,14 @@ p {
     cursor: zoom-in;
 }
 
-/* Buttons */
+.empty-state {
+    padding: 36px 20px;
+    text-align: center;
+}
+
+/* ==========================================
+   BUTTONS
+   ========================================== */
 
 .btn,
 button.btn,
@@ -382,7 +430,7 @@ input[type="submit"],
     gap: 8px;
     min-height: 42px;
     padding: 10px 16px;
-    border: 1px solid transparent;
+    border: 1px solid var(--primary);
     border-radius: 10px;
     background: var(--primary);
     color: #fff;
@@ -397,23 +445,39 @@ button.btn:hover,
 input[type="submit"]:hover,
 .button:hover {
     background: var(--primary-dark);
+    border-color: var(--primary-dark);
     color: #fff;
     transform: translateY(-1px);
 }
 
 .btn-secondary {
-    border-color: var(--border);
     background: var(--surface);
-    color: var(--text);
+    color: var(--primary);
+    border-color: var(--border);
 }
 
 .btn-secondary:hover {
-    background: var(--surface-alt);
-    color: var(--text);
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    border-color: var(--primary);
 }
 
 .btn-danger {
     background: #b42318;
+    border-color: #b42318;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #8f1c13;
+    border-color: #8f1c13;
+}
+
+button[type="submit"] {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    border-radius: 10px;
 }
 
 button:disabled,
@@ -423,7 +487,9 @@ input:disabled {
     transform: none;
 }
 
-/* Forms */
+/* ==========================================
+   FORMS
+   ========================================== */
 
 form {
     width: 100%;
@@ -448,8 +514,8 @@ textarea {
     padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    background: var(--surface);
-    color: var(--text);
+    background: rgba(255, 255, 255, 0.90);
+    color: #1c2d23;
 }
 
 input[type="file"] {
@@ -480,7 +546,9 @@ textarea::placeholder {
     font-size: 0.86rem;
 }
 
-/* Flash messages */
+/* ==========================================
+   FLASH MESSAGES
+   ========================================== */
 
 .flash-stack {
     position: fixed;
@@ -501,9 +569,10 @@ textarea::placeholder {
     border: 1px solid var(--border);
     border-left: 4px solid var(--primary);
     border-radius: 12px;
-    background: var(--surface);
+    background: var(--glass);
     color: var(--text);
     box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
 }
 
 .flash-message.success {
@@ -527,7 +596,9 @@ textarea::placeholder {
     line-height: 1;
 }
 
-/* Toast notifications */
+/* ==========================================
+   TOAST NOTIFICATIONS
+   ========================================== */
 
 .toast-container {
     position: fixed;
@@ -567,7 +638,9 @@ textarea::placeholder {
     transform: translateY(8px);
 }
 
-/* Image modal */
+/* ==========================================
+   IMAGE MODAL
+   ========================================== */
 
 .image-modal {
     position: fixed;
@@ -611,10 +684,13 @@ textarea::placeholder {
     line-height: 1;
 }
 
-/* Status and tables */
+/* ==========================================
+   BADGES AND TABLES
+   ========================================== */
 
 .badge,
-.status-badge {
+.status-badge,
+.tag {
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
@@ -628,7 +704,7 @@ textarea::placeholder {
 table {
     width: 100%;
     border-collapse: collapse;
-    background: var(--surface);
+    background: var(--glass);
 }
 
 th,
@@ -651,19 +727,11 @@ th {
     overflow-x: auto;
     border: 1px solid var(--border);
     border-radius: 12px;
+    background: var(--glass);
 }
 
 .table-wrap table {
     min-width: 650px;
-}
-
-.empty-state {
-    padding: 36px 20px;
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--muted);
-    text-align: center;
 }
 
 hr {
@@ -672,7 +740,117 @@ hr {
     border-top: 1px solid var(--border);
 }
 
-/* Responsive navigation */
+/* ==========================================
+   HOME PAGE SUPPORT
+   ========================================== */
+
+.home-hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(28px, 6vw, 64px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    border-radius: 24px;
+    background: var(--glass);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.home-hero h1 {
+    margin-top: 0;
+}
+
+.home-hero p {
+    max-width: 680px;
+}
+
+.home-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+    padding: 20px;
+}
+
+.home-stats .stat {
+    padding: 16px;
+    box-shadow: none;
+}
+
+.search-panel {
+    margin: 24px 0;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    align-items: end;
+}
+
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: 20px;
+}
+
+.report-grid > * {
+    min-width: 0;
+}
+
+/* ==========================================
+   DARK MODE
+   ========================================== */
+
+html[data-theme="dark"] body {
+    background-color: #101a14;
+    background-image:
+        linear-gradient(
+            rgba(8, 22, 14, 0.78),
+            rgba(8, 22, 14, 0.84)
+        ),
+        url("/static/images/campus-bg.jpg");
+}
+
+html[data-theme="dark"] .site-header,
+html[data-theme="dark"] .site-footer,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .report-card,
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .dashboard-card,
+html[data-theme="dark"] .search-panel,
+html[data-theme="dark"] .home-stats,
+html[data-theme="dark"] .home-hero,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .table-wrap {
+    background-color: rgba(20, 38, 27, 0.84);
+    color: #e9f2ec;
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]),
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+    background-color: rgba(16, 26, 20, 0.94);
+    color: #e9f2ec;
+    border-color: #405b48;
+}
+
+html[data-theme="dark"] .btn-secondary {
+    background: #203a2d;
+    color: #e9f2ec;
+    border-color: #69c394;
+}
+
+html[data-theme="dark"] .primary-navigation {
+    color: #e9f2ec;
+}
+
+/* ==========================================
+   RESPONSIVE NAVIGATION
+   ========================================== */
 
 @media (max-width: 900px) {
     .header-inner {
@@ -696,8 +874,10 @@ hr {
         gap: 4px;
         padding: 12px 20px 18px;
         border-bottom: 1px solid var(--border);
-        background: var(--surface);
+        background: var(--glass);
         box-shadow: var(--shadow);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
     }
 
     .primary-navigation.open {
@@ -718,13 +898,20 @@ hr {
     .footer-inner {
         width: calc(100% - 28px);
     }
+
+    .filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
-/* Small phones */
+/* ==========================================
+   SMALL PHONES
+   ========================================== */
 
 @media (max-width: 560px) {
     body {
         font-size: 15px;
+        background-attachment: scroll;
     }
 
     .brand-logo,
@@ -749,8 +936,14 @@ hr {
     .card-grid,
     .reports-grid,
     .stats-grid,
-    .dashboard-grid {
+    .dashboard-grid,
+    .home-stats,
+    .filter-grid {
         grid-template-columns: 1fr;
+    }
+
+    .home-hero {
+        padding: 26px 20px;
     }
 
     .flash-stack {
@@ -778,6 +971,10 @@ hr {
     }
 }
 
+/* ==========================================
+   ACCESSIBILITY
+   ========================================== */
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -786,163 +983,4 @@ hr {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
     }
-}
-
-/* Restore FindHub background image */
-body {
-    background-color: var(--page);
-    background-image:
-        linear-gradient(
-            rgba(244, 248, 245, 0.84),
-            rgba(244, 248, 245, 0.90)
-        ),
-        url("/static/images/campus-bg.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-blend-mode: normal;
-}
-
-html[data-theme="dark"] body {
-    background-image:
-        linear-gradient(
-            rgba(16, 26, 20, 0.88),
-            rgba(16, 26, 20, 0.92)
-        ),
-        url("/static/images/campus-bg.jpg");
-}
-/* SLSU FindHub — glass panels and green buttons */
-:root {
-  --primary: #087443;
-  --primary-dark: #055c34;
-  --primary-light: #15965a;
-  --page: #edf5ef;
-}
-
-/* Campus background — palitan ang filename ng aktuwal na image */
-body {
-  background:
-    linear-gradient(rgba(8, 45, 29, 0.40), rgba(8, 45, 29, 0.50)),
-    url("/static/images/campus-bg.jpg") center / cover fixed no-repeat;
-}
-
-/* Transparent glass panels */
-.panel,
-.card,
-.search-panel,
-.report-card,
-.home-stats,
-.stat,
-.site-header,
-header.site-header {
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.70);
-  border-radius: 16px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Green buttons */
-button,
-.btn,
-input[type="submit"],
-a.btn,
-button[type="submit"] {
-  background: #087443;
-  color: #fff;
-  border: 1px solid #087443;
-  border-radius: 10px;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-button:hover,
-.btn:hover,
-input[type="submit"]:hover,
-a.btn:hover,
-button[type="submit"]:hover {
-  background: #055c34;
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-/* Form fields */
-input,
-select,
-textarea {
-  border-radius: 9px;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: 2px solid #15965a;
-  outline-offset: 1px;
-}
-
-/* Dark theme background overlay */
-html[data-theme="dark"] body {
-  background-image:
-    linear-gradient(rgba(5, 24, 16, 0.76), rgba(5, 24, 16, 0.82)),
-    url("/static/images/campus-bg.jpg");
-}
-
-html[data-theme="dark"] .panel,
-html[data-theme="dark"] .card,
-html[data-theme="dark"] .search-panel,
-html[data-theme="dark"] .report-card,
-html[data-theme="dark"] .home-stats,
-html[data-theme="dark"] .stat,
-html[data-theme="dark"] header.site-header {
-  background: rgba(18, 35, 26, 0.82);
-  color: #f2fff5;
-  border-color: rgba(255, 255, 255, 0.14);
-}
-/* FindHub campus background */
-body {
-    background-image:
-        linear-gradient(
-            rgba(7, 55, 35, 0.42),
-            rgba(7, 55, 35, 0.52)
-        ),
-        url("/static/images/campus-bg.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    min-height: 100vh;
-}
-
-/* Transparent glass panels */
-.panel,
-.card,
-.search-panel,
-.report-card,
-.home-stats,
-.stat {
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-    border-radius: 16px;
-}
-
-/* Green buttons */
-button,
-.btn,
-input[type="submit"],
-a.btn,
-button[type="submit"] {
-    background-color: #087443;
-    color: #fff;
-    border: 1px solid #087443;
-    border-radius: 10px;
-}
-
-button:hover,
-.btn:hover,
-input[type="submit"]:hover,
-a.btn:hover {
-    background-color: #055c34;
-    color: #fff;
 }
