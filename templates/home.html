@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Home | SLSU JGE FindHub{% endblock %}
+{% block title %}{% if request.args.get('view') == 'reports' %}All Reports | {% endif %}Home | SLSU JGE FindHub{% endblock %}
 {% block head %}
 <style>
   /* Home hero */
@@ -49,11 +49,6 @@
     color: var(--muted);
     font-size: clamp(15px, 2vw, 17px);
     line-height: 1.8;
-  }
-  .home-hero .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
   }
   .home-hero .button {
     box-shadow: 0 5px 13px rgba(0, 75, 43, .16);
@@ -182,15 +177,12 @@
     color: #fff;
     transform: translateY(-1px);
   }
-  .home-page .button.secondary,
-  .home-hero .button.secondary {
+  .home-page .button.secondary {
     border-color: var(--border);
     background: var(--surface);
     color: var(--text);
-    box-shadow: none;
   }
-  .home-page .button.secondary:hover,
-  .home-hero .button.secondary:hover {
+  .home-page .button.secondary:hover {
     background: var(--surface-alt);
     color: var(--text);
   }
@@ -199,18 +191,9 @@
     padding: 8px 12px;
     font-size: 13px;
   }
-  /* Reports — hidden by default, toggled by button */
+  /* Reports section */
   .reports-section {
     margin-top: 30px;
-    display: none;
-  }
-  .reports-section.is-visible {
-    display: block;
-    animation: reportsFadeIn .4s ease both;
-  }
-  @keyframes reportsFadeIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
   }
   .reports-heading {
     display: flex;
@@ -238,6 +221,9 @@
     border: 1px solid var(--border);
     font-size: 12px;
     vertical-align: middle;
+  }
+  .back-to-home-row {
+    margin-bottom: 18px;
   }
   .home-page .report-grid {
     display: grid;
@@ -398,6 +384,20 @@
     flex-wrap: wrap;
     gap: 9px;
   }
+  /* REPORTS-ONLY VIEW: hide hero, stats, search — show ONLY reports */
+  body.reports-only .home-hero,
+  body.reports-only .home-stats,
+  body.reports-only .search-panel {
+    display: none !important;
+  }
+  body.reports-only .reports-section {
+    margin-top: 0;
+    animation: reportsFadeIn .4s ease both;
+  }
+  @keyframes reportsFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   @keyframes homeStickerEnter {
     from { opacity: 0; transform: translateY(7px); }
     to { opacity: 1; transform: translateY(0); }
@@ -429,13 +429,6 @@
     .home-hero .sticker {
       padding: 6px 9px;
       font-size: 12px;
-    }
-    .home-hero .hero-actions {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .home-hero .hero-actions .button {
-      width: 100%;
     }
     .home-stats {
       gap: 10px;
@@ -471,7 +464,7 @@
   @media (prefers-reduced-motion: reduce) {
     .home-hero .sticker,
     .home-report-card,
-    .reports-section.is-visible {
+    body.reports-only .reports-section {
       animation: none;
     }
     .home-report-card:hover .report-photo {
@@ -495,15 +488,9 @@
     share found items, and help reunite belongings with
     their rightful owners in the campus community.
   </p>
-  <div class="hero-actions">
-    <a class="button" href="{{ url_for('new_report') }}">
-      ✨ Submit a Report
-    </a>
-    <button type="button" class="button secondary" id="view-reports-btn"
-            aria-expanded="false" aria-controls="reports-section">
-      📋 View Reports
-    </button>
-  </div>
+  <a class="button" href="{{ url_for('new_report') }}">
+    ✨ Submit a Report
+  </a>
 </section>
 {% endblock %}
 
@@ -597,9 +584,14 @@
 
   <section class="reports-section" id="reports-section"
            aria-labelledby="recent-reports-heading">
+    <div class="back-to-home-row">
+      <a class="button secondary small" href="{{ url_for('home') }}" id="back-to-home-btn" style="display:none;">
+        ← Back to Home
+      </a>
+    </div>
     <div class="reports-heading">
       <h2 id="recent-reports-heading">
-        📌 Recent Lost &amp; Found Reports
+        📌 All Lost &amp; Found Reports
         {% if reports %}
           <span class="reports-count">{{ reports|length }}</span>
         {% endif %}
@@ -699,41 +691,48 @@
 
 <script>
   (function () {
-    const toggleBtn = document.getElementById("view-reports-btn");
-    const reportsSection = document.getElementById("reports-section");
-    if (!toggleBtn || !reportsSection) return;
-
-    function showReports(scroll) {
-      reportsSection.classList.add("is-visible");
-      toggleBtn.setAttribute("aria-expanded", "true");
-      toggleBtn.innerHTML = "🙈 Hide Reports";
-      if (scroll) {
-        setTimeout(function () {
-          reportsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 80);
-      }
-    }
-
-    function hideReports() {
-      reportsSection.classList.remove("is-visible");
-      toggleBtn.setAttribute("aria-expanded", "false");
-      toggleBtn.innerHTML = "📋 View Reports";
-    }
-
-    toggleBtn.addEventListener("click", function () {
-      if (reportsSection.classList.contains("is-visible")) {
-        hideReports();
-      } else {
-        showReports(true);
-      }
-    });
-
-    // Auto-show reports if user came from a search (has query params)
     const params = new URLSearchParams(window.location.search);
-    const hasFilters = params.has("q") || params.has("type")
-      || params.has("category") || params.has("status");
-    if (hasFilters) {
-      showReports(true);
+    const isReportsView = params.get("view") === "reports";
+    const backBtn = document.getElementById("back-to-home-btn");
+    const reportsSection = document.getElementById("reports-section");
+
+    if (isReportsView) {
+      // REPORTS-ONLY: hide hero, stats, search — ONLY reports visible
+      document.body.classList.add("reports-only");
+      if (backBtn) backBtn.style.display = "inline-flex";
+      document.title = "All Reports | SLSU JGE FindHub";
+    } else {
+      // NORMAL HOME: reports section hidden
+      if (reportsSection) reportsSection.style.display = "none";
+    }
+
+    // Intercept "View Reports" nav link — instant switch, no page reload
+    const navLink = document.getElementById("nav-view-reports");
+    if (navLink) {
+      navLink.addEventListener("click", function (e) {
+        if (isReportsView) return;
+        e.preventDefault();
+        document.body.classList.add("reports-only");
+        if (reportsSection) reportsSection.style.display = "";
+        if (backBtn) backBtn.style.display = "inline-flex";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.pushState({}, "", "{{ url_for('home') }}?view=reports");
+        document.title = "All Reports | SLSU JGE FindHub";
+      });
+    }
+
+    // "← Back to Home" button — returns to normal home view
+    if (backBtn) {
+      backBtn.addEventListener("click", function (e) {
+        if (isReportsView) return; // full page load handles this case
+        e.preventDefault();
+        document.body.classList.remove("reports-only");
+        if (reportsSection) reportsSection.style.display = "none";
+        backBtn.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.pushState({}, "", "{{ url_for('home') }}");
+        document.title = "Home | SLSU JGE FindHub";
+      });
     }
   })();
 </script>
