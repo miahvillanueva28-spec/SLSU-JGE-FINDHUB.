@@ -514,6 +514,19 @@ def new_report():
 @app.route("/report/<int:report_id>")
 def report_detail(report_id):
     report = db.get_or_404(Report, report_id)
+
+    # Auto-mark notification as read when admin opens it from notifications
+    notification_id = request.args.get("notification_id", type=int)
+    if notification_id and session.get("admin_logged_in"):
+        notification = Notification.query.get(notification_id)
+        if notification and not notification.is_read:
+            try:
+                notification.is_read = True
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                app.logger.exception("Unable to auto-mark notification as read")
+
     return render_template("report_detail.html", report=report)
 
 
