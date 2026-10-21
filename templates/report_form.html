@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 {% block title %}Submit a Report | FindHub{% endblock %}
 
@@ -18,7 +17,7 @@
 
   <form method="POST" enctype="multipart/form-data">
     <div class="form-grid">
-
+      <!-- Report Type -->
       <div>
         <label for="report_type">Report type *</label>
         <select id="report_type" name="report_type" required>
@@ -28,6 +27,7 @@
         </select>
       </div>
 
+      <!-- Item Name -->
       <div>
         <label for="item_name">Item name *</label>
         <input
@@ -39,33 +39,7 @@
         >
       </div>
 
-      <div>
-        <label for="category">Category *</label>
-        <select id="category" name="category" required>
-          <option value="" disabled selected>Select a category</option>
-          <option value="Electronics">📱 Electronics</option>
-          <option value="IDs and Documents">🪪 IDs and Documents</option>
-          <option value="Wallets and Money">👛 Wallets and Money</option>
-          <option value="Bags">🎒 Bags</option>
-          <option value="Clothing">👕 Clothing</option>
-          <option value="School Supplies">✏️ School Supplies</option>
-          <option value="Books and Notebooks">📚 Books and Notebooks</option>
-          <option value="Keys">🔑 Keys</option>
-          <option value="Jewelry and Accessories">💍 Jewelry and Accessories</option>
-          <option value="Eyeglasses">👓 Eyeglasses</option>
-          <option value="Umbrellas">☂️ Umbrellas</option>
-          <option value="Water Bottles and Tumblers">🥤 Water Bottles and Tumblers</option>
-          <option value="Food and Containers">🍱 Food and Containers</option>
-          <option value="Personal Items">🧴 Personal Items</option>
-          <option value="Sports Equipment">⚽ Sports Equipment</option>
-          <option value="Computer Accessories">💻 Computer Accessories</option>
-          <option value="Headphones and Earphones">🎧 Headphones and Earphones</option>
-          <option value="Watches">⌚ Watches</option>
-          <option value="Cash">💵 Cash</option>
-          <option value="Others">📦 Others</option>
-        </select>
-      </div>
-
+      <!-- Date -->
       <div>
         <label for="incident_date" id="incident-date-label">
           Date Lost or Found *
@@ -79,38 +53,7 @@
         >
       </div>
 
-      <div class="full">
-        <label for="location">Location on campus *</label>
-        <input
-          id="location"
-          name="location"
-          maxlength="180"
-          required
-          placeholder="e.g. Library, Room 203, canteen"
-        >
-      </div>
-
-      <div class="full">
-        <label for="description">Description and identifying details *</label>
-        <textarea
-          id="description"
-          name="description"
-          maxlength="3000"
-          required
-          placeholder="Describe the item, color, brand, or where it was found."
-        ></textarea>
-      </div>
-
-      <div>
-        <label for="contact_name">Your name</label>
-        <input
-          id="contact_name"
-          name="contact_name"
-          maxlength="120"
-          placeholder="Your name"
-        >
-      </div>
-
+      <!-- Contact (moved up to fill the gap left by Category) -->
       <div>
         <label for="contact">Private contact method *</label>
         <input
@@ -122,8 +65,44 @@
         >
       </div>
 
+      <!-- Location (full width) -->
       <div class="full">
-        <label for="photo">Item photo (optional, max 5 MB)</label>
+        <label for="location">Location on campus *</label>
+        <input
+          id="location"
+          name="location"
+          maxlength="180"
+          required
+          placeholder="e.g. Library, Room 203, canteen"
+        >
+      </div>
+
+      <!-- Description (full width) -->
+      <div class="full">
+        <label for="description">Description and identifying details *</label>
+        <textarea
+          id="description"
+          name="description"
+          maxlength="3000"
+          required
+          placeholder="Describe the item, color, brand, or where it was found."
+        ></textarea>
+      </div>
+
+      <!-- Your Name (optional) -->
+      <div>
+        <label for="contact_name">Your name <span style="font-weight:normal;color:var(--muted);">(optional)</span></label>
+        <input
+          id="contact_name"
+          name="contact_name"
+          maxlength="120"
+          placeholder="Your name"
+        >
+      </div>
+
+      <!-- Photo Upload -->
+      <div>
+        <label for="photo">Item photo <span style="font-weight:normal;color:var(--muted);">(optional, max 5 MB)</span></label>
         <input
           id="photo"
           type="file"
@@ -132,6 +111,7 @@
         >
       </div>
 
+      <!-- Public Contact Checkbox (full width) -->
       <div class="full">
         <label style="display:flex;gap:10px;align-items:flex-start;font-weight:normal">
           <input
@@ -146,7 +126,6 @@
           </span>
         </label>
       </div>
-
     </div>
 
     <p class="help">
