@@ -549,18 +549,6 @@
           </select>
         </div>
         <div>
-          <label for="report-category">Category</label>
-          <select id="report-category" name="category">
-            <option value="">All categories</option>
-            {% for category_option in categories|default([], true) %}
-              <option value="{{ category_option }}"
-                {% if request.args.get('category', '') == category_option|string %}selected{% endif %}>
-                {{ category_option }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div>
           <label for="report-status">Status</label>
           <select id="report-status" name="status">
             <option value="">All statuses</option>
