@@ -594,7 +594,7 @@
       <strong>{{ total_open|default(stats.open|default(0)) }}</strong>
     </div>
     <div class="stat">
-      <span class="stat-label">🎒 Items Lost</span>
+      <span class="stat-label">⚠️ Items Lost</span>
       <strong>{{ total_lost|default(stats.lost|default(0)) }}</strong>
     </div>
     <div class="stat">
@@ -706,7 +706,7 @@
                      aria-label="No item photo available">
                   <span aria-hidden="true">
                     {% if report.report_type|lower == 'lost' %}
-                      🎒
+                      ⚠️
                     {% else %}
                       🔎
                     {% endif %}
@@ -769,10 +769,10 @@
         </p>
         <div class="empty-actions">
           <a class="button lost-btn" href="{{ url_for('new_report') }}?type=Lost">
-            🔍 Report Lost Item
+            ⚠️ Report Lost Item
           </a>
           <a class="button found-btn" href="{{ url_for('new_report') }}?type=Found">
-            ✋ Report Found Item
+           🔍 Report Found Item
           </a>
           {% if search_performed %}
             <a class="button secondary" href="{{ url_for('home') }}">
