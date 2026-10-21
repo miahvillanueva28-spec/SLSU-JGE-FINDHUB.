@@ -4,9 +4,7 @@
    MAIN STYLESHEET
    ========================================== */
 
-/* ==========================================
-   1. THEME VARIABLES
-   ========================================== */
+/* 1. THEME VARIABLES */
 
 :root {
     color-scheme: light;
@@ -18,8 +16,8 @@
     --accent: #e4b64f;
 
     --page: #f4f8f5;
-    --surface: rgba(255, 255, 255, 0.95);
-    --surface-alt: rgba(237, 244, 239, 0.97);
+    --surface: rgba(255, 255, 255, 0.96);
+    --surface-alt: rgba(237, 244, 239, 0.98);
 
     --text: #1c2d23;
     --muted: #647369;
@@ -31,9 +29,7 @@
     --shadow: 0 8px 28px rgba(20, 55, 35, 0.15);
     --radius: 16px;
 
-    /* Shared homepage width */
     --homepage-box-width: 800px;
-    --homepage-side-gap: 20px;
 }
 
 html[data-theme="dark"] {
@@ -45,7 +41,7 @@ html[data-theme="dark"] {
     --primary-soft: #203a2d;
 
     --page: #101a14;
-    --surface: rgba(24, 37, 29, 0.96);
+    --surface: rgba(24, 37, 29, 0.97);
     --surface-alt: rgba(32, 47, 37, 0.98);
 
     --text: #e9f2ec;
@@ -58,9 +54,7 @@ html[data-theme="dark"] {
     --shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
 }
 
-/* ==========================================
-   2. GENERAL
-   ========================================== */
+/* 2. RESET AND GENERAL */
 
 *,
 *::before,
@@ -78,15 +72,17 @@ body {
     min-height: 100vh;
     margin: 0;
 
+    display: flex;
+    flex-direction: column;
+
     color: var(--text);
     font-family: Inter, system-ui, -apple-system,
         BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.6;
 
     background-color: var(--page);
-
     background-image:
         linear-gradient(
             rgba(7, 40, 28, 0.38),
@@ -102,11 +98,10 @@ body {
 
 html[data-theme="dark"] body {
     background-color: #101a14;
-
     background-image:
         linear-gradient(
-            rgba(5, 24, 16, 0.62),
-            rgba(5, 24, 16, 0.72)
+            rgba(5, 24, 16, 0.64),
+            rgba(5, 24, 16, 0.74)
         ),
         url("/static/images/campus-bg.jpg");
 }
@@ -153,25 +148,23 @@ textarea:focus-visible {
     padding: 8px 12px;
     border-radius: 8px;
 
-    color: white;
     background: var(--primary);
+    color: white;
 }
 
 .skip-link:focus {
     top: 12px;
 }
 
-/* ==========================================
-   3. HEADER
-   ========================================== */
+/* 3. HEADER */
 
 .site-header {
-    position: sticky;
-    top: 0;
+    position: relative;
     z-index: 100;
+    flex: 0 0 auto;
 
     color: white;
-    background: rgba(5, 82, 52, 0.97);
+    background: rgba(5, 82, 52, 0.98);
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.16);
     box-shadow: 0 3px 14px rgba(15, 50, 30, 0.15);
@@ -238,7 +231,7 @@ textarea:focus-visible {
 }
 
 .brand-copy strong {
-    font-size: 1.03rem;
+    font-size: 1rem;
     letter-spacing: -0.02em;
 }
 
@@ -320,51 +313,68 @@ textarea:focus-visible {
     background: white;
 }
 
-/* ==========================================
-   4. MAIN PAGE CONTAINER
-   ========================================== */
+/* 4. MAIN CONTENT */
 
 .page-container {
     width: min(1000px, calc(100% - 40px));
     max-width: 1000px;
-
     min-width: 0;
 
     margin: 28px auto 48px;
+
+    flex: 1 0 auto;
     box-sizing: border-box;
 }
 
-/* ==========================================
-   5. HOMEPAGE BOX ALIGNMENT
-   ========================================== */
+/* 5. FOOTER - ALWAYS AT BOTTOM ON SHORT PAGES */
 
-/*
-   Ang hero ay nasa hero block ng base.html.
-   Ang statistics, search, at empty state naman ay
-   nasa content block. Iisa ang maximum width nila.
-*/
-
-.home-hero,
-.home-page {
+.site-footer {
     width: 100%;
-    max-width: var(--homepage-box-width);
-    min-width: 0;
+    flex: 0 0 auto;
 
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: auto;
 
-    box-sizing: border-box;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+
+    background: rgba(4, 54, 35, 0.97);
+    color: #e0eee5;
 }
 
-/* Hero */
+.footer-inner {
+    width: min(1000px, calc(100% - 40px));
+    min-height: 48px;
+
+    margin: 0 auto;
+    padding: 14px 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.footer-inner p {
+    margin: 0;
+    color: #e0eee5;
+    font-size: 12px;
+}
+
+.footer-inner strong {
+    color: white;
+}
+
+/* 6. HOMEPAGE HERO AND BOX ALIGNMENT */
 
 .home-hero {
     display: block;
     position: relative;
     overflow: hidden;
 
-    margin-top: 0;
-    margin-bottom: 22px;
+    width: min(var(--homepage-box-width), calc(100% - 40px));
+    max-width: var(--homepage-box-width);
+
+    margin: 22px auto;
 
     padding: clamp(28px, 5vw, 52px);
 
@@ -377,7 +387,13 @@ textarea:focus-visible {
     box-shadow: var(--shadow);
 }
 
-/* Homepage internal sections */
+.home-page {
+    width: 100%;
+    max-width: var(--homepage-box-width);
+    min-width: 0;
+
+    margin: 0 auto;
+}
 
 .home-page .home-stats,
 .home-page .search-panel,
@@ -386,156 +402,22 @@ textarea:focus-visible {
     max-width: 100%;
     min-width: 0;
 
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 0;
+    margin-right: 0;
 
     box-sizing: border-box;
 }
 
-/* Statistics */
+/* 7. STATISTICS */
 
 .home-page .home-stats {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    align-items: stretch;
-
     gap: 15px;
 
     margin-top: 0;
     margin-bottom: 22px;
 }
-
-/* Search panel */
-
-.home-page .search-panel {
-    scroll-margin-top: 95px;
-
-    margin-top: 0;
-    margin-bottom: 30px;
-
-    padding: clamp(18px, 3vw, 26px);
-
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-
-    background: var(--surface);
-    color: var(--text);
-
-    box-shadow: var(--shadow);
-
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* Recent reports section */
-
-.home-page .reports-section {
-    margin-top: 30px;
-    margin-bottom: 0;
-}
-
-/* Empty state: No Reports Found */
-
-.home-page .home-empty-state {
-    display: block;
-
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-
-    margin: 0 auto;
-    padding: 34px 18px;
-
-    border: 1px dashed var(--border);
-    border-radius: 16px;
-
-    background: var(--surface);
-    color: var(--text);
-
-    box-shadow: var(--shadow);
-
-    text-align: center;
-    box-sizing: border-box;
-}
-
-/* ==========================================
-   6. HERO CONTENT
-   ========================================== */
-
-.home-hero .sticker-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 9px;
-
-    margin-bottom: 24px;
-}
-
-.home-hero .sticker {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-
-    padding: 7px 12px;
-
-    border: 1px solid var(--border);
-    border-radius: 999px;
-
-    background: var(--surface-alt);
-    color: var(--text);
-
-    font-size: 13px;
-    font-weight: 700;
-
-    animation: homeStickerEnter 0.45s ease both;
-}
-
-.home-hero .sticker:nth-child(2) {
-    animation-delay: 0.06s;
-}
-
-.home-hero .sticker:nth-child(3) {
-    animation-delay: 0.12s;
-}
-
-.home-hero .sticker:nth-child(4) {
-    animation-delay: 0.18s;
-}
-
-.home-hero h1,
-.home-hero h2 {
-    max-width: 760px;
-
-    margin: 0 0 16px;
-
-    color: var(--text);
-
-    font-size: clamp(28px, 5vw, 45px);
-    line-height: 1.16;
-    letter-spacing: -0.7px;
-}
-
-.home-hero .hero-description {
-    max-width: 700px;
-
-    margin: 0 0 24px;
-
-    color: var(--muted);
-
-    font-size: clamp(15px, 2vw, 17px);
-    line-height: 1.8;
-}
-
-.home-hero .button {
-    box-shadow: 0 5px 13px rgba(0, 75, 43, 0.16);
-}
-
-.home-hero .button:hover {
-    box-shadow: 0 8px 19px rgba(0, 75, 43, 0.24);
-}
-
-/* ==========================================
-   7. STATISTICS CARDS
-   ========================================== */
 
 .home-stats .stat {
     position: relative;
@@ -569,13 +451,6 @@ textarea:focus-visible {
 
     background: var(--primary);
     opacity: 0.72;
-
-    transition: width 0.25s ease, opacity 0.25s ease;
-}
-
-.home-stats .stat:hover::before {
-    width: 6px;
-    opacity: 1;
 }
 
 .home-stats .stat-label {
@@ -586,16 +461,30 @@ textarea:focus-visible {
 
 .home-stats .stat strong {
     color: var(--primary);
-
     font-size: clamp(23px, 3vw, 32px);
     line-height: 1.2;
-
     overflow-wrap: anywhere;
 }
 
-/* ==========================================
-   8. SEARCH AND FILTERS
-   ========================================== */
+/* 8. SEARCH PANEL */
+
+.home-page .search-panel {
+    margin-top: 0;
+    margin-bottom: 30px;
+
+    padding: clamp(18px, 3vw, 26px);
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    background: var(--surface);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
 
 .search-heading {
     display: flex;
@@ -625,7 +514,6 @@ textarea:focus-visible {
 
 .search-description {
     margin: 0 0 18px;
-
     color: var(--muted);
     font-size: 13px;
 }
@@ -638,10 +526,6 @@ textarea:focus-visible {
 
 .filter-grid > div {
     min-width: 0;
-}
-
-.filter-grid label {
-    font-size: 13px;
 }
 
 .filter-grid input,
@@ -659,68 +543,12 @@ textarea:focus-visible {
     margin-top: 17px;
 }
 
-/* ==========================================
-   9. BUTTONS
-   ========================================== */
+/* 9. BUTTONS */
 
-.home-hero .button,
-.home-page .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-
-    min-height: 42px;
-    padding: 10px 15px;
-
-    border: 1px solid transparent;
-    border-radius: 10px;
-
-    background: var(--primary);
-    color: #fff;
-
-    font-size: 14px;
-    font-weight: 700;
-
-    text-decoration: none;
-    cursor: pointer;
-
-    transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.home-page .button:hover,
-.home-hero .button:hover {
-    background: var(--primary-dark);
-    color: #fff;
-
-    transform: translateY(-1px);
-}
-
-.home-page .button.secondary {
-    border-color: var(--border);
-
-    background: var(--surface);
-    color: var(--text);
-}
-
-.home-page .button.secondary:hover {
-    background: var(--surface-alt);
-    color: var(--text);
-}
-
-.home-page .button.small {
-    min-height: 36px;
-    padding: 8px 12px;
-
-    font-size: 13px;
-}
-
-/* General buttons used elsewhere */
-
+.button,
 .btn,
 button.btn,
-input[type="submit"],
-.button {
+input[type="submit"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -742,10 +570,10 @@ input[type="submit"],
     cursor: pointer;
 }
 
+.button:hover,
 .btn:hover,
 button.btn:hover,
-input[type="submit"]:hover,
-.button:hover {
+input[type="submit"]:hover {
     background: var(--primary-dark);
     border-color: var(--primary-dark);
     color: white;
@@ -753,12 +581,14 @@ input[type="submit"]:hover,
     transform: translateY(-1px);
 }
 
+.button.secondary,
 .btn-secondary {
     border-color: var(--border);
     background: var(--surface);
     color: var(--text);
 }
 
+.button.secondary:hover,
 .btn-secondary:hover {
     background: var(--surface-alt);
     color: var(--text);
@@ -775,9 +605,12 @@ input[type="submit"]:hover,
     border-color: #8f1c13;
 }
 
-/* ==========================================
-   10. REPORTS HEADING
-   ========================================== */
+/* 10. REPORTS */
+
+.home-page .reports-section {
+    margin-top: 30px;
+    margin-bottom: 0;
+}
 
 .reports-heading {
     display: flex;
@@ -814,10 +647,6 @@ input[type="submit"]:hover,
     vertical-align: middle;
 }
 
-/* ==========================================
-   11. REPORT GRID AND REPORT CARDS
-   ========================================== */
-
 .home-page .report-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -846,30 +675,9 @@ input[type="submit"]:hover,
     animation: homeCardEnter 0.45s ease both;
 }
 
-.home-report-card:nth-child(2) {
-    animation-delay: 0.04s;
-}
-
-.home-report-card:nth-child(3) {
-    animation-delay: 0.08s;
-}
-
-.home-report-card:nth-child(4) {
-    animation-delay: 0.12s;
-}
-
-.home-report-card:nth-child(5) {
-    animation-delay: 0.16s;
-}
-
-.home-report-card:nth-child(6) {
-    animation-delay: 0.20s;
-}
-
 .home-report-card .report-image-wrap {
     position: relative;
     overflow: hidden;
-
     background: var(--surface-alt);
 }
 
@@ -888,7 +696,6 @@ input[type="submit"]:hover,
 
 .home-report-card .report-photo {
     display: block;
-
     object-fit: cover;
     cursor: zoom-in;
 
@@ -915,7 +722,6 @@ input[type="submit"]:hover,
 
 .home-report-card .report-content h3 {
     margin: 10px 0 8px;
-
     line-height: 1.4;
     overflow-wrap: anywhere;
 }
@@ -923,7 +729,6 @@ input[type="submit"]:hover,
 .home-report-card .report-meta {
     display: grid;
     gap: 5px;
-
     margin-top: 3px;
 }
 
@@ -932,13 +737,7 @@ input[type="submit"]:hover,
 
     color: var(--muted);
     font-size: 13px;
-
     overflow-wrap: anywhere;
-}
-
-.home-report-card .report-meta strong,
-.report-status-row > strong {
-    color: var(--text);
 }
 
 .home-report-card .card-actions {
@@ -946,14 +745,13 @@ input[type="submit"]:hover,
     padding-top: 15px;
 }
 
-/* ==========================================
-   12. STATUS TAGS
-   ========================================== */
+/* 11. STATUS TAGS */
 
-.home-page .tag {
+.home-page .tag,
+.badge,
+.status-badge {
     display: inline-flex;
     align-items: center;
-    align-self: flex-start;
 
     padding: 5px 9px;
 
@@ -997,20 +795,27 @@ html[data-theme="dark"] .home-page .tag.returned {
     color: #d2dae5;
 }
 
-.report-status-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 7px;
+/* 12. NO REPORTS FOUND */
 
-    margin-top: 12px;
+.home-page .home-empty-state {
+    display: block;
 
-    font-size: 12px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    margin: 0;
+    padding: 34px 18px;
+
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+    text-align: center;
 }
-
-/* ==========================================
-   13. NO REPORTS FOUND
-   ========================================== */
 
 .home-empty-state .empty-icon {
     display: flex;
@@ -1051,9 +856,7 @@ html[data-theme="dark"] .home-page .tag.returned {
     gap: 9px;
 }
 
-/* ==========================================
-   14. GENERAL CARDS AND PANELS
-   ========================================== */
+/* 13. GENERAL CARDS AND PANELS */
 
 .card,
 .panel,
@@ -1084,11 +887,9 @@ html[data-theme="dark"] .home-page .tag.returned {
 .card-grid,
 .reports-grid,
 .stats-grid,
-.dashboard-grid,
-.report-grid {
+.dashboard-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-
     align-items: stretch;
     gap: 16px;
 }
@@ -1096,8 +897,7 @@ html[data-theme="dark"] .home-page .tag.returned {
 .card-grid > *,
 .reports-grid > *,
 .stats-grid > *,
-.dashboard-grid > *,
-.report-grid > * {
+.dashboard-grid > * {
     min-width: 0;
 }
 
@@ -1137,14 +937,7 @@ html[data-theme="dark"] .home-page .tag.returned {
     background: var(--surface-alt);
 }
 
-.report-photo,
-[data-image-preview] {
-    cursor: zoom-in;
-}
-
-/* ==========================================
-   15. HEADINGS AND TEXT
-   ========================================== */
+/* 14. HEADINGS AND TEXT */
 
 h1,
 h2,
@@ -1171,13 +964,7 @@ p {
     color: var(--muted);
 }
 
-/* ==========================================
-   16. FORMS
-   ========================================== */
-
-form {
-    width: 100%;
-}
+/* 15. FORMS */
 
 .form-group,
 .form-field {
@@ -1186,7 +973,6 @@ form {
 
 label {
     display: inline-block;
-
     margin-bottom: 6px;
 
     color: var(--text);
@@ -1254,9 +1040,7 @@ textarea::placeholder {
     font-size: 0.86rem;
 }
 
-/* ==========================================
-   17. FLASH MESSAGES
-   ========================================== */
+/* 16. FLASH MESSAGES */
 
 .flash-stack {
     position: fixed;
@@ -1311,9 +1095,7 @@ textarea::placeholder {
     line-height: 1;
 }
 
-/* ==========================================
-   18. TOASTS
-   ========================================== */
+/* 17. TOASTS */
 
 .toast-container {
     position: fixed;
@@ -1351,9 +1133,7 @@ textarea::placeholder {
     color: white;
 }
 
-/* ==========================================
-   19. IMAGE MODAL
-   ========================================== */
+/* 18. IMAGE MODAL */
 
 .image-modal {
     position: fixed;
@@ -1403,25 +1183,7 @@ textarea::placeholder {
     line-height: 1;
 }
 
-/* ==========================================
-   20. TABLES
-   ========================================== */
-
-.badge,
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-
-    padding: 4px 10px;
-
-    border-radius: 99px;
-
-    background: var(--primary-soft);
-    color: var(--primary);
-
-    font-size: 0.8rem;
-    font-weight: 750;
-}
+/* 19. TABLES */
 
 table {
     width: 100%;
@@ -1472,21 +1234,170 @@ th {
     text-align: center;
 }
 
-hr {
-    margin: 24px 0;
+/* 20. ADMIN LOGIN PANEL */
 
-    border: 0;
-    border-top: 1px solid var(--border);
+.admin-login-panel {
+    width: 100%;
+    max-width: 560px;
+
+    margin: 0 auto;
+    padding: 28px;
+
+    box-sizing: border-box;
 }
 
-/* ==========================================
-   21. DARK MODE
-   ========================================== */
+.admin-login-panel .sticker-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-bottom: 18px;
+}
+
+.admin-login-panel .sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 10px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: var(--surface-alt);
+    color: var(--text);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-login-panel h2 {
+    margin: 0 0 12px;
+
+    color: var(--text);
+    font-size: clamp(22px, 4vw, 28px);
+    line-height: 1.3;
+}
+
+.admin-login-panel .help {
+    margin: 0 0 20px;
+
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.admin-login-panel form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.admin-login-panel form label {
+    margin: 0 0 6px;
+
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.admin-login-panel form input[type="text"],
+.admin-login-panel form input[type="password"],
+.admin-login-panel form input[name="username"] {
+    display: block;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+
+    margin: 0 0 14px;
+    padding: 10px 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 14px;
+
+    box-sizing: border-box;
+}
+
+/* Match Log In and Back Home exactly */
+
+.admin-login-panel .card-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: 2px;
+}
+
+.admin-login-panel .card-actions button[type="submit"],
+.admin-login-panel .card-actions a.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 110px;
+    min-width: 110px;
+    height: 40px;
+    min-height: 40px;
+
+    margin: 0;
+    padding: 0 10px;
+
+    box-sizing: border-box;
+    border: 1px solid var(--primary);
+    border-radius: 9px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+
+    cursor: pointer;
+}
+
+.admin-login-panel .card-actions button[type="submit"] {
+    background: var(--primary);
+    color: #fff;
+}
+
+.admin-login-panel .card-actions button[type="submit"]:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.admin-login-panel .card-actions a.button.secondary {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.admin-login-panel .card-actions a.button.secondary:hover {
+    background: var(--surface-alt);
+    color: var(--text);
+}
+
+/* 21. DARK MODE */
 
 html[data-theme="dark"] .site-header {
-    background: rgba(13, 38, 25, 0.97);
+    background: rgba(13, 38, 25, 0.98);
 }
 
+html[data-theme="dark"] .home-hero,
+html[data-theme="dark"] .home-page .search-panel,
+html[data-theme="dark"] .home-page .home-empty-state,
+html[data-theme="dark"] .home-stats .stat,
 html[data-theme="dark"] .card,
 html[data-theme="dark"] .panel,
 html[data-theme="dark"] .stat-card,
@@ -1494,72 +1405,34 @@ html[data-theme="dark"] .report-card,
 html[data-theme="dark"] .form-card,
 html[data-theme="dark"] .dashboard-card,
 html[data-theme="dark"] .empty-state {
-    background: rgba(18, 35, 26, 0.94);
-    color: var(--text);
-
-    border-color: rgba(255, 255, 255, 0.14);
-}
-
-html[data-theme="dark"] .home-hero,
-html[data-theme="dark"] .home-page .search-panel,
-html[data-theme="dark"] .home-page .home-empty-state,
-html[data-theme="dark"] .home-stats .stat {
     background: rgba(18, 35, 26, 0.96);
     color: var(--text);
-
     border-color: var(--border);
 }
 
 html[data-theme="dark"] .site-footer {
-    background: rgba(5, 24, 16, 0.97);
-}
-
-html[data-theme="dark"] .page-container a:not(.btn):not(.button) {
-    color: #8de0ad;
+    background: rgba(5, 24, 16, 0.98);
 }
 
 html[data-theme="dark"] .theme-toggle {
     background: rgba(255, 255, 255, 0.08);
 }
 
-/* ==========================================
-   22. FOOTER
-   ========================================== */
+/* 22. ANIMATIONS */
 
-.site-footer {
-    margin-top: 40px;
+@keyframes homeCardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(9px);
+    }
 
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-
-    background: rgba(4, 54, 35, 0.97);
-    color: #e0eee5;
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.footer-inner {
-    width: min(1000px, calc(100% - 40px));
-
-    margin: 0 auto;
-    padding: 24px 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.footer-inner p {
-    margin: 0;
-    font-size: 0.88rem;
-}
-
-.footer-inner strong {
-    color: white;
-}
-
-/* ==========================================
-   23. RESPONSIVE TABLET
-   ========================================== */
+/* 23. TABLET */
 
 @media (max-width: 950px) {
     .home-page .home-stats {
@@ -1574,6 +1447,8 @@ html[data-theme="dark"] .theme-toggle {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+/* 24. MOBILE NAVIGATION */
 
 @media (max-width: 900px) {
     .header-inner {
@@ -1631,15 +1506,9 @@ html[data-theme="dark"] .theme-toggle {
     }
 }
 
-/* ==========================================
-   24. RESPONSIVE MOBILE
-   ========================================== */
+/* 25. SMALL MOBILE */
 
 @media (max-width: 600px) {
-    :root {
-        --homepage-side-gap: 12px;
-    }
-
     body {
         font-size: 15px;
         background-attachment: scroll;
@@ -1663,29 +1532,20 @@ html[data-theme="dark"] .theme-toggle {
     .page-container {
         width: calc(100% - 24px);
         margin-top: 20px;
-        margin-bottom: 36px;
+        margin-bottom: 30px;
     }
 
     .home-hero {
+        width: calc(100% - 24px);
         padding: 24px 18px;
         border-radius: 16px;
-    }
-
-    .home-hero .sticker-row {
-        gap: 7px;
-        margin-bottom: 20px;
-    }
-
-    .home-hero .sticker {
-        padding: 6px 9px;
-        font-size: 12px;
     }
 
     .home-page .home-stats {
         gap: 10px;
     }
 
-    .home-page .home-stats .stat {
+    .home-stats .stat {
         padding: 15px 12px;
     }
 
@@ -1723,8 +1583,7 @@ html[data-theme="dark"] .theme-toggle {
     .card-grid,
     .reports-grid,
     .stats-grid,
-    .dashboard-grid,
-    .report-grid {
+    .dashboard-grid {
         grid-template-columns: minmax(0, 1fr);
     }
 
@@ -1745,45 +1604,33 @@ html[data-theme="dark"] .theme-toggle {
     }
 
     .footer-inner {
-        display: block;
+        width: calc(100% - 24px);
+
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+
+        padding: 14px 0;
     }
 
-    .footer-inner p + p {
-        margin-top: 6px;
-    }
-}
-
-/* ==========================================
-   25. ANIMATIONS
-   ========================================== */
-
-@keyframes homeStickerEnter {
-    from {
-        opacity: 0;
-        transform: translateY(7px);
+    .admin-login-panel {
+        padding: 20px 16px;
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes homeCardEnter {
-    from {
-        opacity: 0;
-        transform: translateY(9px);
+    .admin-login-panel .card-actions {
+        gap: 8px;
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    .admin-login-panel .card-actions button[type="submit"],
+    .admin-login-panel .card-actions a.button {
+        width: 110px;
+        min-width: 110px;
+        height: 40px;
+        min-height: 40px;
     }
 }
 
-/* ==========================================
-   26. ACCESSIBILITY
-   ========================================== */
+/* 26. ACCESSIBILITY */
 
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -1794,7 +1641,6 @@ html[data-theme="dark"] .theme-toggle {
         animation-duration: 0.01ms !important;
     }
 
-    .home-hero .sticker,
     .home-report-card {
         animation: none;
     }
