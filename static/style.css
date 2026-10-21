@@ -66,14 +66,7 @@ html {
 }
 
 body {
-    position: relative;
-    min-height: 100vh;
-    margin: 0;
-
-    color: var(--text);
-    background-color: var(--page);
-
-    /* SLSU JGE CAMPUS BACKGROUND */
+ body {
     background-image:
         linear-gradient(
             rgba(7, 40, 28, 0.30),
@@ -81,10 +74,11 @@ body {
         ),
         url("/static/images/campus-bg.jpg");
 
-    background-position: center center;
+    background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
+}
 
     font-family:
         Inter,
