@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,19 +61,10 @@
                 {% else %}
                     <a href="{{ url_for('admin_login') }}">Admin</a>
                 {% endif %}
-                <button
-                    class="theme-toggle"
-                    id="theme-toggle"
-                    type="button"
-                    aria-label="Switch to dark mode"
-                    aria-pressed="false"
-                >
-                    <span class="theme-icon" aria-hidden="true">☾</span>
-                    <span class="theme-label">Dark mode</span>
-                </button>
             </nav>
         </div>
     </header>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-stack" aria-live="polite">
@@ -92,10 +83,13 @@
             </div>
         {% endif %}
     {% endwith %}
+
     {% block hero %}{% endblock %}
+
     <main id="main-content" class="page-container">
         {% block content %}{% endblock %}
     </main>
+
     <footer class="site-footer">
         <div class="footer-inner">
             <p>
@@ -107,11 +101,13 @@
             </p>
         </div>
     </footer>
+
     <div
         class="toast-container"
         aria-live="polite"
         aria-atomic="true"
     ></div>
+
     <div
         class="image-modal"
         role="dialog"
@@ -128,13 +124,13 @@
         </button>
         <img alt="Enlarged item photo">
     </div>
+
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const menuButton = document.querySelector(".menu-toggle");
             const navigation = document.querySelector("#primary-navigation");
-            const themeButton = document.querySelector("#theme-toggle");
-            const root = document.documentElement;
+
             /* Mobile navigation */
             if (menuButton && navigation) {
                 menuButton.addEventListener("click", function () {
@@ -162,60 +158,19 @@
                     });
                 });
             }
+
             /* Dismiss flash messages */
             document.querySelectorAll(".flash-dismiss").forEach(function (button) {
                 button.addEventListener("click", function () {
                     button.closest(".flash-message")?.remove();
                 });
             });
-            /* Theme toggle with saved preference */
-            function setTheme(theme) {
-                root.setAttribute("data-theme", theme);
-                if (!themeButton) return;
-                const dark = theme === "dark";
-                themeButton.setAttribute(
-                    "aria-pressed",
-                    String(dark)
-                );
-                themeButton.setAttribute(
-                    "aria-label",
-                    dark ? "Switch to light mode" : "Switch to dark mode"
-                );
-                const icon = themeButton.querySelector(".theme-icon");
-                const label = themeButton.querySelector(".theme-label");
-                if (icon) {
-                    icon.textContent = dark ? "☀" : "☾";
-                }
-                if (label) {
-                    label.textContent = dark ? "Light mode" : "Dark mode";
-                }
-            }
-            let savedTheme = "light";
-            try {
-                savedTheme = localStorage.getItem("findhub-theme") || "light";
-            } catch (_error) {
-                savedTheme = "light";
-            }
-            if (!["light", "dark"].includes(savedTheme)) {
-                savedTheme = "light";
-            }
-            setTheme(savedTheme);
-            if (themeButton) {
-                themeButton.addEventListener("click", function () {
-                    const currentTheme = root.getAttribute("data-theme");
-                    const nextTheme = currentTheme === "dark" ? "light" : "dark";
-                    setTheme(nextTheme);
-                    try {
-                        localStorage.setItem("findhub-theme", nextTheme);
-                    } catch (_error) {
-                        // Theme still works for the current page.
-                    }
-                });
-            }
+
             /* Image preview modal */
             const imageModal = document.querySelector(".image-modal");
             const modalImage = imageModal?.querySelector("img");
             const closeModal = imageModal?.querySelector(".image-modal-close");
+
             document.querySelectorAll(
                 ".report-photo, .item-photo, .detail-photo, img[data-preview]"
             ).forEach(function (img) {
@@ -227,6 +182,7 @@
                     imageModal.hidden = false;
                 });
             });
+
             function hideModal() {
                 if (imageModal) {
                     imageModal.hidden = true;
@@ -235,6 +191,7 @@
                     modalImage.removeAttribute("src");
                 }
             }
+
             closeModal?.addEventListener("click", hideModal);
             imageModal?.addEventListener("click", function (event) {
                 if (event.target === imageModal) {
