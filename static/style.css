@@ -1,49 +1,70 @@
 
 /* ==========================================
-   SLSU JGE FINDHUB - MAIN STYLESHEET
+   SLSU JGE FINDHUB
+   MAIN STYLESHEET
    ========================================== */
 
-/* THEME */
+/* ==========================================
+   1. THEME VARIABLES
+   ========================================== */
 
 :root {
     color-scheme: light;
+
     --primary: #087443;
     --primary-dark: #055c34;
     --primary-light: #15965a;
     --primary-soft: #e7f4ec;
     --accent: #e4b64f;
+
     --page: #f4f8f5;
-    --surface: rgba(255, 255, 255, 0.94);
+    --surface: rgba(255, 255, 255, 0.95);
     --surface-alt: rgba(237, 244, 239, 0.97);
+
     --text: #1c2d23;
     --muted: #647369;
     --border: #d7e3da;
+
     --danger: #b42318;
     --success: #176b45;
+
     --shadow: 0 8px 28px rgba(20, 55, 35, 0.15);
     --radius: 16px;
+
+    /* Shared homepage width */
+    --homepage-box-width: 800px;
+    --homepage-side-gap: 20px;
 }
 
 html[data-theme="dark"] {
     color-scheme: dark;
+
     --primary: #69c394;
     --primary-dark: #8ed9ad;
     --primary-light: #15965a;
     --primary-soft: #203a2d;
+
     --page: #101a14;
     --surface: rgba(24, 37, 29, 0.96);
     --surface-alt: rgba(32, 47, 37, 0.98);
+
     --text: #e9f2ec;
     --muted: #a8b8ad;
     --border: #34483a;
+
     --danger: #ff8a80;
     --success: #7ed5a1;
+
     --shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
 }
 
-/* GENERAL */
+/* ==========================================
+   2. GENERAL
+   ========================================== */
 
-* {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -56,14 +77,23 @@ html {
 body {
     min-height: 100vh;
     margin: 0;
+
     color: var(--text);
-    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: Inter, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+
     font-size: 16px;
     line-height: 1.6;
+
     background-color: var(--page);
+
     background-image:
-        linear-gradient(rgba(7, 40, 28, 0.38), rgba(7, 40, 28, 0.48)),
+        linear-gradient(
+            rgba(7, 40, 28, 0.38),
+            rgba(7, 40, 28, 0.48)
+        ),
         url("/static/images/campus-bg.jpg");
+
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -72,8 +102,12 @@ body {
 
 html[data-theme="dark"] body {
     background-color: #101a14;
+
     background-image:
-        linear-gradient(rgba(5, 24, 16, 0.62), rgba(5, 24, 16, 0.72)),
+        linear-gradient(
+            rgba(5, 24, 16, 0.62),
+            rgba(5, 24, 16, 0.72)
+        ),
         url("/static/images/campus-bg.jpg");
 }
 
@@ -115,8 +149,10 @@ textarea:focus-visible {
     top: -60px;
     left: 12px;
     z-index: 2000;
+
     padding: 8px 12px;
     border-radius: 8px;
+
     color: white;
     background: var(--primary);
 }
@@ -125,16 +161,21 @@ textarea:focus-visible {
     top: 12px;
 }
 
-/* HEADER */
+/* ==========================================
+   3. HEADER
+   ========================================== */
 
 .site-header {
     position: sticky;
     top: 0;
     z-index: 100;
+
     color: white;
     background: rgba(5, 82, 52, 0.97);
+
     border-bottom: 1px solid rgba(255, 255, 255, 0.16);
     box-shadow: 0 3px 14px rgba(15, 50, 30, 0.15);
+
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
@@ -142,7 +183,9 @@ textarea:focus-visible {
 .header-inner {
     width: min(1200px, calc(100% - 40px));
     min-height: 70px;
+
     margin: 0 auto;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -153,7 +196,9 @@ textarea:focus-visible {
     display: flex;
     align-items: center;
     gap: 12px;
+
     min-width: 0;
+
     color: white;
     text-decoration: none;
 }
@@ -167,6 +212,7 @@ textarea:focus-visible {
     width: 46px;
     height: 46px;
     flex: 0 0 46px;
+
     border-radius: 50%;
     object-fit: contain;
 }
@@ -179,6 +225,7 @@ textarea:focus-visible {
 .brand-mark {
     display: grid;
     place-items: center;
+
     background: white;
     color: var(--primary);
     font-weight: 800;
@@ -214,11 +261,15 @@ textarea:focus-visible {
     align-items: center;
     justify-content: center;
     gap: 6px;
+
     padding: 9px 11px;
+
     border: 1px solid transparent;
     border-radius: 9px;
+
     color: white;
     background: transparent;
+
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
@@ -233,22 +284,28 @@ textarea:focus-visible {
 .nav-count {
     display: inline-grid;
     place-items: center;
+
     min-width: 20px;
     height: 20px;
     padding: 0 5px;
+
     border-radius: 99px;
     background: #c83232;
     color: white;
+
     font-size: 0.72rem;
 }
 
 .menu-toggle {
     display: none;
+
     width: 42px;
     height: 42px;
     padding: 9px;
+
     border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 9px;
+
     background: transparent;
 }
 
@@ -256,50 +313,747 @@ textarea:focus-visible {
     display: block;
     width: 100%;
     height: 2px;
+
     margin: 5px 0;
     border-radius: 2px;
+
     background: white;
 }
 
-/* MAIN CONTENT: KEEP ALL BOXES ALIGNED */
+/* ==========================================
+   4. MAIN PAGE CONTAINER
+   ========================================== */
 
 .page-container {
     width: min(1000px, calc(100% - 40px));
     max-width: 1000px;
-    min-height: 0;
+
+    min-width: 0;
+
     margin: 28px auto 48px;
+    box-sizing: border-box;
 }
 
-/* HOMEPAGE HERO / LOST AND FOUND BOX */
+/* ==========================================
+   5. HOMEPAGE BOX ALIGNMENT
+   ========================================== */
 
-.hero,
-.hero-section,
-.hero-banner,
+/*
+   Ang hero ay nasa hero block ng base.html.
+   Ang statistics, search, at empty state naman ay
+   nasa content block. Iisa ang maximum width nila.
+*/
+
+.home-hero,
+.home-page {
+    width: 100%;
+    max-width: var(--homepage-box-width);
+    min-width: 0;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    box-sizing: border-box;
+}
+
+/* Hero */
+
 .home-hero {
     display: block;
+    position: relative;
+    overflow: hidden;
+
+    margin-top: 0;
+    margin-bottom: 22px;
+
+    padding: clamp(28px, 5vw, 52px);
+
+    border: 1px solid var(--border);
+    border-radius: 22px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+}
+
+/* Homepage internal sections */
+
+.home-page .home-stats,
+.home-page .search-panel,
+.home-page .reports-section {
     width: 100%;
     max-width: 100%;
-    min-height: 0;
-    height: auto;
-    margin: 0 auto 20px;
-    padding: 24px 28px;
+    min-width: 0;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    box-sizing: border-box;
+}
+
+/* Statistics */
+
+.home-page .home-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+
+    gap: 15px;
+
+    margin-top: 0;
+    margin-bottom: 22px;
+}
+
+/* Search panel */
+
+.home-page .search-panel {
+    scroll-margin-top: 95px;
+
+    margin-top: 0;
+    margin-bottom: 30px;
+
+    padding: clamp(18px, 3vw, 26px);
+
+    border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-sizing: border-box;
+
+    background: var(--surface);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
-/* Match the search and stats boxes to the same content width */
+/* Recent reports section */
 
-.home-stats,
-.stats-grid,
-.search-panel,
-.search-card {
+.home-page .reports-section {
+    margin-top: 30px;
+    margin-bottom: 0;
+}
+
+/* Empty state: No Reports Found */
+
+.home-page .home-empty-state {
+    display: block;
+
     width: 100%;
     max-width: 100%;
-    margin: 0 auto 20px;
+    min-width: 0;
+
+    margin: 0 auto;
+    padding: 34px 18px;
+
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+
+    text-align: center;
     box-sizing: border-box;
 }
 
-/* GLASS BOXES */
+/* ==========================================
+   6. HERO CONTENT
+   ========================================== */
+
+.home-hero .sticker-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+
+    margin-bottom: 24px;
+}
+
+.home-hero .sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 7px 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: var(--surface-alt);
+    color: var(--text);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    animation: homeStickerEnter 0.45s ease both;
+}
+
+.home-hero .sticker:nth-child(2) {
+    animation-delay: 0.06s;
+}
+
+.home-hero .sticker:nth-child(3) {
+    animation-delay: 0.12s;
+}
+
+.home-hero .sticker:nth-child(4) {
+    animation-delay: 0.18s;
+}
+
+.home-hero h1,
+.home-hero h2 {
+    max-width: 760px;
+
+    margin: 0 0 16px;
+
+    color: var(--text);
+
+    font-size: clamp(28px, 5vw, 45px);
+    line-height: 1.16;
+    letter-spacing: -0.7px;
+}
+
+.home-hero .hero-description {
+    max-width: 700px;
+
+    margin: 0 0 24px;
+
+    color: var(--muted);
+
+    font-size: clamp(15px, 2vw, 17px);
+    line-height: 1.8;
+}
+
+.home-hero .button {
+    box-shadow: 0 5px 13px rgba(0, 75, 43, 0.16);
+}
+
+.home-hero .button:hover {
+    box-shadow: 0 8px 19px rgba(0, 75, 43, 0.24);
+}
+
+/* ==========================================
+   7. STATISTICS CARDS
+   ========================================== */
+
+.home-stats .stat {
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    min-width: 0;
+    padding: 20px;
+
+    border: 1px solid var(--border);
+    border-radius: 15px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+}
+
+.home-stats .stat::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 4px;
+    height: 100%;
+
+    background: var(--primary);
+    opacity: 0.72;
+
+    transition: width 0.25s ease, opacity 0.25s ease;
+}
+
+.home-stats .stat:hover::before {
+    width: 6px;
+    opacity: 1;
+}
+
+.home-stats .stat-label {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.home-stats .stat strong {
+    color: var(--primary);
+
+    font-size: clamp(23px, 3vw, 32px);
+    line-height: 1.2;
+
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   8. SEARCH AND FILTERS
+   ========================================== */
+
+.search-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin: 0 0 14px;
+
+    font-size: clamp(20px, 3vw, 25px);
+}
+
+.search-heading .heading-icon {
+    display: inline-flex;
+    flex: 0 0 40px;
+
+    width: 40px;
+    height: 40px;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+    background: var(--primary-soft);
+
+    font-size: 19px;
+}
+
+.search-description {
+    margin: 0 0 18px;
+
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.filter-grid > div {
+    min-width: 0;
+}
+
+.filter-grid label {
+    font-size: 13px;
+}
+
+.filter-grid input,
+.filter-grid select {
+    width: 100%;
+    min-width: 0;
+}
+
+.search-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+
+    margin-top: 17px;
+}
+
+/* ==========================================
+   9. BUTTONS
+   ========================================== */
+
+.home-hero .button,
+.home-page .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    min-height: 42px;
+    padding: 10px 15px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    background: var(--primary);
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.home-page .button:hover,
+.home-hero .button:hover {
+    background: var(--primary-dark);
+    color: #fff;
+
+    transform: translateY(-1px);
+}
+
+.home-page .button.secondary {
+    border-color: var(--border);
+
+    background: var(--surface);
+    color: var(--text);
+}
+
+.home-page .button.secondary:hover {
+    background: var(--surface-alt);
+    color: var(--text);
+}
+
+.home-page .button.small {
+    min-height: 36px;
+    padding: 8px 12px;
+
+    font-size: 13px;
+}
+
+/* General buttons used elsewhere */
+
+.btn,
+button.btn,
+input[type="submit"],
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 42px;
+    padding: 10px 16px;
+
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+
+    background: var(--primary);
+    color: white;
+
+    font-weight: 700;
+    text-decoration: none;
+
+    transition: transform 0.15s ease, background 0.15s ease;
+    cursor: pointer;
+}
+
+.btn:hover,
+button.btn:hover,
+input[type="submit"]:hover,
+.button:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: white;
+
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.btn-secondary:hover {
+    background: var(--surface-alt);
+    color: var(--text);
+}
+
+.btn-danger {
+    background: #b42318;
+    border-color: #b42318;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #8f1c13;
+    border-color: #8f1c13;
+}
+
+/* ==========================================
+   10. REPORTS HEADING
+   ========================================== */
+
+.reports-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    margin: 8px 0 16px;
+}
+
+.reports-heading h2 {
+    margin: 0;
+    font-size: clamp(19px, 3vw, 24px);
+}
+
+.reports-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 28px;
+    min-height: 26px;
+    padding: 3px 8px;
+    margin-left: 5px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: var(--primary-soft);
+    color: var(--primary);
+
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+/* ==========================================
+   11. REPORT GRID AND REPORT CARDS
+   ========================================== */
+
+.home-page .report-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 18px;
+
+    width: 100%;
+    min-width: 0;
+}
+
+.home-report-card {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    box-shadow: var(--shadow);
+
+    animation: homeCardEnter 0.45s ease both;
+}
+
+.home-report-card:nth-child(2) {
+    animation-delay: 0.04s;
+}
+
+.home-report-card:nth-child(3) {
+    animation-delay: 0.08s;
+}
+
+.home-report-card:nth-child(4) {
+    animation-delay: 0.12s;
+}
+
+.home-report-card:nth-child(5) {
+    animation-delay: 0.16s;
+}
+
+.home-report-card:nth-child(6) {
+    animation-delay: 0.20s;
+}
+
+.home-report-card .report-image-wrap {
+    position: relative;
+    overflow: hidden;
+
+    background: var(--surface-alt);
+}
+
+.home-report-card .report-photo,
+.home-report-card .placeholder-photo {
+    display: flex;
+
+    width: 100%;
+    height: 180px;
+
+    margin: 0;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.home-report-card .report-photo {
+    display: block;
+
+    object-fit: cover;
+    cursor: zoom-in;
+
+    transition: transform 0.45s ease;
+}
+
+.home-report-card:hover .report-photo {
+    transform: scale(1.045);
+}
+
+.home-report-card .placeholder-photo {
+    background: var(--surface-alt);
+    font-size: 42px;
+}
+
+.home-report-card .report-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    min-width: 0;
+    padding: 16px;
+}
+
+.home-report-card .report-content h3 {
+    margin: 10px 0 8px;
+
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.home-report-card .report-meta {
+    display: grid;
+    gap: 5px;
+
+    margin-top: 3px;
+}
+
+.home-report-card .report-meta p {
+    margin: 2px 0;
+
+    color: var(--muted);
+    font-size: 13px;
+
+    overflow-wrap: anywhere;
+}
+
+.home-report-card .report-meta strong,
+.report-status-row > strong {
+    color: var(--text);
+}
+
+.home-report-card .card-actions {
+    margin-top: auto;
+    padding-top: 15px;
+}
+
+/* ==========================================
+   12. STATUS TAGS
+   ========================================== */
+
+.home-page .tag {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    background: var(--primary-soft);
+    color: var(--primary);
+
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.home-page .tag.found {
+    background: #dff4e7;
+    color: #176b45;
+}
+
+.home-page .tag.pending {
+    background: #fff1cc;
+    color: #805700;
+}
+
+.home-page .tag.returned {
+    background: #e6e9ee;
+    color: #465468;
+}
+
+html[data-theme="dark"] .home-page .tag.found {
+    background: #203a2d;
+    color: #9be0b6;
+}
+
+html[data-theme="dark"] .home-page .tag.pending {
+    background: #45381c;
+    color: #f2d18a;
+}
+
+html[data-theme="dark"] .home-page .tag.returned {
+    background: #303944;
+    color: #d2dae5;
+}
+
+.report-status-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+
+    margin-top: 12px;
+
+    font-size: 12px;
+}
+
+/* ==========================================
+   13. NO REPORTS FOUND
+   ========================================== */
+
+.home-empty-state .empty-icon {
+    display: flex;
+
+    width: 70px;
+    height: 70px;
+
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 12px;
+
+    border-radius: 50%;
+    background: var(--primary-soft);
+
+    font-size: 35px;
+}
+
+.home-empty-state h3 {
+    margin: 8px 0;
+}
+
+.home-empty-state p {
+    max-width: 460px;
+
+    margin: 0 auto 17px;
+
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.home-empty-state .empty-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+/* ==========================================
+   14. GENERAL CARDS AND PANELS
+   ========================================== */
 
 .card,
 .panel,
@@ -307,15 +1061,15 @@ textarea:focus-visible {
 .report-card,
 .form-card,
 .dashboard-card,
-.search-panel,
-.empty-state,
-.home-stats,
-.stat {
+.empty-state {
     color: var(--text);
     background: var(--surface);
-    border: 1px solid rgba(255, 255, 255, 0.65);
+
+    border: 1px solid var(--border);
     border-radius: var(--radius);
+
     box-shadow: var(--shadow);
+
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -327,8 +1081,6 @@ textarea:focus-visible {
     padding: clamp(18px, 3vw, 26px);
 }
 
-/* GRIDS */
-
 .card-grid,
 .reports-grid,
 .stats-grid,
@@ -336,6 +1088,7 @@ textarea:focus-visible {
 .report-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+
     align-items: stretch;
     gap: 16px;
 }
@@ -346,7 +1099,6 @@ textarea:focus-visible {
 .dashboard-grid > *,
 .report-grid > * {
     min-width: 0;
-    height: 100%;
 }
 
 .stat-card {
@@ -355,6 +1107,7 @@ textarea:focus-visible {
 
 .stat-card .stat-value {
     display: block;
+
     color: var(--primary);
     font-size: 2rem;
     font-weight: 800;
@@ -376,8 +1129,10 @@ textarea:focus-visible {
 
 .report-card .report-image {
     display: block;
+
     width: 100%;
     aspect-ratio: 16 / 10;
+
     object-fit: cover;
     background: var(--surface-alt);
 }
@@ -387,7 +1142,9 @@ textarea:focus-visible {
     cursor: zoom-in;
 }
 
-/* HEADINGS */
+/* ==========================================
+   15. HEADINGS AND TEXT
+   ========================================== */
 
 h1,
 h2,
@@ -414,61 +1171,9 @@ p {
     color: var(--muted);
 }
 
-/* BUTTONS */
-
-.btn,
-button.btn,
-input[type="submit"],
-.button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 42px;
-    padding: 10px 16px;
-    border: 1px solid var(--primary);
-    border-radius: 10px;
-    background: var(--primary);
-    color: white;
-    font-weight: 700;
-    text-decoration: none;
-    transition: transform 0.15s ease, background 0.15s ease;
-    cursor: pointer;
-}
-
-.btn:hover,
-button.btn:hover,
-input[type="submit"]:hover,
-.button:hover {
-    background: var(--primary-dark);
-    border-color: var(--primary-dark);
-    color: white;
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    border-color: var(--border);
-    background: var(--surface);
-    color: var(--text);
-}
-
-.btn-secondary:hover {
-    background: var(--surface-alt);
-    color: var(--text);
-}
-
-.btn-danger {
-    background: #b42318;
-    border-color: #b42318;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #8f1c13;
-    border-color: #8f1c13;
-}
-
-/* FORMS */
+/* ==========================================
+   16. FORMS
+   ========================================== */
 
 form {
     width: 100%;
@@ -481,7 +1186,9 @@ form {
 
 label {
     display: inline-block;
+
     margin-bottom: 6px;
+
     color: var(--text);
     font-weight: 650;
 }
@@ -490,10 +1197,14 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="s
 select,
 textarea {
     width: 100%;
+    min-width: 0;
     min-height: 44px;
+
     padding: 10px 12px;
+
     border: 1px solid var(--border);
     border-radius: 10px;
+
     background: white;
     color: #1c2d23;
 }
@@ -508,11 +1219,15 @@ html[data-theme="dark"] textarea {
 
 input[type="file"] {
     display: block;
+
     width: 100%;
     max-width: 100%;
+
     padding: 10px;
+
     border: 1px dashed var(--border);
     border-radius: 10px;
+
     background: var(--surface-alt);
     color: var(--text);
 }
@@ -539,15 +1254,19 @@ textarea::placeholder {
     font-size: 0.86rem;
 }
 
-/* FLASH MESSAGES */
+/* ==========================================
+   17. FLASH MESSAGES
+   ========================================== */
 
 .flash-stack {
     position: fixed;
     top: 82px;
     right: 20px;
     z-index: 1200;
+
     display: grid;
     gap: 10px;
+
     width: min(420px, calc(100% - 40px));
 }
 
@@ -556,12 +1275,16 @@ textarea::placeholder {
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
+
     padding: 13px 15px;
+
     border: 1px solid var(--border);
     border-left: 4px solid var(--primary);
     border-radius: 12px;
+
     background: var(--surface);
     color: var(--text);
+
     box-shadow: var(--shadow);
 }
 
@@ -579,31 +1302,41 @@ textarea::placeholder {
 
 .flash-dismiss {
     padding: 0 2px;
+
     border: 0;
     background: transparent;
     color: var(--muted);
+
     font-size: 1.3rem;
     line-height: 1;
 }
 
-/* TOASTS */
+/* ==========================================
+   18. TOASTS
+   ========================================== */
 
 .toast-container {
     position: fixed;
     right: 20px;
     bottom: 20px;
     z-index: 1500;
+
     display: grid;
     gap: 10px;
+
     width: min(360px, calc(100% - 40px));
+
     pointer-events: none;
 }
 
 .toast {
     padding: 13px 16px;
+
     border-radius: 12px;
+
     background: var(--text);
     color: var(--page);
+
     box-shadow: var(--shadow);
     overflow-wrap: anywhere;
 }
@@ -618,16 +1351,21 @@ textarea::placeholder {
     color: white;
 }
 
-/* IMAGE PREVIEW */
+/* ==========================================
+   19. IMAGE MODAL
+   ========================================== */
 
 .image-modal {
     position: fixed;
     inset: 0;
     z-index: 2000;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     padding: 28px;
+
     background: rgba(0, 0, 0, 0.82);
 }
 
@@ -637,9 +1375,12 @@ textarea::placeholder {
 
 .image-modal img {
     display: block;
+
     max-width: min(100%, 1100px);
     max-height: 85vh;
+
     object-fit: contain;
+
     border-radius: 8px;
     box-shadow: 0 12px 50px rgba(0, 0, 0, 0.4);
 }
@@ -648,26 +1389,36 @@ textarea::placeholder {
     position: absolute;
     top: 16px;
     right: 22px;
+
     width: 46px;
     height: 46px;
+
     border: 0;
     border-radius: 50%;
+
     background: rgba(255, 255, 255, 0.16);
     color: white;
+
     font-size: 2rem;
     line-height: 1;
 }
 
-/* TABLES */
+/* ==========================================
+   20. TABLES
+   ========================================== */
 
 .badge,
 .status-badge {
     display: inline-flex;
     align-items: center;
+
     padding: 4px 10px;
+
     border-radius: 99px;
+
     background: var(--primary-soft);
     color: var(--primary);
+
     font-size: 0.8rem;
     font-weight: 750;
 }
@@ -675,6 +1426,7 @@ textarea::placeholder {
 table {
     width: 100%;
     border-collapse: collapse;
+
     background: var(--surface);
     color: var(--text);
 }
@@ -682,13 +1434,16 @@ table {
 th,
 td {
     padding: 12px 14px;
+
     border-bottom: 1px solid var(--border);
+
     text-align: left;
     vertical-align: top;
 }
 
 th {
     color: var(--muted);
+
     font-size: 0.84rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -697,8 +1452,10 @@ th {
 .table-wrap {
     width: 100%;
     overflow-x: auto;
+
     border: 1px solid var(--border);
     border-radius: 12px;
+
     background: var(--surface);
 }
 
@@ -708,18 +1465,23 @@ th {
 
 .empty-state {
     padding: 30px 20px;
+
     border-style: dashed;
+
     color: var(--muted);
     text-align: center;
 }
 
 hr {
     margin: 24px 0;
+
     border: 0;
     border-top: 1px solid var(--border);
 }
 
-/* DARK MODE */
+/* ==========================================
+   21. DARK MODE
+   ========================================== */
 
 html[data-theme="dark"] .site-header {
     background: rgba(13, 38, 25, 0.97);
@@ -731,13 +1493,21 @@ html[data-theme="dark"] .stat-card,
 html[data-theme="dark"] .report-card,
 html[data-theme="dark"] .form-card,
 html[data-theme="dark"] .dashboard-card,
-html[data-theme="dark"] .search-panel,
-html[data-theme="dark"] .empty-state,
-html[data-theme="dark"] .home-stats,
-html[data-theme="dark"] .stat {
+html[data-theme="dark"] .empty-state {
     background: rgba(18, 35, 26, 0.94);
     color: var(--text);
+
     border-color: rgba(255, 255, 255, 0.14);
+}
+
+html[data-theme="dark"] .home-hero,
+html[data-theme="dark"] .home-page .search-panel,
+html[data-theme="dark"] .home-page .home-empty-state,
+html[data-theme="dark"] .home-stats .stat {
+    background: rgba(18, 35, 26, 0.96);
+    color: var(--text);
+
+    border-color: var(--border);
 }
 
 html[data-theme="dark"] .site-footer {
@@ -752,24 +1522,30 @@ html[data-theme="dark"] .theme-toggle {
     background: rgba(255, 255, 255, 0.08);
 }
 
-/* FOOTER */
+/* ==========================================
+   22. FOOTER
+   ========================================== */
 
 .site-footer {
     margin-top: 40px;
+
     border-top: 1px solid rgba(255, 255, 255, 0.2);
+
     background: rgba(4, 54, 35, 0.97);
     color: #e0eee5;
 }
 
 .footer-inner {
     width: min(1000px, calc(100% - 40px));
+
     margin: 0 auto;
     padding: 24px 0;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
     flex-wrap: wrap;
+    gap: 16px;
 }
 
 .footer-inner p {
@@ -781,19 +1557,38 @@ html[data-theme="dark"] .theme-toggle {
     color: white;
 }
 
-/* RESPONSIVE */
+/* ==========================================
+   23. RESPONSIVE TABLET
+   ========================================== */
+
+@media (max-width: 950px) {
+    .home-page .home-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .home-page .report-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
 
 @media (max-width: 900px) {
     .header-inner {
         position: relative;
+
         width: calc(100% - 28px);
         min-height: 68px;
+
         flex-wrap: wrap;
     }
 
     .menu-toggle {
         display: inline-flex;
         flex: 0 0 auto;
+
         flex-direction: column;
         justify-content: center;
     }
@@ -803,11 +1598,14 @@ html[data-theme="dark"] .theme-toggle {
         top: 100%;
         left: -14px;
         right: -14px;
+
         display: none;
         flex-direction: column;
         align-items: stretch;
         gap: 4px;
+
         padding: 12px 20px 18px;
+
         background: #075c3b;
         box-shadow: var(--shadow);
     }
@@ -833,7 +1631,15 @@ html[data-theme="dark"] .theme-toggle {
     }
 }
 
+/* ==========================================
+   24. RESPONSIVE MOBILE
+   ========================================== */
+
 @media (max-width: 600px) {
+    :root {
+        --homepage-side-gap: 12px;
+    }
+
     body {
         font-size: 15px;
         background-attachment: scroll;
@@ -855,7 +1661,63 @@ html[data-theme="dark"] .theme-toggle {
     }
 
     .page-container {
+        width: calc(100% - 24px);
+        margin-top: 20px;
         margin-bottom: 36px;
+    }
+
+    .home-hero {
+        padding: 24px 18px;
+        border-radius: 16px;
+    }
+
+    .home-hero .sticker-row {
+        gap: 7px;
+        margin-bottom: 20px;
+    }
+
+    .home-hero .sticker {
+        padding: 6px 9px;
+        font-size: 12px;
+    }
+
+    .home-page .home-stats {
+        gap: 10px;
+    }
+
+    .home-page .home-stats .stat {
+        padding: 15px 12px;
+    }
+
+    .filter-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .search-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .search-actions > * {
+        width: 100%;
+        text-align: center;
+    }
+
+    .reports-heading {
+        align-items: flex-start;
+    }
+
+    .home-page .report-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .home-report-card .report-photo,
+    .home-report-card .placeholder-photo {
+        height: 210px;
+    }
+
+    .home-page .home-empty-state {
+        padding: 26px 13px;
     }
 
     .card-grid,
@@ -864,13 +1726,6 @@ html[data-theme="dark"] .theme-toggle {
     .dashboard-grid,
     .report-grid {
         grid-template-columns: minmax(0, 1fr);
-    }
-
-    .hero,
-    .hero-section,
-    .hero-banner,
-    .home-hero {
-        padding: 18px 16px;
     }
 
     .flash-stack {
@@ -898,7 +1753,37 @@ html[data-theme="dark"] .theme-toggle {
     }
 }
 
-/* ACCESSIBILITY */
+/* ==========================================
+   25. ANIMATIONS
+   ========================================== */
+
+@keyframes homeStickerEnter {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes homeCardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(9px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================
+   26. ACCESSIBILITY
+   ========================================== */
 
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -908,70 +1793,13 @@ html[data-theme="dark"] .theme-toggle {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
     }
-}
-/* ==========================================
-   PANTAY NA LAPAD NG MGA BOX SA HOMEPAGE
-   Gawing basehan ang No Reports Found box
-   ========================================== */
 
-:root {
-    --findhub-box-width: 800px;
-}
-
-.hero,
-.hero-section,
-.hero-banner,
-.home-hero,
-.home-stats,
-.stats-grid,
-.search-panel,
-.search-card,
-.no-reports,
-.no-results,
-.empty-state,
-.empty-state-card {
-    width: min(var(--findhub-box-width), calc(100% - 40px));
-    max-width: var(--findhub-box-width);
-    margin-left: auto;
-    margin-right: auto;
-    box-sizing: border-box;
-}
-
-/* Panatilihin ang tamang pagitan ng mga box */
-.hero,
-.hero-section,
-.hero-banner,
-.home-hero {
-    margin-top: 20px;
-    margin-bottom: 24px;
-}
-
-/* Pantayin ang laki ng mga report card */
-.report-card,
-.item-card {
-    box-sizing: border-box;
-    min-width: 0;
-}
-
-/* Para hindi lumampas sa screen sa cellphone */
-@media (max-width: 600px) {
-    :root {
-        --findhub-box-width: 800px;
+    .home-hero .sticker,
+    .home-report-card {
+        animation: none;
     }
 
-    .hero,
-    .hero-section,
-    .hero-banner,
-    .home-hero,
-    .home-stats,
-    .stats-grid,
-    .search-panel,
-    .search-card,
-    .no-reports,
-    .no-results,
-    .empty-state,
-    .empty-state-card {
-        width: calc(100% - 24px);
-        max-width: none;
+    .home-report-card:hover .report-photo {
+        transform: none;
     }
 }
