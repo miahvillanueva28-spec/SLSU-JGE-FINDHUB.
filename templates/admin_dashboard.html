@@ -52,7 +52,7 @@
       {% endif %}
     </a>
     <a href="{{ url_for('admin_dashboard') }}?filter=Lost" class="btn-filter {% if request.args.get('filter') == 'Lost' %}active{% endif %}">
-      🎒 Lost Reports
+       ⚠️ Lost Reports
     </a>
     <a href="{{ url_for('admin_dashboard') }}?filter=Found" class="btn-filter {% if request.args.get('filter') == 'Found' %}active{% endif %}">
       🔎 Found Reports
@@ -68,7 +68,7 @@
   <div class="reports-section">
     <h2>
       {% if request.args.get('filter') == 'Lost' %}
-        🎒 Lost Reports
+         ⚠️ Lost Reports
       {% elif request.args.get('filter') == 'Found' %}
         🔎 Found Reports
       {% else %}
