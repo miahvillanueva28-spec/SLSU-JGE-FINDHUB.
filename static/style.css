@@ -66,19 +66,10 @@ html {
 }
 
 body {
- body {
-    background-image:
-        linear-gradient(
-            rgba(7, 40, 28, 0.30),
-            rgba(7, 40, 28, 0.42)
-        ),
-        url("/static/images/campus-bg.jpg");
+    min-height: 100vh;
+    margin: 0;
 
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
+    color: var(--text);
 
     font-family:
         Inter,
@@ -90,6 +81,19 @@ body {
 
     font-size: 16px;
     line-height: 1.6;
+
+    background-color: var(--page);
+    background-image:
+        linear-gradient(
+            rgba(7, 40, 28, 0.30),
+            rgba(7, 40, 28, 0.42)
+        ),
+        url("/static/images/campus-bg.jpg");
+
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 
     transition:
         background-color 0.2s ease,
@@ -186,7 +190,7 @@ textarea:focus-visible {
 
 .header-inner {
     width: min(1200px, calc(100% - 40px));
-    min-height: 78px;
+    min-height: 64px;
 
     margin: 0 auto;
 
@@ -217,7 +221,7 @@ textarea:focus-visible {
     height: 48px;
     flex: 0 0 48px;
 
-    border-radius: 13px;
+    border-radius: 50%;
     object-fit: contain;
 }
 
@@ -348,9 +352,9 @@ textarea:focus-visible {
 .page-container {
     width: min(1160px, calc(100% - 40px));
 
-    min-height: 50vh;
+    min-height: 0;
 
-    margin: 32px auto 64px;
+    margin: 24px auto 64px;
 }
 
 .site-footer {
@@ -407,6 +411,77 @@ p {
 .muted,
 .text-muted {
     color: var(--muted);
+}
+
+/* ==========================================
+   HOMEPAGE HERO - COMPACT DESIGN
+   Supports common hero class names
+   ========================================== */
+
+.hero,
+.hero-section,
+.hero-banner,
+.home-hero,
+.hero-content {
+    box-sizing: border-box;
+    min-height: 0 !important;
+    height: auto;
+    max-height: none;
+}
+
+/* Main hero box */
+
+.hero,
+.hero-section,
+.hero-banner,
+.home-hero {
+    padding: 22px 32px !important;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-radius: 20px;
+}
+
+/* Hero heading */
+
+.hero h1,
+.hero-section h1,
+.hero-banner h1,
+.home-hero h1,
+.hero-content h1 {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    line-height: 1.2;
+    margin: 8px 0 14px;
+}
+
+/* Hero paragraph */
+
+.hero p,
+.hero-section p,
+.hero-banner p,
+.home-hero p,
+.hero-content p {
+    margin-top: 0;
+    margin-bottom: 16px;
+    line-height: 1.55;
+}
+
+/* Hero buttons */
+
+.hero .btn,
+.hero-section .btn,
+.hero-banner .btn,
+.home-hero .btn,
+.hero-content .btn {
+    margin-top: 4px;
+}
+
+/* Category chips */
+
+.hero .chip,
+.hero-section .chip,
+.hero-banner .chip,
+.home-hero .chip {
+    margin-bottom: 6px;
 }
 
 /* ==========================================
@@ -669,7 +744,7 @@ html[data-theme="dark"] textarea::placeholder {
 .flash-stack {
     position: fixed;
 
-    top: 92px;
+    top: 76px;
     right: 20px;
     z-index: 1200;
 
@@ -984,7 +1059,7 @@ html[data-theme="dark"] .theme-toggle {
 
     .page-container {
         width: calc(100% - 28px);
-        margin-top: 24px;
+        margin-top: 20px;
     }
 
     .footer-inner {
@@ -992,7 +1067,7 @@ html[data-theme="dark"] .theme-toggle {
     }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 600px) {
     body {
         font-size: 15px;
         background-attachment: scroll;
@@ -1023,6 +1098,22 @@ html[data-theme="dark"] .theme-toggle {
     .dashboard-grid,
     .report-grid {
         grid-template-columns: 1fr;
+    }
+
+    .hero,
+    .hero-section,
+    .hero-banner,
+    .home-hero {
+        padding: 18px 16px !important;
+        margin-bottom: 16px;
+    }
+
+    .hero h1,
+    .hero-section h1,
+    .hero-banner h1,
+    .home-hero h1,
+    .hero-content h1 {
+        font-size: 1.75rem;
     }
 
     .flash-stack {
