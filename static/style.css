@@ -1154,3 +1154,61 @@ html[data-theme="dark"] .theme-toggle {
         animation-duration: 0.01ms !important;
     }
 }
+
+/* ==========================================
+   ALIGN HOMEPAGE BOXES
+   ========================================== */
+
+/* Pantayin ang lapad ng malaking hero box
+   sa mga box sa ibaba */
+
+.hero,
+.hero-section,
+.hero-banner,
+.home-hero {
+    width: min(800px, calc(100% - 40px)) !important;
+    max-width: 800px;
+    min-height: 0 !important;
+    height: auto;
+    margin: 20px auto 24px !important;
+    padding: 24px 28px !important;
+    border-radius: 18px;
+    box-sizing: border-box;
+}
+
+/* Pantayin ang lapad at alignment ng statistics
+   at search box */
+
+.home-stats,
+.stats-grid,
+.search-panel,
+.search-card {
+    width: min(800px, calc(100% - 40px));
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+/* Mas maliit na margin sa cellphone */
+
+@media (max-width: 600px) {
+    .hero,
+    .hero-section,
+    .hero-banner,
+    .home-hero,
+    .home-stats,
+    .stats-grid,
+    .search-panel,
+    .search-card {
+        width: calc(100% - 28px) !important;
+        max-width: 800px;
+    }
+
+    .hero,
+    .hero-section,
+    .hero-banner,
+    .home-hero {
+        padding: 18px 16px !important;
+    }
+}
