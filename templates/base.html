@@ -125,29 +125,42 @@
             const themeButton = document.querySelector("#theme-toggle");
             const root = document.documentElement;
 
+            /* Mobile navigation */
             if (menuButton && navigation) {
                 menuButton.addEventListener("click", function () {
                     const isOpen = navigation.classList.toggle("is-open");
+
                     menuButton.setAttribute("aria-expanded", String(isOpen));
                     menuButton.setAttribute(
                         "aria-label",
                         isOpen ? "Close navigation" : "Open navigation"
                     );
                 });
+
+                navigation.querySelectorAll("a").forEach(function (link) {
+                    link.addEventListener("click", function () {
+                        navigation.classList.remove("is-open");
+                        menuButton.setAttribute("aria-expanded", "false");
+                        menuButton.setAttribute("aria-label", "Open navigation");
+                    });
+                });
             }
 
+            /* Dismiss flash messages */
             document.querySelectorAll(".flash-dismiss").forEach(function (button) {
                 button.addEventListener("click", function () {
                     button.closest(".flash-message")?.remove();
                 });
             });
 
+            /* Theme toggle */
             function setTheme(theme) {
                 root.setAttribute("data-theme", theme);
 
                 if (!themeButton) return;
 
                 const dark = theme === "dark";
+
                 themeButton.setAttribute("aria-pressed", String(dark));
                 themeButton.setAttribute(
                     "aria-label",
@@ -170,6 +183,7 @@
                 });
             }
 
+            /* Image preview modal */
             const imageModal = document.querySelector(".image-modal");
             const modalImage = imageModal?.querySelector("img");
             const closeModal = imageModal?.querySelector(".image-modal-close");
@@ -181,6 +195,7 @@
 
                 img.addEventListener("click", function () {
                     if (!imageModal || !modalImage) return;
+
                     modalImage.src = img.src;
                     modalImage.alt = img.alt || "Enlarged item photo";
                     imageModal.hidden = false;
