@@ -1,23 +1,14 @@
 {% extends "base.html" %}
-{% block title %}{{ report.item_name }} — Report #{{ report.id }}{% endblock %}
-
+{% block title %}{{ report.item_name }}{% endblock %}
 {% block content %}
 <div class="container py-4">
-  <!-- ✅ BACK TO HOME BUTTON -->
-  <div class="mb-4">
-    <a href="{{ url_for('home') }}" class="back-home-btn">
-      ← Back to Home
-    </a>
-  </div>
-
   <!-- Breadcrumb -->
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Report #{{ report.id }}</li>
+      <li class="breadcrumb-item active" aria-current="page">{{ report.item_name }}</li>
     </ol>
   </nav>
-
   <div class="row g-4">
     <!-- Photo Column -->
     <div class="col-lg-5">
@@ -52,7 +43,6 @@
         </div>
       </div>
     </div>
-
     <!-- Details Column -->
     <div class="col-lg-7">
       <!-- Report Details -->
@@ -64,20 +54,16 @@
           <dl class="row mb-0">
             <dt class="col-sm-4 text-muted">Category</dt>
             <dd class="col-sm-8">{{ report.category or 'Not specified' }}</dd>
-
             <dt class="col-sm-4 text-muted">
               {{ 'Date Lost' if report.report_type == 'Lost' else 'Date Found' }}
             </dt>
             <dd class="col-sm-8">
               {{ report.incident_date.strftime('%B %d, %Y') if report.incident_date else 'Not specified' }}
             </dd>
-
             <dt class="col-sm-4 text-muted">Location</dt>
             <dd class="col-sm-8">{{ report.location or 'Not specified' }}</dd>
-
             <dt class="col-sm-4 text-muted">Description</dt>
             <dd class="col-sm-8">{{ report.description or 'No description provided' }}</dd>
-
             {% if report.contact_public or admin_logged_in %}
               <dt class="col-sm-4 text-muted">Reported by</dt>
               <dd class="col-sm-8">{{ report.contact_name }}</dd>
@@ -94,7 +80,6 @@
           </dl>
         </div>
       </div>
-
       <!-- Claim Form -->
       {% if report.status not in ['Returned', 'Archived'] %}
         <div class="card shadow-sm border-0 mb-4" id="claim-form">
@@ -148,7 +133,6 @@
           {% endif %}
         </div>
       {% endif %}
-
       <!-- Admin: Claims List -->
       {% if admin_logged_in and report.claims %}
         <div class="card shadow-sm border-0">
@@ -182,28 +166,7 @@
     </div>
   </div>
 </div>
-
 <style>
-  /* Back to Home Button */
-  .back-home-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 18px;
-    border: 1px solid var(--border, #ddd);
-    border-radius: 10px;
-    background: var(--surface, #fff);
-    color: var(--text, #333);
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.25s ease;
-  }
-  .back-home-btn:hover {
-    background: var(--primary-soft, #e6f4ea);
-    border-color: var(--primary, #075c3b);
-    color: var(--primary, #075c3b);
-    transform: translateX(-3px);
-  }
   /* Card consistency */
   .card {
     border-radius: 14px !important;
