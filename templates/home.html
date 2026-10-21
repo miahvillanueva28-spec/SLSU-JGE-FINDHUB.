@@ -1,5 +1,9 @@
 {% extends "base.html" %}
-{% block title %}{% if request.args.get('view') == 'reports' %}All Reports | {% endif %}Home | SLSU JGE FindHub{% endblock %}
+
+{% block title %}
+  {% if request.args.get('view') == 'reports' %}All Reports | {% endif %}Home | SLSU JGE FindHub
+{% endblock %}
+
 {% block head %}
 <style>
   /* Home hero */
@@ -50,11 +54,54 @@
     font-size: clamp(15px, 2vw, 17px);
     line-height: 1.8;
   }
+  .home-hero .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
   .home-hero .button {
     box-shadow: 0 5px 13px rgba(0, 75, 43, .16);
   }
   .home-hero .button:hover {
     box-shadow: 0 8px 19px rgba(0, 75, 43, .24);
+  }
+  .button.lost-btn {
+    background: #fff3e0;
+    color: #e65100;
+    border-color: #ffcc80;
+  }
+  .button.lost-btn:hover {
+    background: #ffe0b2;
+    color: #e65100;
+    border-color: #ffb74d;
+  }
+  .button.found-btn {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #a5d6a7;
+  }
+  .button.found-btn:hover {
+    background: #c8e6c9;
+    color: #2e7d32;
+    border-color: #81c784;
+  }
+  html[data-theme="dark"] .button.lost-btn {
+    background: #5d3a14;
+    color: #ffcc80;
+    border-color: #8d551a;
+  }
+  html[data-theme="dark"] .button.lost-btn:hover {
+    background: #7a4a1a;
+    color: #ffe0b2;
+  }
+  html[data-theme="dark"] .button.found-btn {
+    background: #1e4620;
+    color: #a5d6a7;
+    border-color: #2e7d32;
+  }
+  html[data-theme="dark"] .button.found-btn:hover {
+    background: #265c28;
+    color: #c8e6c9;
   }
   /* Statistics */
   .home-stats {
@@ -460,6 +507,15 @@
     .home-page .home-empty-state {
       padding: 26px 13px;
     }
+    .home-hero .button-group,
+    .home-empty-state .empty-actions {
+      flex-direction: column;
+    }
+    .home-hero .button,
+    .home-empty-state .button {
+      width: 100%;
+      text-align: center;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     .home-hero .sticker,
@@ -473,6 +529,7 @@
   }
 </style>
 {% endblock %}
+
 {% block hero %}
 <section class="hero home-hero">
   <div class="sticker-row" aria-label="Common lost and found categories">
@@ -481,17 +538,26 @@
     <span class="sticker"><span aria-hidden="true">📱</span> Gadgets</span>
     <span class="sticker"><span aria-hidden="true">🪪</span> School IDs</span>
   </div>
+
   <h2>Lost Something? Found Something?</h2>
+
   <p class="hero-description">
     Welcome to SLSU JGE FindHub! Report lost belongings,
     share found items, and help reunite belongings with
     their rightful owners in the campus community.
   </p>
-  <a class="button" href="{{ url_for('new_report') }}">
-    ✨ Submit a Report
-  </a>
+
+  <div class="button-group">
+    <a class="button lost-btn" href="{{ url_for('new_report') }}?type=Lost">
+      🔍 Report Lost Item
+    </a>
+    <a class="button found-btn" href="{{ url_for('new_report') }}?type=Found">
+      ✋ Report Found Item
+    </a>
+  </div>
 </section>
 {% endblock %}
+
 {% block content %}
 <div class="home-page">
   <section class="stats home-stats" aria-label="Lost and found statistics">
@@ -512,15 +578,18 @@
       <strong>FindHub</strong>
     </div>
   </section>
+
   <section class="panel search-panel" id="find-item"
            aria-labelledby="find-item-heading">
     <h2 class="search-heading" id="find-item-heading">
       <span class="heading-icon" aria-hidden="true">🔎</span>
       <span>Find an Item</span>
     </h2>
+
     <p class="search-description">
       Search reports by keyword, type, or status.
     </p>
+
     <form method="GET" action="{{ url_for('home') }}"
           role="search" aria-label="Search lost and found reports">
       <div class="filter-grid">
@@ -558,6 +627,7 @@
           </select>
         </div>
       </div>
+
       <div class="search-actions">
         <button type="submit">🔎 Search Reports</button>
         <a class="button secondary" href="{{ url_for('home') }}">
@@ -566,6 +636,7 @@
       </div>
     </form>
   </section>
+
   <section class="reports-section" id="reports-section"
            aria-labelledby="recent-reports-heading">
     <div class="back-to-home-row">
@@ -573,6 +644,7 @@
         ← Back to Home
       </a>
     </div>
+
     <div class="reports-heading">
       <h2 id="recent-reports-heading">
         {% if search_performed %}
@@ -584,10 +656,16 @@
           <span class="reports-count">{{ reports|length }}</span>
         {% endif %}
       </h2>
-      <a class="button small" href="{{ url_for('new_report') }}">
-        + New Report
-      </a>
+      <div style="display: flex; gap: 8px;">
+        <a class="button small lost-btn" href="{{ url_for('new_report') }}?type=Lost">
+          + Report Lost
+        </a>
+        <a class="button small found-btn" href="{{ url_for('new_report') }}?type=Found">
+          + Report Found
+        </a>
+      </div>
     </div>
+
     {% if reports %}
       <div class="report-grid">
         {% for report in reports %}
@@ -612,11 +690,14 @@
                 </div>
               {% endif %}
             </div>
+
             <div class="report-content">
               <span class="tag {% if report.report_type|lower == 'found' %}found{% endif %}">
                 {{ report.report_type }}
               </span>
+
               <h3>{{ report.item_name }}</h3>
+
               <div class="report-meta">
                 <p>
                   <strong>Location:</strong>
@@ -629,6 +710,7 @@
                   </p>
                 {% endif %}
               </div>
+
               <div class="report-status-row">
                 <strong>Status:</strong>
                 <span class="tag
@@ -638,6 +720,7 @@
                   {{ report.status or 'Open' }}
                 </span>
               </div>
+
               <div class="card-actions">
                 <a class="button small"
                    href="{{ url_for('report_detail', report_id=report.id) }}">
@@ -666,8 +749,11 @@
           {% endif %}
         </p>
         <div class="empty-actions">
-          <a class="button" href="{{ url_for('new_report') }}">
-            ✨ Submit a Report
+          <a class="button lost-btn" href="{{ url_for('new_report') }}?type=Lost">
+            🔍 Report Lost Item
+          </a>
+          <a class="button found-btn" href="{{ url_for('new_report') }}?type=Found">
+            ✋ Report Found Item
           </a>
           {% if search_performed %}
             <a class="button secondary" href="{{ url_for('home') }}">
@@ -679,6 +765,7 @@
     {% endif %}
   </section>
 </div>
+
 <script>
   (function () {
     const params = new URLSearchParams(window.location.search);
