@@ -697,16 +697,7 @@ def admin_update_report_status(report_id):
     report.status = new_status
 
     try:
-        if old_status != new_status:
-            create_notification(
-                title="Item Status Updated",
-                message=(
-                    f'"{report.item_name}" (report #{report.id}) '
-                    f"changed from {old_status} to {new_status}."
-                ),
-                notification_type="status",
-                report_id=report.id,
-            )
+        # No notification created for status updates (admin action only)
         db.session.commit()
         flash("Report status updated successfully.", "success")
     except Exception:
