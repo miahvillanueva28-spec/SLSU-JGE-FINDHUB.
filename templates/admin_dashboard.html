@@ -1,299 +1,217 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard | FindHub{% endblock %}
-
+{% block title %}Admin Dashboard — SLSU JGE FindHub{% endblock %}
 {% block content %}
-{% set total_reports = stats.total|default(0) %}
-{% set lost_total = stats.lost|default(0) %}
-{% set found_total = stats.found|default(0) %}
-{% set open_total = stats.open|default(0) %}
-{% set pending_claims_total = stats.pending_claims|default(0) %}
-{% set pending_reports_total = stats.reports_pending_claim|default(0) %}
-{% set returned_total = stats.returned|default(0) %}
-
-<section class="panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<div class="container py-4">
+  <!-- Dashboard Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
     <div>
-      <h2>🛠️ Admin Dashboard</h2>
-      <p class="help">
-        Manage Lost and Found reports, review claims, and update item statuses.
-      </p>
+      <h2 class="mb-1 fw-bold">⚙️ Admin Dashboard</h2>
+      <p class="text-muted mb-0">Manage reports, review claims, and track lost & found items across campus.</p>
     </div>
-
-    <a class="button" href="{{ url_for('export_reports') }}">
-      ⬇ Export CSV
+    <a href="{{ url_for('export_reports') }}" class="btn btn-success px-4">
+      📊 Export CSV
     </a>
   </div>
 
-  <div class="stats">
-    <div class="stat">
-      <span>📚 Total Reports</span>
-      <strong>{{ total_reports }}</strong>
+  <!-- Stats Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3 fs-2">📋</div>
+            <div>
+              <div class="text-muted small">Total Reports</div>
+              <div class="fs-4 fw-bold">{{ stats.total }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="stat">
-      <span>🔎 Lost Reports</span>
-      <strong>{{ lost_total }}</strong>
+    <div class="col-sm-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3 fs-2 text-danger">🔍</div>
+            <div>
+              <div class="text-muted small">Lost Items</div>
+              <div class="fs-4 fw-bold text-danger">{{ stats.lost }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="stat">
-      <span>🎒 Found Reports</span>
-      <strong>{{ found_total }}</strong>
+    <div class="col-sm-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3 fs-2 text-success">✨</div>
+            <div>
+              <div class="text-muted small">Found Items</div>
+              <div class="fs-4 fw-bold text-success">{{ stats.found }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="stat">
-      <span>📌 Open Reports</span>
-      <strong>{{ open_total }}</strong>
-    </div>
-    <div class="stat">
-      <span>🤝 Pending Claim Requests</span>
-      <strong>{{ pending_claims_total }}</strong>
-    </div>
-    <div class="stat">
-      <span>⏳ Reports Awaiting Claims</span>
-      <strong>{{ pending_reports_total }}</strong>
-    </div>
-    <div class="stat">
-      <span>✅ Returned Items</span>
-      <strong>{{ returned_total }}</strong>
+    <div class="col-sm-6 col-md-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3 fs-2 text-primary">🟢</div>
+            <div>
+              <div class="text-muted small">Open Reports</div>
+              <div class="fs-4 fw-bold text-primary">{{ stats.open }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="card-actions">
-    <a class="button" href="{{ url_for('admin_claims') }}">
-      🤝 Review All Claims
-    </a>
-    <a class="button secondary" href="{{ url_for('home') }}">
-      🌐 View Public Website
-    </a>
-    <a class="button secondary" href="{{ url_for('notifications_page') }}">
-      🔔 Notifications
-    </a>
-  </div>
-</section>
-
-<section class="panel">
-  <h2>🔎 Lost Item Reports</h2>
-  <p class="help">Total Lost Reports: {{ lost_reports|length }}</p>
-
-  {% if lost_reports %}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Item Details</th>
-            <th>Report Information</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in lost_reports %}
-            <tr>
-              <td>
-                <strong>{{ r.item_name }}</strong><br>
-                <span class="help">Report #{{ r.id }} · {{ r.category }}</span><br>
-                <a href="{{ url_for('report_detail', report_id=r.id) }}">View Report</a>
-              </td>
-
-              <td>
-                <span class="tag">Lost</span>
-                <p><strong>Location:</strong> {{ r.location }}</p>
-                <p><strong>Date Lost:</strong> {{ r.incident_date }}</p>
-                <p class="help">
-                  Posted:
-                  {% if r.created_at %}
-                    {{ r.created_at.strftime('%b %d, %Y') }}
-                  {% else %}
-                    N/A
-                  {% endif %}
-                </p>
-                {% if r.photo %}
-                  <a href="{{ photo_src(r.photo) }}" target="_blank" rel="noopener noreferrer">
-                    View Photo
-                  </a>
-                {% endif %}
-              </td>
-
-              <td>
-                <form method="POST"
-                      action="{{ url_for('admin_update_report_status', report_id=r.id) }}">
-                  <label for="lost-status-{{ r.id }}">Update status</label>
-                  <select id="lost-status-{{ r.id }}" name="status" required>
-                    {% for s in ['Open', 'Pending Claim', 'Returned', 'Archived'] %}
-                      <option value="{{ s }}"
-                        {% if (r.status or '')|lower == s|lower %}selected{% endif %}>
-                        {{ s }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                  <button class="small" type="submit">Save Status</button>
-                </form>
-                <p class="help">Current: {{ r.status or 'N/A' }}</p>
-              </td>
-
-              <td>
-                <form method="POST"
-                      action="{{ url_for('admin_delete_report', report_id=r.id) }}"
-                      onsubmit="return confirm('Delete this Lost report and its claims? This cannot be undone.');">
-                  <button class="danger small" type="submit">Delete</button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3 fs-2 text-warning">⏳</div>
+            <div>
+              <div class="text-muted small">Pending Claims</div>
+              <div class="fs-4 fw-bold text-warning">{{ stats.pending_claims }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  {% else %}
-    <div class="empty-state">
-      <div style="font-size:36px">🔎</div>
-      <h3>No Lost Reports Yet</h3>
-      <p>Lost item reports will appear here when submitted.</p>
+    <div class="col-sm-6 col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3 fs-2 text-success">✅</div>
+            <div>
+              <div class="text-muted small">Returned Items</div>
+              <div class="fs-4 fw-bold text-success">{{ stats.returned }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  {% endif %}
-</section>
-
-<section class="panel">
-  <h2>🎒 Found Item Reports</h2>
-  <p class="help">Total Found Reports: {{ found_reports|length }}</p>
-
-  {% if found_reports %}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Item Details</th>
-            <th>Report Information</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in found_reports %}
-            <tr>
-              <td>
-                <strong>{{ r.item_name }}</strong><br>
-                <span class="help">Report #{{ r.id }} · {{ r.category }}</span><br>
-                <a href="{{ url_for('report_detail', report_id=r.id) }}">View Report</a>
-              </td>
-
-              <td>
-                <span class="tag found">Found</span>
-                <p><strong>Location:</strong> {{ r.location }}</p>
-                <p><strong>Date Found:</strong> {{ r.incident_date }}</p>
-                <p class="help">
-                  Posted:
-                  {% if r.created_at %}
-                    {{ r.created_at.strftime('%b %d, %Y') }}
-                  {% else %}
-                    N/A
-                  {% endif %}
-                </p>
-                {% if r.photo %}
-                  <a href="{{ photo_src(r.photo) }}" target="_blank" rel="noopener noreferrer">
-                    View Photo
-                  </a>
-                {% endif %}
-              </td>
-
-              <td>
-                <form method="POST"
-                      action="{{ url_for('admin_update_report_status', report_id=r.id) }}">
-                  <label for="found-status-{{ r.id }}">Update status</label>
-                  <select id="found-status-{{ r.id }}" name="status" required>
-                    {% for s in ['Open', 'Pending Claim', 'Returned', 'Archived'] %}
-                      <option value="{{ s }}"
-                        {% if (r.status or '')|lower == s|lower %}selected{% endif %}>
-                        {{ s }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                  <button class="small" type="submit">Save Status</button>
-                </form>
-                <p class="help">Current: {{ r.status or 'N/A' }}</p>
-              </td>
-
-              <td>
-                <form method="POST"
-                      action="{{ url_for('admin_delete_report', report_id=r.id) }}"
-                      onsubmit="return confirm('Delete this Found report and its claims? This cannot be undone.');">
-                  <button class="danger small" type="submit">Delete</button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="col-sm-6 col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="me-3 fs-2 text-secondary">📁</div>
+            <div>
+              <div class="text-muted small">Archived</div>
+              <div class="fs-4 fw-bold text-secondary">{{ stats.archived }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  {% else %}
-    <div class="empty-state">
-      <div style="font-size:36px">🎒</div>
-      <h3>No Found Reports Yet</h3>
-      <p>Found item reports will appear here when submitted.</p>
-    </div>
-  {% endif %}
-</section>
-
-<section class="panel">
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-    <div>
-      <h2>🤝 Latest Claim Requests</h2>
-      <p class="help">
-        Pending requests: {{ pending_claims_total }}
-        · Reports marked Pending Claim: {{ pending_reports_total }}
-      </p>
-    </div>
-    <a class="button" href="{{ url_for('admin_claims') }}">Review All Claims</a>
   </div>
 
-  {% if claims %}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Claim ID</th>
-            <th>Item</th>
-            <th>Claimant</th>
-            <th>Claim Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in claims %}
-            <tr>
-              <td>#{{ c.id }}</td>
-              <td>
-                {% if c.report %}
-                  <strong>{{ c.report.item_name }}</strong><br>
-                  <span class="help">
-                    {{ c.report.report_type }} · Report #{{ c.report.id }}
-                  </span><br>
-                  <a href="{{ url_for('report_detail', report_id=c.report.id) }}">View Report</a>
-                {% else %}
-                  Report unavailable
-                {% endif %}
-              </td>
-              <td>
-                {{ c.claimant_name }}<br>
-                <span class="help">{{ c.claimant_contact }}</span>
-              </td>
-              <td>
-                {% if (c.status or '')|lower == 'pending' %}
-                  <span class="tag pending">Pending</span>
-                {% elif (c.status or '')|lower == 'approved' %}
-                  <span class="tag returned">Approved</span>
-                {% elif (c.status or '')|lower == 'rejected' %}
-                  <span class="tag">Rejected</span>
-                {% else %}
-                  <span class="tag">{{ c.status or 'N/A' }}</span>
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <!-- Quick Actions -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <h5 class="mb-0">⚡ Quick Actions</h5>
     </div>
-  {% else %}
-    <div class="empty-state">
-      <div style="font-size:36px">📭</div>
-      <h3>No Claim Requests Yet</h3>
-      <p>Submitted claims will appear here for administrator review.</p>
+    <div class="card-body">
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('admin_claims') }}" class="btn btn-primary px-4">
+          📋 Review All Claims
+          {% if stats.pending_claims > 0 %}
+            <span class="badge bg-light text-dark ms-1">{{ stats.pending_claims }} pending</span>
+          {% endif %}
+        </a>
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary px-4">
+          🌐 View Public Website
+        </a>
+        <a href="{{ url_for('notifications_page') }}" class="btn btn-outline-dark px-4">
+          🔔 Notifications
+          {% if unread_notification_count > 0 %}
+            <span class="badge bg-danger ms-1">{{ unread_notification_count }}</span>
+          {% endif %}
+        </a>
+      </div>
     </div>
-  {% endif %}
-</section>
+  </div>
+
+  <!-- Recent Reports -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">📑 All Reports</h5>
+      <span class="text-muted small">{{ reports|length }} total</span>
+    </div>
+    <div class="card-body p-0">
+      {% if reports %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Item</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for report in reports %}
+                <tr>
+                  <td class="fw-mono text-muted">#{{ report.id }}</td>
+                  <td>
+                    <a href="{{ url_for('report_detail', report_id=report.id) }}" class="text-decoration-none fw-medium">
+                      {{ report.item_name }}
+                    </a>
+                  </td>
+                  <td>
+                    {% if report.report_type == 'Lost' %}
+                      <span class="badge bg-danger">Lost</span>
+                    {% else %}
+                      <span class="badge bg-success">Found</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if report.status == 'Open' %}
+                      <span class="badge bg-primary">Open</span>
+                    {% elif report.status == 'Pending Claim' %}
+                      <span class="badge bg-warning text-dark">Pending Claim</span>
+                    {% elif report.status == 'Returned' %}
+                      <span class="badge bg-success">Returned</span>
+                    {% elif report.status == 'Archived' %}
+                      <span class="badge bg-secondary">Archived</span>
+                    {% else %}
+                      <span class="badge bg-light text-dark">{{ report.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-muted small">
+                    {{ report.created_at.strftime('%b %d, %Y') }}
+                  </td>
+                  <td class="text-end">
+                    <a href="{{ url_for('report_detail', report_id=report.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-4 text-muted">
+          📭 No reports submitted yet.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .fw-mono { font-family: ui-monospace, SFMono-Regular, monospace; }
+  .card { border-radius: 12px; overflow: hidden; }
+  .table th { border: none; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .table td { border: none; vertical-align: middle; padding: 0.75rem 1rem; }
+  .table tbody tr { border-top: 1px solid #f0f0f0; }
+  .badge { font-weight: 500; }
+</style>
 {% endblock %}
