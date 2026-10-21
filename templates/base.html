@@ -41,6 +41,7 @@
             </button>
             <nav class="primary-navigation" id="primary-navigation">
                 <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('home') }}?view=reports" id="nav-view-reports">View Reports</a>
                 <a href="{{ url_for('new_report') }}">Report an Item</a>
                 {% if admin_logged_in|default(false) %}
                     <a href="{{ url_for('admin_dashboard') }}">
@@ -64,7 +65,6 @@
             </nav>
         </div>
     </header>
-
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-stack" aria-live="polite">
@@ -83,13 +83,10 @@
             </div>
         {% endif %}
     {% endwith %}
-
     {% block hero %}{% endblock %}
-
     <main id="main-content" class="page-container">
         {% block content %}{% endblock %}
     </main>
-
     <footer class="site-footer">
         <div class="footer-inner">
             <p>
@@ -101,13 +98,11 @@
             </p>
         </div>
     </footer>
-
     <div
         class="toast-container"
         aria-live="polite"
         aria-atomic="true"
     ></div>
-
     <div
         class="image-modal"
         role="dialog"
@@ -124,13 +119,11 @@
         </button>
         <img alt="Enlarged item photo">
     </div>
-
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const menuButton = document.querySelector(".menu-toggle");
             const navigation = document.querySelector("#primary-navigation");
-
             /* Mobile navigation */
             if (menuButton && navigation) {
                 menuButton.addEventListener("click", function () {
@@ -158,19 +151,16 @@
                     });
                 });
             }
-
             /* Dismiss flash messages */
             document.querySelectorAll(".flash-dismiss").forEach(function (button) {
                 button.addEventListener("click", function () {
                     button.closest(".flash-message")?.remove();
                 });
             });
-
             /* Image preview modal */
             const imageModal = document.querySelector(".image-modal");
             const modalImage = imageModal?.querySelector("img");
             const closeModal = imageModal?.querySelector(".image-modal-close");
-
             document.querySelectorAll(
                 ".report-photo, .item-photo, .detail-photo, img[data-preview]"
             ).forEach(function (img) {
@@ -182,7 +172,6 @@
                     imageModal.hidden = false;
                 });
             });
-
             function hideModal() {
                 if (imageModal) {
                     imageModal.hidden = true;
@@ -191,7 +180,6 @@
                     modalImage.removeAttribute("src");
                 }
             }
-
             closeModal?.addEventListener("click", hideModal);
             imageModal?.addEventListener("click", function (event) {
                 if (event.target === imageModal) {
