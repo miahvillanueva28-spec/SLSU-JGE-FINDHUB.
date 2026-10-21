@@ -4,12 +4,11 @@ import io
 import hmac
 import secrets
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from functools import wraps
 
 import cloudinary
 import cloudinary.uploader
-
 from flask import (
     Flask,
     render_template,
@@ -25,11 +24,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_
 from werkzeug.utils import secure_filename
 
-
 # ==================================================
 # APP CONFIGURATION
 # ==================================================
-
 BASE_DIR = Path(__file__).resolve().parent
 IS_VERCEL = os.environ.get("VERCEL", "").lower() == "1"
 
@@ -41,14 +38,12 @@ DATA_DIR = Path(
 ).resolve()
 
 UPLOAD_FOLDER = DATA_DIR / "uploads"
-
 if not IS_VERCEL:
     UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__)
 
 secret_key = os.environ.get("SECRET_KEY", "").strip()
-
 if IS_VERCEL and not secret_key:
     raise RuntimeError(
         "SECRET_KEY must be configured in Vercel Environment Variables."
@@ -63,30 +58,22 @@ app.config["SESSION_COOKIE_SECURE"] = (
     os.environ.get("COOKIE_SECURE", "true").lower() == "true"
 )
 
-
 # ==================================================
 # DATABASE CONFIGURATION
 # ==================================================
-
 database_url = os.environ.get("DATABASE_URL", "").strip()
 
 if database_url.startswith("postgres://"):
     database_url = database_url.replace(
-        "postgres://",
-        "postgresql+psycopg2://",
-        1,
+        "postgres://", "postgresql+psycopg2://", 1
     )
 elif database_url.startswith("postgresql://"):
     database_url = database_url.replace(
-        "postgresql://",
-        "postgresql+psycopg2://",
-        1,
+        "postgresql://", "postgresql+psycopg2://", 1
     )
 elif database_url.startswith("postgresql+psycopg://"):
     database_url = database_url.replace(
-        "postgresql+psycopg://",
-        "postgresql+psycopg2://",
-        1,
+        "postgresql+psycopg://", "postgresql+psycopg2://", 1
     )
 
 if not database_url:
@@ -95,16 +82,12 @@ if not database_url:
             "DATABASE_URL is missing. Configure PostgreSQL and add "
             "DATABASE_URL in Vercel Environment Variables."
         )
-
     database_url = f"sqlite:///{DATA_DIR / 'findhub.db'}"
-
     app.logger.warning(
         "DATABASE_URL is missing. Using local SQLite for development only."
     )
 
-if not database_url.startswith(
-    ("postgresql+psycopg2://", "sqlite:///")
-):
+if not database_url.startswith(("postgresql+psycopg2://", "sqlite:///")):
     raise RuntimeError(
         "Unsupported DATABASE_URL. Use PostgreSQL or SQLite locally."
     )
@@ -123,11 +106,9 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 
 db = SQLAlchemy(app)
 
-
 # ==================================================
 # CLOUDINARY PHOTO STORAGE
 # ==================================================
-
 CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "").strip()
 USE_CLOUDINARY = bool(CLOUDINARY_URL)
 
@@ -139,118 +120,68 @@ if IS_VERCEL and not USE_CLOUDINARY:
         "CLOUDINARY_URL is missing. Photo uploads will not work on Vercel."
     )
 
-
 # ==================================================
 # WEBSITE BRANDING
 # ==================================================
-
 CAMPUS_LOGO = (
     "https://www.slsu.edu.ph/wp-content/uploads/2023/05/"
     "Campuses/Campus-Logo/SLSU-JGE-Logo.png"
 )
-
 CAMPUS_PHOTO = (
     "https://www.slsu.edu.ph/wp-content/uploads/"
     "elementor/thumbs/JGE%20bldg-q6759ky68kjrv7f9iklhioqfdjrgb6067ofnjh7qns.jpg"
 )
 
-
 # ==================================================
 # DATABASE MODELS
 # ==================================================
+def utcnow():
+    """Timezone-aware UTC timestamp (Python 3.12+ compatible)."""
+    return datetime.now(timezone.utc)
+
 
 class Report(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     report_type = db.Column(db.String(20), nullable=False)
     item_name = db.Column(db.String(150), nullable=False)
     category = db.Column(db.String(80), nullable=False)
     description = db.Column(db.Text, nullable=False)
     location = db.Column(db.String(200), nullable=False)
     incident_date = db.Column(db.Date, nullable=False)
-
     contact_name = db.Column(db.String(120), nullable=False)
     contact = db.Column(db.String(150), nullable=False)
-    contact_public = db.Column(
-        db.Boolean,
-        default=False,
-        nullable=False,
-    )
-
+    contact_public = db.Column(db.Boolean, default=False, nullable=False)
     # Cloudinary URL or legacy local filename.
     photo = db.Column(db.String(1000), nullable=True)
-
-    status = db.Column(
-        db.String(30),
-        default="Open",
-        nullable=False,
-    )
-
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
-        nullable=False,
-    )
-
+    status = db.Column(db.String(30), default="Open", nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
     claims = db.relationship(
-        "Claim",
-        backref="report",
-        cascade="all, delete-orphan",
-        lazy=True,
+        "Claim", backref="report", cascade="all, delete-orphan", lazy=True
     )
 
 
 class Claim(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     report_id = db.Column(
-        db.Integer,
-        db.ForeignKey("report.id"),
-        nullable=False,
+        db.Integer, db.ForeignKey("report.id"), nullable=False
     )
-
     claimant_name = db.Column(db.String(120), nullable=False)
     claimant_contact = db.Column(db.String(150), nullable=False)
     proof = db.Column(db.Text, nullable=False)
-
-    status = db.Column(
-        db.String(30),
-        default="Pending",
-        nullable=False,
-    )
-
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
-        nullable=False,
-    )
+    status = db.Column(db.String(30), default="Pending", nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     title = db.Column(db.String(150), nullable=False)
     message = db.Column(db.Text, nullable=False)
-
     notification_type = db.Column(
-        db.String(30),
-        nullable=False,
-        default="info",
+        db.String(30), nullable=False, default="info"
     )
-
     report_id = db.Column(db.Integer, nullable=True)
-
-    is_read = db.Column(
-        db.Boolean,
-        nullable=False,
-        default=False,
-    )
-
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
-        nullable=False,
-    )
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
 
 # Creates missing tables only.
@@ -258,11 +189,9 @@ class Notification(db.Model):
 with app.app_context():
     db.create_all()
 
-
 # ==================================================
 # TEMPLATE CONTEXT
 # ==================================================
-
 @app.context_processor
 def inject_global_template_values():
     return {
@@ -276,49 +205,21 @@ def inject_global_template_values():
 @app.context_processor
 def inject_notification_count():
     count = 0
-
     if session.get("admin_logged_in"):
-        count = Notification.query.filter_by(
-            is_read=False
-        ).count()
-
-    return {
-        "unread_notification_count": count,
-    }
+        count = Notification.query.filter_by(is_read=False).count()
+    return {"unread_notification_count": count}
 
 
 # ==================================================
 # CONSTANTS AND HELPERS
 # ==================================================
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
-ALLOWED_EXTENSIONS = {
-    "png",
-    "jpg",
-    "jpeg",
-    "gif",
-    "webp",
-}
-
-REPORT_STATUSES = {
-    "Open",
-    "Pending Claim",
-    "Returned",
-    "Archived",
-}
-
-CLAIM_STATUSES = {
-    "Pending",
-    "Approved",
-    "Rejected",
-}
+REPORT_STATUSES = {"Open", "Pending Claim", "Returned", "Archived"}
+CLAIM_STATUSES = {"Pending", "Approved", "Rejected"}
 
 
-def create_notification(
-    title,
-    message,
-    notification_type="info",
-    report_id=None,
-):
+def create_notification(title, message, notification_type="info", report_id=None):
     notification = Notification(
         title=title,
         message=message,
@@ -326,7 +227,6 @@ def create_notification(
         report_id=report_id,
         is_read=False,
     )
-
     db.session.add(notification)
     return notification
 
@@ -335,14 +235,9 @@ def admin_required(view_function):
     @wraps(view_function)
     def wrapped_view(*args, **kwargs):
         if not session.get("admin_logged_in"):
-            flash(
-                "Please log in as an administrator first.",
-                "warning",
-            )
+            flash("Please log in as an administrator first.", "warning")
             return redirect(url_for("admin_login"))
-
         return view_function(*args, **kwargs)
-
     return wrapped_view
 
 
@@ -350,27 +245,22 @@ def allowed_file(filename):
     return (
         bool(filename)
         and "." in filename
-        and filename.rsplit(".", 1)[1].lower()
-        in ALLOWED_EXTENSIONS
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
     )
 
 
 def photo_src(photo):
     if not photo:
         return None
-
     if photo.startswith(("https://", "http://")):
         return photo
-
     # Supports older locally stored images.
     return url_for("uploaded_photo", filename=photo)
 
 
 @app.context_processor
 def inject_photo_helper():
-    return {
-        "photo_src": photo_src,
-    }
+    return {"photo_src": photo_src}
 
 
 def save_photo(file_storage):
@@ -378,11 +268,8 @@ def save_photo(file_storage):
         return None
 
     original_name = secure_filename(file_storage.filename)
-
     if not original_name or not allowed_file(original_name):
-        raise ValueError(
-            "Use a PNG, JPG, JPEG, GIF, or WEBP image."
-        )
+        raise ValueError("Use a PNG, JPG, JPEG, GIF, or WEBP image.")
 
     if not USE_CLOUDINARY:
         if IS_VERCEL:
@@ -390,10 +277,8 @@ def save_photo(file_storage):
                 "Photo storage is not configured. Set CLOUDINARY_URL "
                 "in Vercel Environment Variables."
             )
-
         filename = f"{secrets.token_hex(12)}_{original_name}"
         file_storage.save(UPLOAD_FOLDER / filename)
-
         return filename
 
     result = cloudinary.uploader.upload(
@@ -401,14 +286,9 @@ def save_photo(file_storage):
         folder="slsu-jge-findhub",
         resource_type="image",
     )
-
     photo_url = result.get("secure_url")
-
     if not photo_url:
-        raise RuntimeError(
-            "Cloudinary did not return a secure photo URL."
-        )
-
+        raise RuntimeError("Cloudinary did not return a secure photo URL.")
     return photo_url
 
 
@@ -416,13 +296,10 @@ def delete_photo(photo):
     # Cloudinary images are not deleted automatically.
     if not photo or photo.startswith(("https://", "http://")):
         return
-
     if IS_VERCEL:
         return
-
     filename = Path(photo).name
     path = UPLOAD_FOLDER / filename
-
     try:
         if path.is_file():
             path.unlink()
@@ -432,24 +309,18 @@ def delete_photo(photo):
 
 def parse_incident_date(value):
     try:
-        return datetime.strptime(
-            value,
-            "%Y-%m-%d",
-        ).date()
+        return datetime.strptime(value, "%Y-%m-%d").date()
     except (TypeError, ValueError):
         return None
 
 
 def get_report_form_value(name, default=""):
-    return (
-        request.form.get(name, default) or ""
-    ).strip()
+    return (request.form.get(name, default) or "").strip()
 
 
 # ==================================================
 # HOME AND SEARCH
 # ==================================================
-
 @app.route("/")
 def home():
     query = request.args.get("q", "").strip()[:100]
@@ -462,10 +333,7 @@ def home():
         row[0]
         for row in (
             db.session.query(Report.category)
-            .filter(
-                Report.category.isnot(None),
-                Report.category != "",
-            )
+            .filter(Report.category.isnot(None), Report.category != "")
             .distinct()
             .order_by(Report.category.asc())
             .all()
@@ -475,23 +343,13 @@ def home():
     reports_query = Report.query
 
     if report_type in {"Lost", "Found"}:
-        reports_query = reports_query.filter(
-            Report.report_type == report_type
-        )
-
+        reports_query = reports_query.filter(Report.report_type == report_type)
     if category and category in categories:
-        reports_query = reports_query.filter(
-            Report.category == category
-        )
-
+        reports_query = reports_query.filter(Report.category == category)
     if status in REPORT_STATUSES:
-        reports_query = reports_query.filter(
-            Report.status == status
-        )
-
+        reports_query = reports_query.filter(Report.status == status)
     if query:
         search_term = f"%{query}%"
-
         reports_query = reports_query.filter(
             or_(
                 Report.item_name.ilike(search_term),
@@ -503,37 +361,23 @@ def home():
 
     if sort == "oldest":
         reports_query = reports_query.order_by(
-            Report.created_at.asc(),
-            Report.id.asc(),
+            Report.created_at.asc(), Report.id.asc()
         )
     elif sort == "name":
         reports_query = reports_query.order_by(
-            Report.item_name.asc(),
-            Report.id.asc(),
+            Report.item_name.asc(), Report.id.asc()
         )
     else:
         sort = "newest"
-
         reports_query = reports_query.order_by(
-            Report.created_at.desc(),
-            Report.id.desc(),
+            Report.created_at.desc(), Report.id.desc()
         )
 
     reports = reports_query.all()
-
     total_reports = Report.query.count()
-
-    total_lost = Report.query.filter_by(
-        report_type="Lost"
-    ).count()
-
-    total_found = Report.query.filter_by(
-        report_type="Found"
-    ).count()
-
-    total_open = Report.query.filter_by(
-        status="Open"
-    ).count()
+    total_lost = Report.query.filter_by(report_type="Lost").count()
+    total_found = Report.query.filter_by(report_type="Found").count()
+    total_open = Report.query.filter_by(status="Open").count()
 
     stats = {
         "total": total_reports,
@@ -562,7 +406,6 @@ def home():
 # ==================================================
 # CREATE A REPORT
 # ==================================================
-
 @app.route("/report/new", methods=["GET", "POST"])
 def new_report():
     if request.method == "POST":
@@ -571,65 +414,41 @@ def new_report():
         category = get_report_form_value("category")
         description = get_report_form_value("description")
         location = get_report_form_value("location")
-
         incident_date = parse_incident_date(
             get_report_form_value("incident_date")
         )
-
         contact_name = get_report_form_value("contact_name")
         contact = get_report_form_value("contact")
-
         contact_public = request.form.get("contact_public") in {
-            "1",
-            "true",
-            "on",
-            "yes",
+            "1", "true", "on", "yes"
         }
 
         if report_type not in {"Lost", "Found"}:
-            flash(
-                "Please select Lost or Found.",
-                "danger",
-            )
+            flash("Please select Lost or Found.", "danger")
             return redirect(url_for("new_report"))
 
         if not all([
-            item_name,
-            category,
-            description,
-            location,
-            incident_date,
-            contact,
+            item_name, category, description, location, incident_date, contact,
         ]):
-            flash(
-                "Please complete all required fields.",
-                "danger",
-            )
+            flash("Please complete all required fields.", "danger")
             return redirect(url_for("new_report"))
 
         if incident_date > date.today():
-            flash(
-                "The lost or found date cannot be in the future.",
-                "danger",
-            )
+            flash("The lost or found date cannot be in the future.", "danger")
             return redirect(url_for("new_report"))
 
         if len(item_name) > 150:
             flash("Item name is too long.", "danger")
             return redirect(url_for("new_report"))
-
         if len(category) > 80:
             flash("Category is too long.", "danger")
             return redirect(url_for("new_report"))
-
         if len(location) > 200:
             flash("Location is too long.", "danger")
             return redirect(url_for("new_report"))
-
         if len(contact) > 150:
             flash("Contact details are too long.", "danger")
             return redirect(url_for("new_report"))
-
         if len(contact_name) > 120:
             flash("Your name is too long.", "danger")
             return redirect(url_for("new_report"))
@@ -639,17 +458,13 @@ def new_report():
         stored_contact_name = contact_name or "Not provided"
 
         saved_photo = None
-
         try:
-            saved_photo = save_photo(
-                request.files.get("photo")
-            )
+            saved_photo = save_photo(request.files.get("photo"))
         except ValueError as error:
             flash(str(error), "danger")
             return redirect(url_for("new_report"))
         except Exception:
             app.logger.exception("Photo upload failed")
-
             flash(
                 "Photo upload failed. Check your Cloudinary configuration.",
                 "danger",
@@ -673,7 +488,6 @@ def new_report():
         try:
             db.session.add(report)
             db.session.flush()
-
             create_notification(
                 title="New Lost and Found Report",
                 message=(
@@ -683,33 +497,16 @@ def new_report():
                 notification_type="report",
                 report_id=report.id,
             )
-
             db.session.commit()
-
         except Exception:
             db.session.rollback()
             app.logger.exception("Unable to save report")
-
-            # Remove a newly saved local photo if the database save failed.
             delete_photo(saved_photo)
-
-            flash(
-                "Unable to save your report. Please try again.",
-                "danger",
-            )
+            flash("Unable to save your report. Please try again.", "danger")
             return redirect(url_for("new_report"))
 
-        flash(
-            "Your report was submitted successfully!",
-            "success",
-        )
-
-        return redirect(
-            url_for(
-                "report_detail",
-                report_id=report.id,
-            )
-        )
+        flash("Your report was submitted successfully!", "success")
+        return redirect(url_for("report_detail", report_id=report.id))
 
     return render_template("report_form.html")
 
@@ -717,25 +514,16 @@ def new_report():
 # ==================================================
 # REPORT DETAILS
 # ==================================================
-
 @app.route("/report/<int:report_id>")
 def report_detail(report_id):
     report = db.get_or_404(Report, report_id)
-
-    return render_template(
-        "report_detail.html",
-        report=report,
-    )
+    return render_template("report_detail.html", report=report)
 
 
 # ==================================================
 # CLAIM SUBMISSION
 # ==================================================
-
-@app.route(
-    "/report/<int:report_id>/claim",
-    methods=["POST"],
-)
+@app.route("/report/<int:report_id>/claim", methods=["POST"])
 def submit_claim(report_id):
     report = db.get_or_404(Report, report_id)
 
@@ -744,39 +532,22 @@ def submit_claim(report_id):
             "This report is no longer accepting claim requests.",
             "warning",
         )
-
-        return redirect(
-            url_for(
-                "report_detail",
-                report_id=report.id,
-            )
-        )
+        return redirect(url_for("report_detail", report_id=report.id))
 
     claimant_name = get_report_form_value("claimant_name")
     claimant_contact = get_report_form_value("claimant_contact")
     proof = get_report_form_value("proof")
 
-    if not all([
-        claimant_name,
-        claimant_contact,
-        proof,
-    ]):
+    if not all([claimant_name, claimant_contact, proof]):
         flash(
             "Complete your name, contact details, and ownership proof.",
             "danger",
         )
-
-        return redirect(
-            url_for(
-                "report_detail",
-                report_id=report.id,
-            )
-        )
+        return redirect(url_for("report_detail", report_id=report.id))
 
     if len(claimant_name) > 120:
         flash("Your name is too long.", "danger")
         return redirect(url_for("report_detail", report_id=report.id))
-
     if len(claimant_contact) > 150:
         flash("Your contact details are too long.", "danger")
         return redirect(url_for("report_detail", report_id=report.id))
@@ -792,9 +563,7 @@ def submit_claim(report_id):
     try:
         db.session.add(claim)
         report.status = "Pending Claim"
-
         db.session.flush()
-
         create_notification(
             title="New Item Claim",
             message=(
@@ -804,43 +573,24 @@ def submit_claim(report_id):
             notification_type="claim",
             report_id=report.id,
         )
-
         db.session.commit()
-
     except Exception:
         db.session.rollback()
         app.logger.exception("Unable to save claim")
-
-        flash(
-            "Unable to submit your claim. Please try again.",
-            "danger",
-        )
-
-        return redirect(
-            url_for(
-                "report_detail",
-                report_id=report.id,
-            )
-        )
+        flash("Unable to submit your claim. Please try again.", "danger")
+        return redirect(url_for("report_detail", report_id=report.id))
 
     flash(
         "Your claim request was submitted successfully "
         "and is waiting for administrator review.",
         "success",
     )
-
-    return redirect(
-        url_for(
-            "report_detail",
-            report_id=report.id,
-        )
-    )
+    return redirect(url_for("report_detail", report_id=report.id))
 
 
 # ==================================================
 # LEGACY LOCAL PHOTO ROUTE
 # ==================================================
-
 @app.route("/uploads/<path:filename>")
 def uploaded_photo(filename):
     if IS_VERCEL:
@@ -849,17 +599,12 @@ def uploaded_photo(filename):
             "Restore it to Cloudinary and update its database URL.",
             404,
         )
-
-    return send_from_directory(
-        UPLOAD_FOLDER,
-        filename,
-    )
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 # ==================================================
 # ADMIN LOGIN
 # ==================================================
-
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if session.get("admin_logged_in"):
@@ -868,52 +613,27 @@ def admin_login():
     if request.method == "POST":
         username = request.form.get("username", "")
         password = request.form.get("password", "")
-
-        expected_username = os.environ.get(
-            "ADMIN_USERNAME",
-            "",
-        )
-
-        expected_password = os.environ.get(
-            "ADMIN_PASSWORD",
-            "",
-        )
+        expected_username = os.environ.get("ADMIN_USERNAME", "")
+        expected_password = os.environ.get("ADMIN_PASSWORD", "")
 
         if not expected_username or not expected_password:
             flash(
                 "Admin credentials are not configured on the server.",
                 "danger",
             )
-
             return render_template("admin_login.html")
 
-        valid_username = hmac.compare_digest(
-            username,
-            expected_username,
-        )
-
-        valid_password = hmac.compare_digest(
-            password,
-            expected_password,
-        )
+        valid_username = hmac.compare_digest(username, expected_username)
+        valid_password = hmac.compare_digest(password, expected_password)
 
         if valid_username and valid_password:
             session.clear()
-
             session["admin_logged_in"] = True
             session["admin_username"] = expected_username
-
-            flash(
-                "Welcome to the admin dashboard!",
-                "success",
-            )
-
+            flash("Welcome to the admin dashboard!", "success")
             return redirect(url_for("admin_dashboard"))
 
-        flash(
-            "Invalid username or password.",
-            "danger",
-        )
+        flash("Invalid username or password.", "danger")
 
     return render_template("admin_login.html")
 
@@ -921,59 +641,35 @@ def admin_login():
 # ==================================================
 # ADMIN DASHBOARD
 # ==================================================
-
 @app.route("/admin")
 @admin_required
 def admin_dashboard():
     reports = Report.query.order_by(
-        Report.created_at.desc(),
-        Report.id.desc(),
+        Report.created_at.desc(), Report.id.desc()
     ).all()
 
-    lost_reports = [
-        report
-        for report in reports
-        if report.report_type == "Lost"
-    ]
-
-    found_reports = [
-        report
-        for report in reports
-        if report.report_type == "Found"
-    ]
+    lost_reports = [r for r in reports if r.report_type == "Lost"]
+    found_reports = [r for r in reports if r.report_type == "Found"]
 
     latest_claims = Claim.query.order_by(
-        Claim.created_at.desc(),
-        Claim.id.desc(),
+        Claim.created_at.desc(), Claim.id.desc()
     ).limit(6).all()
 
-    pending_claim_count = Claim.query.filter_by(
-        status="Pending"
-    ).count()
+    pending_claim_count = Claim.query.filter_by(status="Pending").count()
 
     stats = {
         "all": len(reports),
         "total": len(reports),
         "lost": len(lost_reports),
         "found": len(found_reports),
-        "open": sum(
-            1 for report in reports
-            if report.status == "Open"
-        ),
+        "open": sum(1 for r in reports if r.status == "Open"),
         "claims": pending_claim_count,
         "pending_claims": pending_claim_count,
         "reports_pending_claim": sum(
-            1 for report in reports
-            if report.status == "Pending Claim"
+            1 for r in reports if r.status == "Pending Claim"
         ),
-        "returned": sum(
-            1 for report in reports
-            if report.status == "Returned"
-        ),
-        "archived": sum(
-            1 for report in reports
-            if report.status == "Archived"
-        ),
+        "returned": sum(1 for r in reports if r.status == "Returned"),
+        "archived": sum(1 for r in reports if r.status == "Archived"),
     }
 
     return render_template(
@@ -990,11 +686,7 @@ def admin_dashboard():
 # ==================================================
 # ADMIN: UPDATE REPORT STATUS
 # ==================================================
-
-@app.route(
-    "/admin/report/<int:report_id>/status",
-    methods=["POST"],
-)
+@app.route("/admin/report/<int:report_id>/status", methods=["POST"])
 @admin_required
 def admin_update_report_status(report_id):
     report = db.get_or_404(Report, report_id)
@@ -1018,22 +710,12 @@ def admin_update_report_status(report_id):
                 notification_type="status",
                 report_id=report.id,
             )
-
         db.session.commit()
-
-        flash(
-            "Report status updated successfully.",
-            "success",
-        )
-
+        flash("Report status updated successfully.", "success")
     except Exception:
         db.session.rollback()
         app.logger.exception("Report status update failed")
-
-        flash(
-            "Unable to update report status.",
-            "danger",
-        )
+        flash("Unable to update report status.", "danger")
 
     return redirect(url_for("admin_dashboard"))
 
@@ -1041,37 +723,26 @@ def admin_update_report_status(report_id):
 # ==================================================
 # ADMIN: DELETE REPORT
 # ==================================================
-
-@app.route(
-    "/admin/report/<int:report_id>/delete",
-    methods=["POST"],
-)
+@app.route("/admin/report/<int:report_id>/delete", methods=["POST"])
 @admin_required
 def admin_delete_report(report_id):
     report = db.get_or_404(Report, report_id)
-
     report_id_to_delete = report.id
     photo = report.photo
 
     try:
         db.session.delete(report)
         db.session.commit()
-
         delete_photo(photo)
-
         flash(
             f"Report #{report_id_to_delete} deleted successfully.",
             "success",
         )
-
     except Exception:
         db.session.rollback()
-
         app.logger.exception(
-            "Failed to delete report #%s",
-            report_id_to_delete,
+            "Failed to delete report #%s", report_id_to_delete
         )
-
         flash(
             "Unable to delete report. Please check the deployment logs.",
             "danger",
@@ -1083,29 +754,19 @@ def admin_delete_report(report_id):
 # ==================================================
 # ADMIN: VIEW CLAIMS
 # ==================================================
-
 @app.route("/admin/claims")
 @admin_required
 def admin_claims():
     claims = Claim.query.order_by(
-        Claim.created_at.desc(),
-        Claim.id.desc(),
+        Claim.created_at.desc(), Claim.id.desc()
     ).all()
-
-    return render_template(
-        "admin_claims.html",
-        claims=claims,
-    )
+    return render_template("admin_claims.html", claims=claims)
 
 
 # ==================================================
 # ADMIN: UPDATE CLAIM STATUS
 # ==================================================
-
-@app.route(
-    "/admin/claim/<int:claim_id>/status",
-    methods=["POST"],
-)
+@app.route("/admin/claim/<int:claim_id>/status", methods=["POST"])
 @admin_required
 def admin_update_claim_status(claim_id):
     claim = db.get_or_404(Claim, claim_id)
@@ -1130,7 +791,6 @@ def admin_update_claim_status(claim_id):
 
         if new_status == "Approved":
             report.status = "Returned"
-
             # Reject other pending claims for the same item after
             # an administrator approves one claim.
             other_pending_claims = Claim.query.filter(
@@ -1138,7 +798,6 @@ def admin_update_claim_status(claim_id):
                 Claim.status == "Pending",
                 Claim.id != claim.id,
             ).all()
-
             for other_claim in other_pending_claims:
                 other_claim.status = "Rejected"
 
@@ -1148,11 +807,7 @@ def admin_update_claim_status(claim_id):
                 Claim.status == "Pending",
                 Claim.id != claim.id,
             ).count()
-
-            if (
-                other_pending_count == 0
-                and report.status == "Pending Claim"
-            ):
+            if other_pending_count == 0 and report.status == "Pending Claim":
                 report.status = "Open"
 
         if old_claim_status != new_status:
@@ -1163,7 +818,6 @@ def admin_update_claim_status(claim_id):
                     "was approved. The item is marked as returned."
                 )
                 notification_type = "success"
-
             elif new_status == "Rejected":
                 title = "Claim Rejected"
                 message = (
@@ -1171,7 +825,6 @@ def admin_update_claim_status(claim_id):
                     "was rejected."
                 )
                 notification_type = "warning"
-
             else:
                 title = "Claim Status Updated"
                 message = (
@@ -1187,20 +840,11 @@ def admin_update_claim_status(claim_id):
             )
 
         db.session.commit()
-
-        flash(
-            "Claim status updated successfully.",
-            "success",
-        )
-
+        flash("Claim status updated successfully.", "success")
     except Exception:
         db.session.rollback()
         app.logger.exception("Claim status update failed")
-
-        flash(
-            "Unable to update claim status.",
-            "danger",
-        )
+        flash("Unable to update claim status.", "danger")
 
     return redirect(url_for("admin_claims"))
 
@@ -1208,19 +852,13 @@ def admin_update_claim_status(claim_id):
 # ==================================================
 # ADMIN: NOTIFICATIONS
 # ==================================================
-
 @app.route("/notifications")
 @admin_required
 def notifications_page():
     notifications = Notification.query.order_by(
-        Notification.created_at.desc(),
-        Notification.id.desc(),
+        Notification.created_at.desc(), Notification.id.desc()
     ).all()
-
-    unread_count = Notification.query.filter_by(
-        is_read=False
-    ).count()
-
+    unread_count = Notification.query.filter_by(is_read=False).count()
     return render_template(
         "notifications.html",
         notifications=notifications,
@@ -1228,102 +866,72 @@ def notifications_page():
     )
 
 
-@app.route(
-    "/notifications/<int:notification_id>/read",
-    methods=["POST"],
-)
+@app.route("/notifications/<int:notification_id>/read", methods=["POST"])
 @admin_required
 def mark_notification_read(notification_id):
-    notification = db.get_or_404(
-        Notification,
-        notification_id,
-    )
-
+    notification = db.get_or_404(Notification, notification_id)
     try:
         notification.is_read = True
         db.session.commit()
-
-        flash(
-            "Notification marked as read.",
-            "success",
-        )
-
+        flash("Notification marked as read.", "success")
     except Exception:
         db.session.rollback()
-        app.logger.exception(
-            "Unable to mark notification as read"
-        )
-
-        flash(
-            "Unable to update notification.",
-            "danger",
-        )
-
+        app.logger.exception("Unable to mark notification as read")
+        flash("Unable to update notification.", "danger")
     return redirect(url_for("notifications_page"))
 
 
-@app.route(
-    "/notifications/read-all",
-    methods=["POST"],
-)
+@app.route("/notifications/read-all", methods=["POST"])
 @admin_required
 def mark_all_notifications_read():
     try:
-        Notification.query.filter_by(
-            is_read=False
-        ).update(
-            {"is_read": True},
-            synchronize_session=False,
+        Notification.query.filter_by(is_read=False).update(
+            {"is_read": True}, synchronize_session=False
         )
-
         db.session.commit()
+        flash("All notifications marked as read.", "success")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Unable to mark all notifications as read")
+        flash("Unable to update notifications.", "danger")
+    return redirect(url_for("notifications_page"))
 
-        flash(
-            "All notifications marked as read.",
-            "success",
-        )
 
+# ==================================================
+# ADMIN: DELETE NOTIFICATION  ✅ NEW — ADDED
+# ==================================================
+@app.route("/notifications/<int:notification_id>/delete", methods=["POST"])
+@admin_required
+def delete_notification(notification_id):
+    notification = db.get_or_404(Notification, notification_id)
+    try:
+        db.session.delete(notification)
+        db.session.commit()
+        flash("Notification deleted successfully.", "success")
     except Exception:
         db.session.rollback()
         app.logger.exception(
-            "Unable to mark all notifications as read"
+            "Unable to delete notification #%s", notification_id
         )
-
-        flash(
-            "Unable to update notifications.",
-            "danger",
-        )
-
+        flash("Unable to delete notification.", "danger")
     return redirect(url_for("notifications_page"))
 
 
 # ==================================================
 # ADMIN: CSV EXPORT
 # ==================================================
-
 @app.route("/admin/export.csv")
 @admin_required
 def export_reports():
     output = io.StringIO()
     writer = csv.writer(output)
-
     writer.writerow([
-        "ID",
-        "Type",
-        "Item",
-        "Category",
-        "Description",
-        "Location",
-        "Incident Date",
-        "Contact Name",
-        "Contact",
-        "Status",
-        "Created At",
+        "ID", "Type", "Item", "Category", "Description", "Location",
+        "Incident Date", "Contact Name", "Contact", "Status", "Created At",
     ])
 
     reports = Report.query.order_by(
-        Report.created_at.desc(),
-        Report.id.desc(),
+        Report.created_at.desc(), Report.id.desc()
     ).all()
 
     for report in reports:
@@ -1334,103 +942,67 @@ def export_reports():
             report.category,
             report.description,
             report.location,
-            (
-                report.incident_date.isoformat()
-                if report.incident_date
-                else ""
-            ),
+            report.incident_date.isoformat() if report.incident_date else "",
             report.contact_name,
             report.contact,
             report.status,
-            (
-                report.created_at.isoformat()
-                if report.created_at
-                else ""
-            ),
+            report.created_at.isoformat() if report.created_at else "",
         ])
 
-    response = make_response(
-        "\ufeff" + output.getvalue()
-    )
-
-    response.headers["Content-Type"] = (
-        "text/csv; charset=utf-8"
-    )
-
+    response = make_response("\ufeff" + output.getvalue())
+    response.headers["Content-Type"] = "text/csv; charset=utf-8"
     response.headers["Content-Disposition"] = (
         "attachment; filename=findhub_reports.csv"
     )
-
     return response
 
 
 # ==================================================
 # ADMIN LOGOUT
 # ==================================================
-
 @app.route("/admin/logout")
 def admin_logout():
     session.clear()
-
-    flash(
-        "You have been logged out.",
-        "success",
-    )
-
+    flash("You have been logged out.", "success")
     return redirect(url_for("home"))
 
 
 # ==================================================
 # ERROR HANDLERS
 # ==================================================
-
 @app.errorhandler(413)
 def file_too_large(_error):
     flash(
         "The uploaded file is too large. Maximum size is 5 MB.",
         "danger",
     )
-
-    return redirect(
-        request.referrer or url_for("new_report")
-    )
+    return redirect(request.referrer or url_for("new_report"))
 
 
 @app.errorhandler(404)
 def page_not_found(_error):
-    return (
-        render_template("404.html"),
-        404,
-    ) if (BASE_DIR / "templates" / "404.html").exists() else (
-        "Page not found.",
-        404,
-    )
+    if (BASE_DIR / "templates" / "404.html").exists():
+        return render_template("404.html"), 404
+    return "Page not found.", 404
 
 
 # ==================================================
 # SECURITY HEADERS
 # ==================================================
-
 @app.after_request
 def add_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
-
-    response.headers["Referrer-Policy"] = (
-        "strict-origin-when-cross-origin"
-    )
-
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = (
         "camera=(), microphone=(), geolocation=()"
     )
-
     return response
 
 
 # ==================================================
 # LOCAL DEVELOPMENT
 # ==================================================
-
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
