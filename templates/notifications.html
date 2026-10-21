@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Notifications | SLSU JGE FindHub{% endblock %}
-
 {% block head %}
 <style>
   .notifications-page {
@@ -11,7 +9,6 @@
     padding: 0 12px;
     box-sizing: border-box;
   }
-
   .notifications-header {
     display: flex;
     align-items: center;
@@ -20,46 +17,39 @@
     gap: 14px;
     margin-bottom: 24px;
   }
-
   .notifications-header h1 {
     margin: 0;
-    color: var(--primary-dark);
+    color: var(--primary-dark, #075c3b);
     font-size: clamp(1.5rem, 4vw, 2rem);
   }
-
   .notifications-subtitle {
     margin: 6px 0 0;
-    color: var(--muted);
+    color: var(--muted, #6b7f72);
     line-height: 1.6;
   }
-
   .notification-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
   }
-
   .notification-list {
     display: grid;
     gap: 14px;
   }
-
   .notification-item {
     display: flex;
     align-items: flex-start;
     gap: 14px;
     padding: 18px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border, #d4ded7);
     border-radius: 14px;
-    background: var(--surface);
-    box-shadow: var(--shadow);
+    background: var(--surface, #ffffff);
+    box-shadow: var(--shadow, 0 2px 10px rgba(0,0,0,0.08));
     overflow-wrap: anywhere;
   }
-
   .notification-item.unread {
-    border-left: 5px solid var(--primary);
+    border-left: 5px solid var(--primary, #075c3b);
   }
-
   .notification-icon {
     flex: 0 0 44px;
     width: 44px;
@@ -67,129 +57,140 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: var(--primary-soft);
+    background: var(--primary-soft, rgba(7,92,59,0.12));
     font-size: 1.3rem;
   }
-
   .notification-body {
     flex: 1;
     min-width: 0;
   }
-
   .notification-title {
     margin: 0 0 5px;
     font-size: 1.05rem;
-    color: var(--text);
+    color: var(--text, #1a2e22);
   }
-
   .notification-message {
     margin: 0 0 8px;
-    color: var(--text);
+    color: var(--text, #1a2e22);
     white-space: pre-wrap;
     line-height: 1.6;
   }
-
   .notification-date {
     display: block;
     font-size: .85rem;
-    color: var(--muted);
+    color: var(--muted, #6b7f72);
   }
-
   .unread-label {
     display: inline-block;
     margin-left: 6px;
     padding: 2px 8px;
     border-radius: 20px;
-    background: var(--primary-soft);
-    color: var(--primary-dark);
+    background: var(--primary-soft, rgba(7,92,59,0.12));
+    color: var(--primary-dark, #075c3b);
     font-size: .75rem;
     font-weight: 700;
   }
-
   .notification-empty {
     padding: 45px 20px;
     text-align: center;
     border-radius: 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #d4ded7);
   }
-
   .notification-empty .empty-icon {
     font-size: 3rem;
     margin-bottom: 10px;
   }
-
   .notification-empty h2 {
     margin: 0 0 8px;
-    color: var(--text);
+    color: var(--text, #1a2e22);
   }
-
   .notification-empty p {
     margin: 0;
-    color: var(--muted);
+    color: var(--muted, #6b7f72);
     line-height: 1.6;
   }
-
-  .notification-item form {
+  /* Action buttons row */
+  .notification-actions-row {
+    display: flex;
+    flex-shrink: 0;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .notification-actions-row form,
+  .notification-actions-row a {
     flex-shrink: 0;
   }
-
-  .notification-item form button {
-    width: auto;
+  .notification-actions-row .button {
     white-space: nowrap;
+    width: auto;
   }
-
-  html[data-theme="dark"] .notifications-header h1 {
-    color: #8cdaa9;
+  /* Open button — green, matches site theme */
+  .btn-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    border: 1px solid var(--primary, #075c3b);
+    border-radius: 8px;
+    background: var(--primary, #075c3b);
+    color: #fff !important;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.4;
   }
-
-  html[data-theme="dark"] .notification-item,
-  html[data-theme="dark"] .notification-empty {
-    background: rgba(17, 34, 24, .94);
-    border-color: rgba(155, 190, 164, .20);
+  .btn-open:hover {
+    background: var(--primary-dark, #05432a);
+    border-color: var(--primary-dark, #05432a);
+    color: #fff !important;
+    transform: translateY(-1px);
   }
-
-  html[data-theme="dark"] .notification-title,
-  html[data-theme="dark"] .notification-message,
-  html[data-theme="dark"] .notification-empty h2 {
-    color: #edf5ef;
+  /* Mark as read button — outline style */
+  .btn-mark-read {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border: 1px solid var(--border, #d4ded7);
+    border-radius: 8px;
+    background: var(--surface, #fff);
+    color: var(--text, #1a2e22);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.4;
   }
-
-  html[data-theme="dark"] .notification-date,
-  html[data-theme="dark"] .notifications-subtitle,
-  html[data-theme="dark"] .notification-empty p {
-    color: #b5c6ba;
+  .btn-mark-read:hover {
+    background: var(--primary-soft, rgba(7,92,59,0.12));
+    border-color: var(--primary, #075c3b);
+    color: var(--primary, #075c3b);
   }
-
-  html[data-theme="dark"] .notification-icon {
-    background: rgba(67, 184, 120, .15);
-  }
-
-  html[data-theme="dark"] .unread-label {
-    background: #193c2c;
-    color: #9be7b8;
-  }
-
   @media (max-width: 520px) {
     .notification-item {
       padding: 14px;
       gap: 10px;
       flex-wrap: wrap;
     }
-
     .notification-icon {
       flex-basis: 36px;
       width: 36px;
       height: 36px;
       font-size: 1.1rem;
     }
-
     .notification-body {
       flex-basis: calc(100% - 50px);
     }
-
-    .notification-item form {
+    .notification-actions-row {
       margin-left: 46px;
+      width: 100%;
+    }
+    .notification-actions-row .btn-open,
+    .notification-actions-row .btn-mark-read {
+      flex: 1;
+      justify-content: center;
     }
   }
 </style>
@@ -202,13 +203,15 @@
       <h1>🔔 Notifications</h1>
       <p class="notifications-subtitle">
         Tingnan ang mga update tungkol sa Lost and Found reports.
+        {% if unread_count|default(0) > 0 %}
+          <strong>({{ unread_count }} bago)</strong>
+        {% endif %}
       </p>
     </div>
-
-    {% if unread_count|default(0)|int > 0 %}
+    {% if unread_count|default(0) > 0 %}
       <div class="notification-actions">
         <form method="POST" action="{{ url_for('mark_all_notifications_read') }}">
-          <button type="submit" class="button">
+          <button type="submit" class="btn-open">
             ✓ Mark all as read
           </button>
         </form>
@@ -221,17 +224,16 @@
       {% for notification in notifications %}
         <article class="notification-item {% if not notification.is_read %}unread{% endif %}">
           <div class="notification-icon" aria-hidden="true">
-            {% set kind = notification.notification_type|default('info') %}
-            {% if kind == 'claim' %}
-              🤝
-            {% elif kind == 'returned' %}
-              ✅
-            {% elif kind == 'report' %}
-              📋
-            {% elif kind == 'status' %}
+            {% if notification.notification_type == 'claim' %}
+              ✋
+            {% elif notification.notification_type == 'status' %}
               🔄
+            {% elif notification.notification_type == 'success' %}
+              ✅
+            {% elif notification.notification_type == 'warning' %}
+              ⚠️
             {% else %}
-              🔔
+              📋
             {% endif %}
           </div>
 
@@ -242,44 +244,45 @@
                 <span class="unread-label">Bago</span>
               {% endif %}
             </h2>
-
             <p class="notification-message">{{ notification.message }}</p>
-
             <time class="notification-date">
               {% if notification.created_at %}
                 {{ notification.created_at.strftime('%b %d, %Y · %I:%M %p') }}
-              {% else %}
-                Petsa hindi available
               {% endif %}
             </time>
           </div>
 
-          {% if not notification.is_read %}
-            <form
-              method="POST"
-              action="{{ url_for('mark_notification_read', notification_id=notification.id) }}"
-            >
-              <button
-                type="submit"
-                class="button secondary small"
-                aria-label="Mark notification as read"
-              >
-                Mark as read
-              </button>
-            </form>
-          {% endif %}
+          <!-- ✅ ACTION BUTTONS: Open + Mark as read -->
+          <div class="notification-actions-row">
+            {% if notification.report_id %}
+              <a href="{{ url_for('report_detail', report_id=notification.report_id) }}"
+                 class="btn-open"
+                 aria-label="Open the related report">
+                👁 Open
+              </a>
+            {% endif %}
+            {% if not notification.is_read %}
+              <form method="POST"
+                    action="{{ url_for('mark_notification_read', notification_id=notification.id) }}">
+                <button type="submit" class="btn-mark-read"
+                        aria-label="Mark notification as read">
+                  Mark as read
+                </button>
+              </form>
+            {% endif %}
+          </div>
         </article>
       {% endfor %}
     </section>
   {% else %}
-    <section class="notification-empty">
-      <div class="empty-icon" aria-hidden="true">🔕</div>
-      <h2>Wala ka pang notifications</h2>
+    <div class="notification-empty">
+      <div class="empty-icon" aria-hidden="true">🔔</div>
+      <h2>No notifications yet</h2>
       <p>
-        Dito lalabas ang mga update kapag may bagong report,
-        bagong claim, o pagbabago sa status ng mga item.
+        Wala pang mga notification. Lalabas dito ang mga update tungkol sa
+        mga bagong report at claim requests.
       </p>
-    </section>
+    </div>
   {% endif %}
 </main>
 {% endblock %}
