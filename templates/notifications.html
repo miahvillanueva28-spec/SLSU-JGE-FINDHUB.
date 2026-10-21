@@ -209,7 +209,7 @@
       <p class="notifications-subtitle">
         Tingnan ang mga update tungkol sa Lost and Found reports.
         {% if unread_count|default(0) > 0 %}
-          <strong>({{ unread_count }} bago)</strong>
+          <strong>({{ unread_count }} unread)</strong>
         {% endif %}
       </p>
     </div>
@@ -245,9 +245,6 @@
           <div class="notification-body">
             <h2 class="notification-title">
               {{ notification.title }}
-              {% if not notification.is_read %}
-                <span class="unread-label">Bago</span>
-              {% endif %}
             </h2>
             <p class="notification-message">{{ notification.message }}</p>
             <time class="notification-date">
