@@ -131,7 +131,7 @@
   }
   .filter-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
   }
   .filter-grid > div {
@@ -285,18 +285,18 @@
     line-height: 1.4;
     overflow-wrap: anywhere;
   }
-  .home-report-card .report-meta {
+  .report-meta {
     display: grid;
     gap: 5px;
     margin-top: 3px;
   }
-  .home-report-card .report-meta p {
+  .report-meta p {
     margin: 2px 0;
     color: var(--muted);
     font-size: 13px;
     overflow-wrap: anywhere;
   }
-  .home-report-card .report-meta strong,
+  .report-meta strong,
   .report-status-row > strong {
     color: var(--text);
   }
@@ -473,7 +473,6 @@
   }
 </style>
 {% endblock %}
-
 {% block hero %}
 <section class="hero home-hero">
   <div class="sticker-row" aria-label="Common lost and found categories">
@@ -493,7 +492,6 @@
   </a>
 </section>
 {% endblock %}
-
 {% block content %}
 <div class="home-page">
   <section class="stats home-stats" aria-label="Lost and found statistics">
@@ -514,7 +512,6 @@
       <strong>FindHub</strong>
     </div>
   </section>
-
   <section class="panel search-panel" id="find-item"
            aria-labelledby="find-item-heading">
     <h2 class="search-heading" id="find-item-heading">
@@ -522,7 +519,7 @@
       <span>Find an Item</span>
     </h2>
     <p class="search-description">
-      Search reports by keyword, report type, category, or status.
+      Search reports by keyword, type, or status.
     </p>
     <form method="GET" action="{{ url_for('home') }}"
           role="search" aria-label="Search lost and found reports">
@@ -539,11 +536,11 @@
           <select id="report-type" name="type">
             <option value="">All report types</option>
             <option value="Lost"
-              {% if request.args.get('type', '')|lower == 'lost' %}selected{% endif %}>
+              {% if request.args.get('type', '') == 'Lost' %}selected{% endif %}>
               Lost
             </option>
             <option value="Found"
-              {% if request.args.get('type', '')|lower == 'found' %}selected{% endif %}>
+              {% if request.args.get('type', '') == 'Found' %}selected{% endif %}>
               Found
             </option>
           </select>
@@ -569,7 +566,6 @@
       </div>
     </form>
   </section>
-
   <section class="reports-section" id="reports-section"
            aria-labelledby="recent-reports-heading">
     <div class="back-to-home-row">
@@ -579,7 +575,11 @@
     </div>
     <div class="reports-heading">
       <h2 id="recent-reports-heading">
-        📌 All Lost &amp; Found Reports
+        {% if search_performed %}
+          🔍 Search Results
+        {% else %}
+          📌 Recent Reports
+        {% endif %}
         {% if reports %}
           <span class="reports-count">{{ reports|length }}</span>
         {% endif %}
@@ -588,7 +588,6 @@
         + New Report
       </a>
     </div>
-
     {% if reports %}
       <div class="report-grid">
         {% for report in reports %}
@@ -619,10 +618,6 @@
               </span>
               <h3>{{ report.item_name }}</h3>
               <div class="report-meta">
-                <p>
-                  <strong>Category:</strong>
-                  {{ report.category or 'Not specified' }}
-                </p>
                 <p>
                   <strong>Location:</strong>
                   {{ report.location or 'Not specified' }}
@@ -656,17 +651,25 @@
     {% else %}
       <div class="home-empty-state">
         <div class="empty-icon" aria-hidden="true">🕵️</div>
-        <h3>No reports found</h3>
+        <h3>
+          {% if search_performed %}
+            No matching reports found
+          {% else %}
+            No reports yet
+          {% endif %}
+        </h3>
         <p>
-          No items match your search right now. Try changing your filters
-          or submit a new report to help the SLSU JGE community.
+          {% if search_performed %}
+            No items match your search right now. Try different keywords or clear filters.
+          {% else %}
+            Be the first to submit a report and help the SLSU JGE community.
+          {% endif %}
         </p>
         <div class="empty-actions">
           <a class="button" href="{{ url_for('new_report') }}">
             ✨ Submit a Report
           </a>
-          {% if request.args.get('q') or request.args.get('type')
-                or request.args.get('category') or request.args.get('status') %}
+          {% if search_performed %}
             <a class="button secondary" href="{{ url_for('home') }}">
               Clear Filters
             </a>
@@ -676,25 +679,28 @@
     {% endif %}
   </section>
 </div>
-
 <script>
   (function () {
     const params = new URLSearchParams(window.location.search);
+    const hasSearch = params.has('q') || params.has('type') || params.has('status');
     const isReportsView = params.get("view") === "reports";
     const backBtn = document.getElementById("back-to-home-btn");
     const reportsSection = document.getElementById("reports-section");
 
-    if (isReportsView) {
-      // REPORTS-ONLY: hide hero, stats, search — ONLY reports visible
-      document.body.classList.add("reports-only");
-      if (backBtn) backBtn.style.display = "inline-flex";
-      document.title = "All Reports | SLSU JGE FindHub";
+    // Show reports section if searching OR in reports view
+    if (hasSearch || isReportsView) {
+      if (reportsSection) reportsSection.style.display = "";
     } else {
-      // NORMAL HOME: reports section hidden
       if (reportsSection) reportsSection.style.display = "none";
     }
 
-    // Intercept "View Reports" nav link — instant switch, no page reload
+    if (isReportsView) {
+      document.body.classList.add("reports-only");
+      if (backBtn) backBtn.style.display = "inline-flex";
+      document.title = "All Reports | SLSU JGE FindHub";
+    }
+
+    // Intercept "View Reports" nav link
     const navLink = document.getElementById("nav-view-reports");
     if (navLink) {
       navLink.addEventListener("click", function (e) {
@@ -709,13 +715,13 @@
       });
     }
 
-    // "← Back to Home" button — returns to normal home view
+    // "← Back to Home" button
     if (backBtn) {
       backBtn.addEventListener("click", function (e) {
-        if (isReportsView) return; // full page load handles this case
+        if (isReportsView && !hasSearch) return;
         e.preventDefault();
         document.body.classList.remove("reports-only");
-        if (reportsSection) reportsSection.style.display = "none";
+        if (!hasSearch && reportsSection) reportsSection.style.display = "none";
         backBtn.style.display = "none";
         window.scrollTo({ top: 0, behavior: "smooth" });
         history.pushState({}, "", "{{ url_for('home') }}");
