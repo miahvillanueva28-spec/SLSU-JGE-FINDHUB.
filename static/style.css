@@ -1649,3 +1649,112 @@ html[data-theme="dark"] .theme-toggle {
         transform: none;
     }
 }
+/* ==============================================
+   DARK MODE SUPPORT
+============================================== */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --primary: #43b878;
+  --primary-dark: #8cdaa9;
+  --primary-soft: rgba(67, 184, 120, 0.18);
+  --surface: #112218;
+  --surface-elevated: #162b20;
+  --text: #edf5ef;
+  --text-soft: #c8d8cd;
+  --muted: #9fb5a6;
+  --border: rgba(155, 190, 164, 0.22);
+  --shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --danger: #e86a6a;
+  --warning: #e2b050;
+  --success: #58c27c;
+}
+
+/* Base page colours */
+html[data-theme="dark"] body {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+/* Header & Footer */
+html[data-theme="dark"] .site-header,
+html[data-theme="dark"] .site-footer {
+  background-color: #0d1a12;
+  border-color: var(--border);
+  color: var(--text);
+}
+html[data-theme="dark"] .site-header a,
+html[data-theme="dark"] .site-footer a {
+  color: var(--text);
+}
+
+/* Navigation */
+html[data-theme="dark"] .primary-navigation a {
+  color: var(--text-soft);
+}
+html[data-theme="dark"] .primary-navigation a:hover,
+html[data-theme="dark"] .primary-navigation a.active {
+  color: var(--primary);
+}
+html[data-theme="dark"] .nav-count {
+  background: var(--primary);
+  color: #000;
+}
+
+/* Cards, panels, form elements */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .form-group,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background-color: #162b20;
+  border-color: var(--border);
+  color: var(--text);
+}
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
+  border-color: var(--primary);
+  outline-color: var(--primary-soft);
+}
+
+/* Buttons */
+html[data-theme="dark"] .button.secondary {
+  background-color: #1f3629;
+  border-color: var(--border);
+  color: var(--text);
+}
+html[data-theme="dark"] .button.secondary:hover {
+  background-color: #274534;
+}
+
+/* Theme toggle button */
+html[data-theme="dark"] .theme-toggle {
+  color: var(--text);
+}
+
+/* Flash messages */
+html[data-theme="dark"] .flash-message {
+  background-color: #162b20;
+  border-color: var(--border);
+}
+html[data-theme="dark"] .flash-message.success {
+  border-left-color: var(--success);
+}
+html[data-theme="dark"] .flash-message.danger {
+  border-left-color: var(--danger);
+}
+html[data-theme="dark"] .flash-message.warning {
+  border-left-color: var(--warning);
+}
+
+/* Notification list */
+html[data-theme="dark"] .notification-item {
+  background: #162b20;
+  border-color: var(--border);
+}
+html[data-theme="dark"] .notification-item.unread {
+  border-left-color: var(--primary);
+}
+
