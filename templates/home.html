@@ -1,8 +1,5 @@
-
 {% extends "base.html" %}
-
 {% block title %}Home | SLSU JGE FindHub{% endblock %}
-
 {% block head %}
 <style>
   /* Home hero */
@@ -15,14 +12,12 @@
     background: var(--surface);
     box-shadow: var(--shadow);
   }
-
   .home-hero .sticker-row {
     display: flex;
     flex-wrap: wrap;
     gap: 9px;
     margin-bottom: 24px;
   }
-
   .home-hero .sticker {
     display: inline-flex;
     align-items: center;
@@ -36,11 +31,9 @@
     font-weight: 700;
     animation: homeStickerEnter .45s ease both;
   }
-
   .home-hero .sticker:nth-child(2) { animation-delay: .06s; }
   .home-hero .sticker:nth-child(3) { animation-delay: .12s; }
   .home-hero .sticker:nth-child(4) { animation-delay: .18s; }
-
   .home-hero h1,
   .home-hero h2 {
     max-width: 760px;
@@ -50,7 +43,6 @@
     line-height: 1.16;
     letter-spacing: -.7px;
   }
-
   .home-hero .hero-description {
     max-width: 700px;
     margin: 0 0 24px;
@@ -58,15 +50,17 @@
     font-size: clamp(15px, 2vw, 17px);
     line-height: 1.8;
   }
-
+  .home-hero .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
   .home-hero .button {
     box-shadow: 0 5px 13px rgba(0, 75, 43, .16);
   }
-
   .home-hero .button:hover {
     box-shadow: 0 8px 19px rgba(0, 75, 43, .24);
   }
-
   /* Statistics */
   .home-stats {
     display: grid;
@@ -74,7 +68,6 @@
     gap: 15px;
     margin: 22px 0;
   }
-
   .home-stats .stat {
     position: relative;
     overflow: hidden;
@@ -87,7 +80,6 @@
     background: var(--surface);
     box-shadow: var(--shadow);
   }
-
   .home-stats .stat::before {
     content: "";
     position: absolute;
@@ -99,31 +91,26 @@
     opacity: .72;
     transition: width .25s ease, opacity .25s ease;
   }
-
   .home-stats .stat:hover::before {
     width: 6px;
     opacity: 1;
   }
-
   .home-stats .stat-label {
     color: var(--muted);
     font-size: 13px;
     font-weight: 600;
   }
-
   .home-stats .stat strong {
     color: var(--primary);
     font-size: clamp(23px, 3vw, 32px);
     line-height: 1.2;
     overflow-wrap: anywhere;
   }
-
   /* Search panel */
   .search-panel {
     scroll-margin-top: 95px;
     margin-bottom: 30px;
   }
-
   .search-heading {
     display: flex;
     align-items: center;
@@ -131,7 +118,6 @@
     margin: 0 0 14px;
     font-size: clamp(20px, 3vw, 25px);
   }
-
   .search-heading .heading-icon {
     display: inline-flex;
     width: 40px;
@@ -143,33 +129,27 @@
     background: var(--primary-soft);
     font-size: 19px;
   }
-
   .search-description {
     margin: 0 0 18px;
     color: var(--muted);
     font-size: 13px;
   }
-
   .filter-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
   }
-
   .filter-grid > div {
     min-width: 0;
   }
-
   .filter-grid label {
     font-size: 13px;
   }
-
   .filter-grid input,
   .filter-grid select {
     width: 100%;
     min-width: 0;
   }
-
   .search-actions {
     display: flex;
     gap: 9px;
@@ -177,7 +157,6 @@
     flex-wrap: wrap;
     margin-top: 17px;
   }
-
   /* Buttons */
   .home-hero .button,
   .home-page .button {
@@ -197,36 +176,42 @@
     cursor: pointer;
     transition: transform .2s ease, background .2s ease;
   }
-
   .home-page .button:hover,
   .home-hero .button:hover {
     background: var(--primary-dark);
     color: #fff;
     transform: translateY(-1px);
   }
-
-  .home-page .button.secondary {
+  .home-page .button.secondary,
+  .home-hero .button.secondary {
     border-color: var(--border);
     background: var(--surface);
     color: var(--text);
+    box-shadow: none;
   }
-
-  .home-page .button.secondary:hover {
+  .home-page .button.secondary:hover,
+  .home-hero .button.secondary:hover {
     background: var(--surface-alt);
     color: var(--text);
   }
-
   .home-page .button.small {
     min-height: 36px;
     padding: 8px 12px;
     font-size: 13px;
   }
-
-  /* Reports */
+  /* Reports — hidden by default, toggled by button */
   .reports-section {
     margin-top: 30px;
+    display: none;
   }
-
+  .reports-section.is-visible {
+    display: block;
+    animation: reportsFadeIn .4s ease both;
+  }
+  @keyframes reportsFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   .reports-heading {
     display: flex;
     justify-content: space-between;
@@ -235,12 +220,10 @@
     flex-wrap: wrap;
     margin: 8px 0 16px;
   }
-
   .reports-heading h2 {
     margin: 0;
     font-size: clamp(19px, 3vw, 24px);
   }
-
   .reports-count {
     display: inline-flex;
     align-items: center;
@@ -256,13 +239,11 @@
     font-size: 12px;
     vertical-align: middle;
   }
-
   .home-page .report-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
   }
-
   .home-report-card {
     display: flex;
     flex-direction: column;
@@ -274,19 +255,16 @@
     box-shadow: var(--shadow);
     animation: homeCardEnter .45s ease both;
   }
-
   .home-report-card:nth-child(2) { animation-delay: .04s; }
   .home-report-card:nth-child(3) { animation-delay: .08s; }
   .home-report-card:nth-child(4) { animation-delay: .12s; }
   .home-report-card:nth-child(5) { animation-delay: .16s; }
   .home-report-card:nth-child(6) { animation-delay: .20s; }
-
   .home-report-card .report-image-wrap {
     position: relative;
     overflow: hidden;
     background: var(--surface-alt);
   }
-
   .home-report-card .report-photo,
   .home-report-card .placeholder-photo {
     display: flex;
@@ -296,23 +274,19 @@
     align-items: center;
     justify-content: center;
   }
-
   .home-report-card .report-photo {
     display: block;
     object-fit: cover;
     cursor: zoom-in;
     transition: transform .45s ease;
   }
-
   .home-report-card:hover .report-photo {
     transform: scale(1.045);
   }
-
   .home-report-card .placeholder-photo {
     background: var(--surface-alt);
     font-size: 42px;
   }
-
   .home-report-card .report-content {
     display: flex;
     flex: 1;
@@ -320,31 +294,26 @@
     min-width: 0;
     padding: 16px;
   }
-
   .home-report-card .report-content h3 {
     margin: 10px 0 8px;
     line-height: 1.4;
     overflow-wrap: anywhere;
   }
-
   .home-report-card .report-meta {
     display: grid;
     gap: 5px;
     margin-top: 3px;
   }
-
   .home-report-card .report-meta p {
     margin: 2px 0;
     color: var(--muted);
     font-size: 13px;
     overflow-wrap: anywhere;
   }
-
   .home-report-card .report-meta strong,
   .report-status-row > strong {
     color: var(--text);
   }
-
   .home-page .tag {
     display: inline-flex;
     align-items: center;
@@ -357,37 +326,30 @@
     font-weight: 800;
     line-height: 1.3;
   }
-
   .home-page .tag.found {
     background: #dff4e7;
     color: #176b45;
   }
-
   .home-page .tag.pending {
     background: #fff1cc;
     color: #805700;
   }
-
   .home-page .tag.returned {
     background: #e6e9ee;
     color: #465468;
   }
-
   html[data-theme="dark"] .home-page .tag.found {
     background: #203a2d;
     color: #9be0b6;
   }
-
   html[data-theme="dark"] .home-page .tag.pending {
     background: #45381c;
     color: #f2d18a;
   }
-
   html[data-theme="dark"] .home-page .tag.returned {
     background: #303944;
     color: #d2dae5;
   }
-
   .report-status-row {
     display: flex;
     align-items: center;
@@ -396,12 +358,10 @@
     margin-top: 12px;
     font-size: 12px;
   }
-
   .home-report-card .card-actions {
     margin-top: auto;
     padding-top: 15px;
   }
-
   /* Empty state */
   .home-page .home-empty-state {
     padding: 34px 18px;
@@ -410,7 +370,6 @@
     background: var(--surface);
     text-align: center;
   }
-
   .home-empty-state .empty-icon {
     display: flex;
     width: 70px;
@@ -422,11 +381,9 @@
     background: var(--primary-soft);
     font-size: 35px;
   }
-
   .home-empty-state h3 {
     margin: 8px 0;
   }
-
   .home-empty-state p {
     max-width: 460px;
     margin: 0 auto 17px;
@@ -434,7 +391,6 @@
     font-size: 13px;
     line-height: 1.7;
   }
-
   .home-empty-state .empty-actions {
     display: flex;
     justify-content: center;
@@ -442,93 +398,82 @@
     flex-wrap: wrap;
     gap: 9px;
   }
-
   @keyframes homeStickerEnter {
     from { opacity: 0; transform: translateY(7px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes homeCardEnter {
     from { opacity: 0; transform: translateY(9px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
   @media (max-width: 950px) {
     .home-stats {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
     .filter-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
     .home-page .report-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-
   @media (max-width: 600px) {
     .home-hero {
       padding: 24px 18px;
       border-radius: 16px;
     }
-
     .home-hero .sticker-row {
       gap: 7px;
       margin-bottom: 20px;
     }
-
     .home-hero .sticker {
       padding: 6px 9px;
       font-size: 12px;
     }
-
+    .home-hero .hero-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .home-hero .hero-actions .button {
+      width: 100%;
+    }
     .home-stats {
       gap: 10px;
     }
-
     .home-stats .stat {
       padding: 15px 12px;
     }
-
     .filter-grid {
       grid-template-columns: 1fr;
     }
-
     .search-actions {
       align-items: stretch;
       flex-direction: column;
     }
-
     .search-actions > * {
       width: 100%;
       text-align: center;
     }
-
     .reports-heading {
       align-items: flex-start;
     }
-
     .home-page .report-grid {
       grid-template-columns: 1fr;
     }
-
     .home-report-card .report-photo,
     .home-report-card .placeholder-photo {
       height: 210px;
     }
-
     .home-page .home-empty-state {
       padding: 26px 13px;
     }
   }
-
   @media (prefers-reduced-motion: reduce) {
     .home-hero .sticker,
-    .home-report-card {
+    .home-report-card,
+    .reports-section.is-visible {
       animation: none;
     }
-
     .home-report-card:hover .report-photo {
       transform: none;
     }
@@ -544,40 +489,39 @@
     <span class="sticker"><span aria-hidden="true">📱</span> Gadgets</span>
     <span class="sticker"><span aria-hidden="true">🪪</span> School IDs</span>
   </div>
-
   <h2>Lost Something? Found Something?</h2>
-
   <p class="hero-description">
     Welcome to SLSU JGE FindHub! Report lost belongings,
     share found items, and help reunite belongings with
     their rightful owners in the campus community.
   </p>
-
-  <a class="button" href="{{ url_for('new_report') }}">
-    ✨ Submit a Report
-  </a>
+  <div class="hero-actions">
+    <a class="button" href="{{ url_for('new_report') }}">
+      ✨ Submit a Report
+    </a>
+    <button type="button" class="button secondary" id="view-reports-btn"
+            aria-expanded="false" aria-controls="reports-section">
+      📋 View Reports
+    </button>
+  </div>
 </section>
 {% endblock %}
 
 {% block content %}
 <div class="home-page">
-
   <section class="stats home-stats" aria-label="Lost and found statistics">
     <div class="stat">
       <span class="stat-label">📌 Active reports</span>
       <strong>{{ total_open|default(stats.open|default(0)) }}</strong>
     </div>
-
     <div class="stat">
       <span class="stat-label">🎒 Lost items</span>
       <strong>{{ total_lost|default(stats.lost|default(0)) }}</strong>
     </div>
-
     <div class="stat">
       <span class="stat-label">🔎 Found items</span>
       <strong>{{ total_found|default(stats.found|default(0)) }}</strong>
     </div>
-
     <div class="stat">
       <span class="stat-label">💛 Community</span>
       <strong>FindHub</strong>
@@ -590,14 +534,11 @@
       <span class="heading-icon" aria-hidden="true">🔎</span>
       <span>Find an Item</span>
     </h2>
-
     <p class="search-description">
       Search reports by keyword, report type, category, or status.
     </p>
-
     <form method="GET" action="{{ url_for('home') }}"
           role="search" aria-label="Search lost and found reports">
-
       <div class="filter-grid">
         <div>
           <label for="search-query">Search keywords</label>
@@ -606,7 +547,6 @@
                  value="{{ request.args.get('q', '') }}"
                  maxlength="200" autocomplete="off">
         </div>
-
         <div>
           <label for="report-type">Report type</label>
           <select id="report-type" name="type">
@@ -621,7 +561,6 @@
             </option>
           </select>
         </div>
-
         <div>
           <label for="report-category">Category</label>
           <select id="report-category" name="category">
@@ -634,7 +573,6 @@
             {% endfor %}
           </select>
         </div>
-
         <div>
           <label for="report-status">Status</label>
           <select id="report-status" name="status">
@@ -648,7 +586,6 @@
           </select>
         </div>
       </div>
-
       <div class="search-actions">
         <button type="submit">🔎 Search Reports</button>
         <a class="button secondary" href="{{ url_for('home') }}">
@@ -658,7 +595,8 @@
     </form>
   </section>
 
-  <section class="reports-section" aria-labelledby="recent-reports-heading">
+  <section class="reports-section" id="reports-section"
+           aria-labelledby="recent-reports-heading">
     <div class="reports-heading">
       <h2 id="recent-reports-heading">
         📌 Recent Lost &amp; Found Reports
@@ -666,7 +604,6 @@
           <span class="reports-count">{{ reports|length }}</span>
         {% endif %}
       </h2>
-
       <a class="button small" href="{{ url_for('new_report') }}">
         + New Report
       </a>
@@ -696,25 +633,20 @@
                 </div>
               {% endif %}
             </div>
-
             <div class="report-content">
               <span class="tag {% if report.report_type|lower == 'found' %}found{% endif %}">
                 {{ report.report_type }}
               </span>
-
               <h3>{{ report.item_name }}</h3>
-
               <div class="report-meta">
                 <p>
                   <strong>Category:</strong>
                   {{ report.category or 'Not specified' }}
                 </p>
-
                 <p>
                   <strong>Location:</strong>
                   {{ report.location or 'Not specified' }}
                 </p>
-
                 {% if report.incident_date %}
                   <p>
                     <strong>Date:</strong>
@@ -722,7 +654,6 @@
                   </p>
                 {% endif %}
               </div>
-
               <div class="report-status-row">
                 <strong>Status:</strong>
                 <span class="tag
@@ -732,7 +663,6 @@
                   {{ report.status or 'Open' }}
                 </span>
               </div>
-
               <div class="card-actions">
                 <a class="button small"
                    href="{{ url_for('report_detail', report_id=report.id) }}">
@@ -746,19 +676,15 @@
     {% else %}
       <div class="home-empty-state">
         <div class="empty-icon" aria-hidden="true">🕵️</div>
-
         <h3>No reports found</h3>
-
         <p>
           No items match your search right now. Try changing your filters
           or submit a new report to help the SLSU JGE community.
         </p>
-
         <div class="empty-actions">
           <a class="button" href="{{ url_for('new_report') }}">
             ✨ Submit a Report
           </a>
-
           {% if request.args.get('q') or request.args.get('type')
                 or request.args.get('category') or request.args.get('status') %}
             <a class="button secondary" href="{{ url_for('home') }}">
@@ -769,6 +695,46 @@
       </div>
     {% endif %}
   </section>
-
 </div>
+
+<script>
+  (function () {
+    const toggleBtn = document.getElementById("view-reports-btn");
+    const reportsSection = document.getElementById("reports-section");
+    if (!toggleBtn || !reportsSection) return;
+
+    function showReports(scroll) {
+      reportsSection.classList.add("is-visible");
+      toggleBtn.setAttribute("aria-expanded", "true");
+      toggleBtn.innerHTML = "🙈 Hide Reports";
+      if (scroll) {
+        setTimeout(function () {
+          reportsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 80);
+      }
+    }
+
+    function hideReports() {
+      reportsSection.classList.remove("is-visible");
+      toggleBtn.setAttribute("aria-expanded", "false");
+      toggleBtn.innerHTML = "📋 View Reports";
+    }
+
+    toggleBtn.addEventListener("click", function () {
+      if (reportsSection.classList.contains("is-visible")) {
+        hideReports();
+      } else {
+        showReports(true);
+      }
+    });
+
+    // Auto-show reports if user came from a search (has query params)
+    const params = new URLSearchParams(window.location.search);
+    const hasFilters = params.has("q") || params.has("type")
+      || params.has("category") || params.has("status");
+    if (hasFilters) {
+      showReports(true);
+    }
+  })();
+</script>
 {% endblock %}
