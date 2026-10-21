@@ -130,7 +130,6 @@ class Report(db.Model):
     contact_name = db.Column(db.String(120), nullable=False)
     contact = db.Column(db.String(150), nullable=False)
     contact_public = db.Column(db.Boolean, default=False, nullable=False)
-    # Cloudinary URL or legacy local filename.
     photo = db.Column(db.String(1000), nullable=True)
     status = db.Column(db.String(30), default="Open", nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
@@ -157,8 +156,6 @@ class Notification(db.Model):
     report_id = db.Column(db.Integer, nullable=True)
     is_read = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
-# Creates missing tables only.
-# It does not automatically migrate existing database columns.
 with app.app_context():
     db.create_all()
 # ==================================================
@@ -213,7 +210,6 @@ def photo_src(photo):
         return None
     if photo.startswith(("https://", "http://")):
         return photo
-    # Supports older locally stored images.
     return url_for("uploaded_photo", filename=photo)
 @app.context_processor
 def inject_photo_helper():
@@ -243,7 +239,6 @@ def save_photo(file_storage):
         raise RuntimeError("Cloudinary did not return a secure photo URL.")
     return photo_url
 def delete_photo(photo):
-    # Cloudinary images are not deleted automatically.
     if not photo or photo.startswith(("https://", "http://")):
         return
     if IS_VERCEL:
@@ -263,7 +258,7 @@ def parse_incident_date(value):
 def get_report_form_value(name, default=""):
     return (request.form.get(name, default) or "").strip()
 # ==================================================
-# HOME AND SEARCH — UPDATED
+# HOME AND SEARCH
 # ==================================================
 @app.route("/")
 def home():
@@ -272,13 +267,11 @@ def home():
     status = request.args.get("status", "").strip()
     sort = request.args.get("sort", "newest").strip()
 
-    # Mark if search was performed — controls page display
+    # search_performed = TRUE means user searched → HIDE hero/stats boxes
     search_performed = bool(query or report_type or status)
 
-    # Base query
     reports_query = Report.query
 
-    # Apply filters
     if report_type in {"Lost", "Found"}:
         reports_query = reports_query.filter(Report.report_type == report_type)
 
@@ -295,7 +288,6 @@ def home():
             )
         )
 
-    # Sort results
     if sort == "oldest":
         reports_query = reports_query.order_by(
             Report.created_at.asc(), Report.id.asc()
@@ -312,7 +304,6 @@ def home():
 
     reports = reports_query.all()
 
-    # Statistics
     total_reports = Report.query.count()
     total_lost = Report.query.filter_by(report_type="Lost").count()
     total_found = Report.query.filter_by(report_type="Found").count()
@@ -381,8 +372,6 @@ def new_report():
         if len(contact_name) > 120:
             flash("Your name is too long.", "danger")
             return redirect(url_for("new_report"))
-        # contact_name is optional in the form, but the current
-        # database model requires a non-null value.
         stored_contact_name = contact_name or "Not provided"
         saved_photo = None
         try:
@@ -438,7 +427,6 @@ def new_report():
 @app.route("/report/<int:report_id>")
 def report_detail(report_id):
     report = db.get_or_404(Report, report_id)
-    # Auto-mark notification as read when admin opens it from notifications
     notification_id = request.args.get("notification_id", type=int)
     if notification_id and session.get("admin_logged_in"):
         notification = Notification.query.get(notification_id)
@@ -598,7 +586,6 @@ def admin_update_report_status(report_id):
     if new_status not in REPORT_STATUSES:
         flash("Invalid report status.", "danger")
         return redirect(url_for("admin_dashboard"))
-    old_status = report.status
     report.status = new_status
     try:
         db.session.commit()
@@ -668,7 +655,6 @@ def admin_update_claim_status(claim_id):
         claim.status = new_status
         if new_status == "Approved":
             report.status = "Returned"
-            # Reject other pending claims for the same item
             other_pending_claims = Claim.query.filter(
                 Claim.report_id == report.id,
                 Claim.status == "Pending",
@@ -760,9 +746,6 @@ def mark_all_notifications_read():
         app.logger.exception("Unable to mark all notifications as read")
         flash("Unable to update notifications.", "danger")
     return redirect(url_for("notifications_page"))
-# ==================================================
-# ADMIN: DELETE NOTIFICATION
-# ==================================================
 @app.route("/notifications/<int:notification_id>/delete", methods=["POST"])
 @admin_required
 def delete_notification(notification_id):
