@@ -1,290 +1,733 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindHub — SLSU JGE Lost & Found</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        :root {
-            --primary: #0d47a1;
-            --secondary: #1565c0;
-            --accent: #ff6f00;
-            --light: #f5f9ff;
-            --dark: #0a2342;
-        }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #333; }
-        .hero-banner {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 4rem 0;
-            border-radius: 0 0 1.5rem 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white; border-radius: 1rem; padding: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06); text-align: center;
-            transition: transform 0.3s ease;
-        }
-        .stat-card:hover { transform: translateY(-5px); }
-        .stat-card .num { font-size: 2.2rem; font-weight: 700; color: var(--primary); }
-        .search-card {
-            background: white; border-radius: 1rem; padding: 2rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 2rem;
-        }
-        .report-card {
-            background: white; border-radius: 1rem; overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.06); margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        .report-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-        .report-type-badge {
-            position: absolute; top: 1rem; right: 1rem;
-            padding: 0.3rem 0.8rem; border-radius: 2rem; font-weight: 600; font-size: 0.85rem;
-        }
-        .type-lost { background: #fff3e0; color: #e65100; }
-        .type-found { background: #e8f5e9; color: #2e7d32; }
-        .status-badge { padding: 0.25rem 0.6rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; }
-        .status-open { background: #e3f2fd; color: #1565c0; }
-        .status-pending { background: #fff8e1; color: #f57c00; }
-        .status-returned { background: #e8f5e9; color: #2e7d32; }
-        .status-archived { background: #eceff1; color: #616161; }
-        .btn-primary-custom {
-            background: var(--primary); border: none; padding: 0.6rem 1.5rem; border-radius: 0.5rem;
-            font-weight: 600; transition: background 0.3s ease;
-        }
-        .btn-primary-custom:hover { background: var(--secondary); }
-        .btn-lost {
-            background: #fff3e0; color: #e65100; border: none; padding: 0.6rem 1.5rem; border-radius: 0.5rem;
-            font-weight: 600; transition: all 0.3s ease;
-        }
-        .btn-lost:hover { background: #ffe0b2; color: #e65100; }
-        .btn-found {
-            background: #e8f5e9; color: #2e7d32; border: none; padding: 0.6rem 1.5rem; border-radius: 0.5rem;
-            font-weight: 600; transition: all 0.3s ease;
-        }
-        .btn-found:hover { background: #c8e6c9; color: #2e7d32; }
-        .photo-placeholder {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; aspect-ratio: 4/3; color: #64b5f6; font-size: 2rem;
-        }
-        a { text-decoration: none; }
-    </style>
-</head>
-<body>
-
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-0">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('home') }}">
-            {% if campus_logo %}
-                <img src="{{ campus_logo }}" alt="Campus Logo" height="32" width="32">
-            {% endif %}
-            <span>FindHub</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navMenu">
-            <ul class="navbar-nav ms-auto align-items-center gap-1">
-                <li class="nav-item"><a class="nav-link active" href="{{ url_for('home') }}">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('new_report') }}">Report Item</a></li>
-                {% if admin_logged_in %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('notifications_page') }}">
-                        Notifications
-                        {% if unread_notification_count > 0 %}
-                            <span class="badge bg-danger rounded-pill ms-1">{{ unread_notification_count }}</span>
-                        {% endif %}
-                    </a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_logout') }}">Logout</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<!-- HERO & STATS -->
-<section class="hero-banner">
-    <div class="container text-center">
-        <h1 class="display-4 fw-bold mb-3">Lost Something? Found Something?</h1>
-        <p class="lead mb-4 col-lg-8 mx-auto">
-            SLSU JGE Campus Lost and Found Hub — reconnecting items with their rightful owners.
-        </p>
-        <div class="d-flex flex-wrap justify-content-center gap-3">
-            <a href="{{ url_for('new_report') }}?type=Lost" class="btn btn-lost btn-lg px-4">
-                <i class="bi bi-search-heart me-2"></i> Report Lost Item
-            </a>
-            <a href="{{ url_for('new_report') }}?type=Found" class="btn btn-found btn-lg px-4">
-                <i class="bi bi-box-seam me-2"></i> Report Found Item
-            </a>
-        </div>
-    </div>
+{% extends "base.html" %}
+{% block title %}{% if request.args.get('view') == 'reports' %}All Reports | {% endif %}Home | SLSU JGE FindHub{% endblock %}
+{% block head %}
+<style>
+  /* Home hero */
+  .home-hero {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(28px, 5vw, 52px);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .home-hero .sticker-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-bottom: 24px;
+  }
+  .home-hero .sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    animation: homeStickerEnter .45s ease both;
+  }
+  .home-hero .sticker:nth-child(2) { animation-delay: .06s; }
+  .home-hero .sticker:nth-child(3) { animation-delay: .12s; }
+  .home-hero .sticker:nth-child(4) { animation-delay: .18s; }
+  .home-hero h1,
+  .home-hero h2 {
+    max-width: 760px;
+    margin: 0 0 16px;
+    color: var(--text);
+    font-size: clamp(28px, 5vw, 45px);
+    line-height: 1.16;
+    letter-spacing: -.7px;
+  }
+  .home-hero .hero-description {
+    max-width: 700px;
+    margin: 0 0 24px;
+    color: var(--muted);
+    font-size: clamp(15px, 2vw, 17px);
+    line-height: 1.8;
+  }
+  .home-hero .button {
+    box-shadow: 0 5px 13px rgba(0, 75, 43, .16);
+  }
+  .home-hero .button:hover {
+    box-shadow: 0 8px 19px rgba(0, 75, 43, .24);
+  }
+  /* Statistics */
+  .home-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin: 22px 0;
+  }
+  .home-stats .stat {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .home-stats .stat::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+    opacity: .72;
+    transition: width .25s ease, opacity .25s ease;
+  }
+  .home-stats .stat:hover::before {
+    width: 6px;
+    opacity: 1;
+  }
+  .home-stats .stat-label {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .home-stats .stat strong {
+    color: var(--primary);
+    font-size: clamp(23px, 3vw, 32px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  /* Search panel */
+  .search-panel {
+    scroll-margin-top: 95px;
+    margin-bottom: 30px;
+  }
+  .search-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px;
+    font-size: clamp(20px, 3vw, 25px);
+  }
+  .search-heading .heading-icon {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: var(--primary-soft);
+    font-size: 19px;
+  }
+  .search-description {
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .filter-grid > div {
+    min-width: 0;
+  }
+  .filter-grid label {
+    font-size: 13px;
+  }
+  .filter-grid input,
+  .filter-grid select {
+    width: 100%;
+    min-width: 0;
+  }
+  .search-actions {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 17px;
+  }
+  /* Buttons */
+  .home-hero .button,
+  .home-page .button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    min-height: 42px;
+    padding: 10px 15px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .2s ease, background .2s ease;
+  }
+  .home-page .button:hover,
+  .home-hero .button:hover {
+    background: var(--primary-dark);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .home-page .button.secondary {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .home-page .button.secondary:hover {
+    background: var(--surface-alt);
+    color: var(--text);
+  }
+  .home-page .button.small {
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  /* Reports section */
+  .reports-section {
+    margin-top: 30px;
+  }
+  .reports-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 8px 0 16px;
+  }
+  .reports-heading h2 {
+    margin: 0;
+    font-size: clamp(19px, 3vw, 24px);
+  }
+  .reports-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 26px;
+    padding: 3px 8px;
+    margin-left: 5px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    vertical-align: middle;
+  }
+  .back-to-home-row {
+    margin-bottom: 18px;
+  }
+  .home-page .report-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .home-report-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    animation: homeCardEnter .45s ease both;
+  }
+  .home-report-card:nth-child(2) { animation-delay: .04s; }
+  .home-report-card:nth-child(3) { animation-delay: .08s; }
+  .home-report-card:nth-child(4) { animation-delay: .12s; }
+  .home-report-card:nth-child(5) { animation-delay: .16s; }
+  .home-report-card:nth-child(6) { animation-delay: .20s; }
+  .home-report-card .report-image-wrap {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface-alt);
+  }
+  .home-report-card .report-photo,
+  .home-report-card .placeholder-photo {
+    display: flex;
+    width: 100%;
+    height: 180px;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+  }
+  .home-report-card .report-photo {
+    display: block;
+    object-fit: cover;
+    cursor: zoom-in;
+    transition: transform .45s ease;
+  }
+  .home-report-card:hover .report-photo {
+    transform: scale(1.045);
+  }
+  .home-report-card .placeholder-photo {
+    background: var(--surface-alt);
+    font-size: 42px;
+  }
+  .home-report-card .report-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    padding: 16px;
+  }
+  .home-report-card .report-content h3 {
+    margin: 10px 0 8px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  .report-meta {
+    display: grid;
+    gap: 5px;
+    margin-top: 3px;
+  }
+  .report-meta p {
+    margin: 2px 0;
+    color: var(--muted);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+  .report-meta strong,
+  .report-status-row > strong {
+    color: var(--text);
+  }
+  .home-page .tag {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+  .home-page .tag.found {
+    background: #dff4e7;
+    color: #176b45;
+  }
+  .home-page .tag.pending {
+    background: #fff1cc;
+    color: #805700;
+  }
+  .home-page .tag.returned {
+    background: #e6e9ee;
+    color: #465468;
+  }
+  html[data-theme="dark"] .home-page .tag.found {
+    background: #203a2d;
+    color: #9be0b6;
+  }
+  html[data-theme="dark"] .home-page .tag.pending {
+    background: #45381c;
+    color: #f2d18a;
+  }
+  html[data-theme="dark"] .home-page .tag.returned {
+    background: #303944;
+    color: #d2dae5;
+  }
+  .report-status-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 12px;
+    font-size: 12px;
+  }
+  .home-report-card .card-actions {
+    margin-top: auto;
+    padding-top: 15px;
+  }
+  /* Empty state */
+  .home-page .home-empty-state {
+    padding: 34px 18px;
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    text-align: center;
+  }
+  .home-empty-state .empty-icon {
+    display: flex;
+    width: 70px;
+    height: 70px;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    font-size: 35px;
+  }
+  .home-empty-state h3 {
+    margin: 8px 0;
+  }
+  .home-empty-state p {
+    max-width: 460px;
+    margin: 0 auto 17px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .home-empty-state .empty-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+  /* REPORTS-ONLY VIEW: hide hero, stats, search — show ONLY reports */
+  body.reports-only .home-hero,
+  body.reports-only .home-stats,
+  body.reports-only .search-panel {
+    display: none !important;
+  }
+  body.reports-only .reports-section {
+    margin-top: 0;
+    animation: reportsFadeIn .4s ease both;
+  }
+  @keyframes reportsFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes homeStickerEnter {
+    from { opacity: 0; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes homeCardEnter {
+    from { opacity: 0; transform: translateY(9px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (max-width: 950px) {
+    .home-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .filter-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .home-page .report-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    .home-hero {
+      padding: 24px 18px;
+      border-radius: 16px;
+    }
+    .home-hero .sticker-row {
+      gap: 7px;
+      margin-bottom: 20px;
+    }
+    .home-hero .sticker {
+      padding: 6px 9px;
+      font-size: 12px;
+    }
+    .home-stats {
+      gap: 10px;
+    }
+    .home-stats .stat {
+      padding: 15px 12px;
+    }
+    .filter-grid {
+      grid-template-columns: 1fr;
+    }
+    .search-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .search-actions > * {
+      width: 100%;
+      text-align: center;
+    }
+    .reports-heading {
+      align-items: flex-start;
+    }
+    .home-page .report-grid {
+      grid-template-columns: 1fr;
+    }
+    .home-report-card .report-photo,
+    .home-report-card .placeholder-photo {
+      height: 210px;
+    }
+    .home-page .home-empty-state {
+      padding: 26px 13px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home-hero .sticker,
+    .home-report-card,
+    body.reports-only .reports-section {
+      animation: none;
+    }
+    .home-report-card:hover .report-photo {
+      transform: none;
+    }
+  }
+</style>
+{% endblock %}
+{% block hero %}
+<section class="hero home-hero">
+  <div class="sticker-row" aria-label="Common lost and found categories">
+    <span class="sticker"><span aria-hidden="true">🎒</span> Bags</span>
+    <span class="sticker"><span aria-hidden="true">🔑</span> Keys</span>
+    <span class="sticker"><span aria-hidden="true">📱</span> Gadgets</span>
+    <span class="sticker"><span aria-hidden="true">🪪</span> School IDs</span>
+  </div>
+  <h2>Lost Something? Found Something?</h2>
+  <p class="hero-description">
+    Welcome to SLSU JGE FindHub! Report lost belongings,
+    share found items, and help reunite belongings with
+    their rightful owners in the campus community.
+  </p>
+  <a class="button" href="{{ url_for('new_report') }}">
+    ✨ Submit a Report
+  </a>
 </section>
-
-<section class="container mb-4">
-    <div class="row g-3">
-        <div class="col-sm-6 col-md-3">
-            <div class="stat-card">
-                <div class="num">{{ stats.total }}</div>
-                <div class="text-muted">Total Reports</div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-3">
-            <div class="stat-card">
-                <div class="num text-danger">{{ stats.lost }}</div>
-                <div class="text-muted">Lost Items</div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-3">
-            <div class="stat-card">
-                <div class="num text-success">{{ stats.found }}</div>
-                <div class="text-muted">Found Items</div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-md-3">
-            <div class="stat-card">
-                <div class="num text-primary">{{ stats.open }}</div>
-                <div class="text-muted">Open / Unclaimed</div>
-            </div>
-        </div>
+{% endblock %}
+{% block content %}
+<div class="home-page">
+  <section class="stats home-stats" aria-label="Lost and found statistics">
+    <div class="stat">
+      <span class="stat-label">📌 Active reports</span>
+      <strong>{{ total_open|default(stats.open|default(0)) }}</strong>
     </div>
-</section>
-
-<!-- SEARCH & FILTERS -->
-<section class="container">
-    <div class="search-card">
-        <form action="{{ url_for('home') }}" method="get" class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label for="q" class="form-label fw-semibold">Search</label>
-                <input type="text" id="q" name="q" class="form-control"
-                       placeholder="Item name, description, location…" value="{{ query }}">
-            </div>
-            <div class="col-md-2">
-                <label for="type" class="form-label fw-semibold">Type</label>
-                <select id="type" name="type" class="form-select">
-                    <option value="">All Types</option>
-                    <option value="Lost" {% if selected_type=='Lost' %}selected{% endif %}>Lost</option>
-                    <option value="Found" {% if selected_type=='Found' %}selected{% endif %}>Found</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="status" class="form-label fw-semibold">Status</label>
-                <select id="status" name="status" class="form-select">
-                    <option value="">All Status</option>
-                    <option value="Open" {% if selected_status=='Open' %}selected{% endif %}>Open</option>
-                    <option value="Pending Claim" {% if selected_status=='Pending Claim' %}selected{% endif %}>Pending Claim</option>
-                    <option value="Returned" {% if selected_status=='Returned' %}selected{% endif %}>Returned</option>
-                    <option value="Archived" {% if selected_status=='Archived' %}selected{% endif %}>Archived</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="sort" class="form-label fw-semibold">Sort By</label>
-                <select id="sort" name="sort" class="form-select">
-                    <option value="newest" {% if selected_sort=='newest' %}selected{% endif %}>Newest First</option>
-                    <option value="oldest" {% if selected_sort=='oldest' %}selected{% endif %}>Oldest First</option>
-                    <option value="name" {% if selected_sort=='name' %}selected{% endif %}>Item Name</option>
-                </select>
-            </div>
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary-custom flex-grow-1">
-                    <i class="bi bi-search"></i> Search
-                </button>
-                {% if search_performed %}
-                    <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
-                        Clear
-                    </a>
-                {% endif %}
-            </div>
-        </form>
+    <div class="stat">
+      <span class="stat-label">🎒 Lost items</span>
+      <strong>{{ total_lost|default(stats.lost|default(0)) }}</strong>
     </div>
-</section>
-
-<!-- RESULTS SECTION -->
-<section class="container pb-5">
-    {% if search_performed %}
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h4 fw-bold mb-0">
-                Search Results
-                <span class="text-muted fw-normal">({{ reports|length }} match{% if reports|length != 1 %}es{% endif %})</span>
-            </h2>
-            <a href="{{ url_for('home') }}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Home
-            </a>
+    <div class="stat">
+      <span class="stat-label">🔎 Found items</span>
+      <strong>{{ total_found|default(stats.found|default(0)) }}</strong>
+    </div>
+    <div class="stat">
+      <span class="stat-label">💛 Community</span>
+      <strong>FindHub</strong>
+    </div>
+  </section>
+  <section class="panel search-panel" id="find-item"
+           aria-labelledby="find-item-heading">
+    <h2 class="search-heading" id="find-item-heading">
+      <span class="heading-icon" aria-hidden="true">🔎</span>
+      <span>Find an Item</span>
+    </h2>
+    <p class="search-description">
+      Search reports by keyword, type, or status.
+    </p>
+    <form method="GET" action="{{ url_for('home') }}"
+          role="search" aria-label="Search lost and found reports">
+      <div class="filter-grid">
+        <div>
+          <label for="search-query">Search keywords</label>
+          <input id="search-query" type="search" name="q"
+                 placeholder="Item, description, or location..."
+                 value="{{ request.args.get('q', '') }}"
+                 maxlength="200" autocomplete="off">
         </div>
-    {% else %}
-        <h2 class="h4 fw-bold mb-3">Recent Reports</h2>
-    {% endif %}
-
-    {% if reports %}
-        <div class="row">
-            {% for report in reports %}
-                <div class="col-md-6 col-lg-4">
-                    <a href="{{ url_for('report_detail', report_id=report.id) }}" class="text-decoration-none">
-                        <div class="report-card position-relative h-100">
-                            {% if report.photo %}
-                                <img src="{{ photo_src(report.photo) }}" alt="{{ report.item_name }}"
-                                     class="w-100" style="aspect-ratio:4/3; object-fit:cover;">
-                            {% else %}
-                                <div class="photo-placeholder">
-                                    <i class="bi bi-image"></i>
-                                </div>
-                            {% endif %}
-
-                            <span class="report-type-badge {% if report.report_type == 'Lost' %}type-lost{% else %}type-found{% endif %}">
-                                {{ report.report_type }}
-                            </span>
-
-                            <div class="p-3">
-                                <h5 class="fw-bold text-dark mb-1">{{ report.item_name }}</h5>
-                                <p class="text-muted small mb-2">
-                                    <i class="bi bi-geo-alt"></i> {{ report.location }}
-                                </p>
-                                <p class="text-muted small mb-2">
-                                    <i class="bi bi-calendar"></i> {{ report.incident_date.strftime('%b %d, %Y') }}
-                                </p>
-                                <span class="status-badge status-{{ report.status.lower().replace(' ', '-') }}">
-                                    {{ report.status }}
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+        <div>
+          <label for="report-type">Report type</label>
+          <select id="report-type" name="type">
+            <option value="">All report types</option>
+            <option value="Lost"
+              {% if request.args.get('type', '') == 'Lost' %}selected{% endif %}>
+              Lost
+            </option>
+            <option value="Found"
+              {% if request.args.get('type', '') == 'Found' %}selected{% endif %}>
+              Found
+            </option>
+          </select>
+        </div>
+        <div>
+          <label for="report-status">Status</label>
+          <select id="report-status" name="status">
+            <option value="">All statuses</option>
+            {% for status_option in ['Open', 'Pending Claim', 'Returned', 'Archived'] %}
+              <option value="{{ status_option }}"
+                {% if request.args.get('status', '') == status_option %}selected{% endif %}>
+                {{ status_option }}
+              </option>
             {% endfor %}
+          </select>
         </div>
-    {% else %}
-        <div class="text-center py-5">
-            {% if search_performed %}
-                <i class="bi bi-search display-1 text-muted mb-3"></i>
-                <h4 class="text-muted">No matching reports found</h4>
-                <p class="text-muted mb-3">Try different keywords, type, or status filter.</p>
-                <a href="{{ url_for('home') }}" class="btn btn-primary-custom">Clear Search</a>
-            {% else %}
-                <i class="bi bi-inbox display-1 text-muted mb-3"></i>
-                <h4 class="text-muted">No reports yet</h4>
-                <p class="text-muted mb-3">Be the first to submit a lost or found item report!</p>
-                <div class="d-flex flex-wrap justify-content-center gap-3 mt-3">
-                    <a href="{{ url_for('new_report') }}?type=Lost" class="btn btn-lost">
-                        <i class="bi bi-search-heart me-2"></i> Report Lost Item
-                    </a>
-                    <a href="{{ url_for('new_report') }}?type=Found" class="btn btn-found">
-                        <i class="bi bi-box-seam me-2"></i> Report Found Item
-                    </a>
-                </div>
-            {% endif %}
-        </div>
-    {% endif %}
-</section>
-
-<footer class="bg-dark text-white py-4 mt-5">
-    <div class="container text-center small">
-        <p class="mb-1">SLSU Juan G. Jalando-on Campus — Lost & Found System</p>
-        <p class="text-muted mb-0">© {{ today.year }} Southern Luzon State University</p>
+      </div>
+      <div class="search-actions">
+        <button type="submit">🔎 Search Reports</button>
+        <a class="button secondary" href="{{ url_for('home') }}">
+          Clear Filters
+        </a>
+      </div>
+    </form>
+  </section>
+  <section class="reports-section" id="reports-section"
+           aria-labelledby="recent-reports-heading">
+    <div class="back-to-home-row">
+      <a class="button secondary small" href="{{ url_for('home') }}" id="back-to-home-btn" style="display:none;">
+        ← Back to Home
+      </a>
     </div>
-</footer>
+    <div class="reports-heading">
+      <h2 id="recent-reports-heading">
+        {% if search_performed %}
+          🔍 Search Results
+        {% else %}
+          📌 Recent Reports
+        {% endif %}
+        {% if reports %}
+          <span class="reports-count">{{ reports|length }}</span>
+        {% endif %}
+      </h2>
+      <a class="button small" href="{{ url_for('new_report') }}">
+        + New Report
+      </a>
+    </div>
+    {% if reports %}
+      <div class="report-grid">
+        {% for report in reports %}
+          <article class="home-report-card">
+            <div class="report-image-wrap">
+              {% if report.photo %}
+                <img class="report-photo"
+                     src="{{ photo_src(report.photo) }}"
+                     alt="Photo of {{ report.item_name }}"
+                     loading="lazy"
+                     decoding="async">
+              {% else %}
+                <div class="placeholder-photo"
+                     aria-label="No item photo available">
+                  <span aria-hidden="true">
+                    {% if report.report_type|lower == 'lost' %}
+                      🎒
+                    {% else %}
+                      🔎
+                    {% endif %}
+                  </span>
+                </div>
+              {% endif %}
+            </div>
+            <div class="report-content">
+              <span class="tag {% if report.report_type|lower == 'found' %}found{% endif %}">
+                {{ report.report_type }}
+              </span>
+              <h3>{{ report.item_name }}</h3>
+              <div class="report-meta">
+                <p>
+                  <strong>Location:</strong>
+                  {{ report.location or 'Not specified' }}
+                </p>
+                {% if report.incident_date %}
+                  <p>
+                    <strong>Date:</strong>
+                    {{ report.incident_date }}
+                  </p>
+                {% endif %}
+              </div>
+              <div class="report-status-row">
+                <strong>Status:</strong>
+                <span class="tag
+                  {% if report.status == 'Pending Claim' %}pending
+                  {% elif report.status in ['Returned', 'Archived'] %}returned
+                  {% endif %}">
+                  {{ report.status or 'Open' }}
+                </span>
+              </div>
+              <div class="card-actions">
+                <a class="button small"
+                   href="{{ url_for('report_detail', report_id=report.id) }}">
+                  View Details →
+                </a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="home-empty-state">
+        <div class="empty-icon" aria-hidden="true">🕵️</div>
+        <h3>
+          {% if search_performed %}
+            No matching reports found
+          {% else %}
+            No reports yet
+          {% endif %}
+        </h3>
+        <p>
+          {% if search_performed %}
+            No items match your search right now. Try different keywords or clear filters.
+          {% else %}
+            Be the first to submit a report and help the SLSU JGE community.
+          {% endif %}
+        </p>
+        <div class="empty-actions">
+          <a class="button" href="{{ url_for('new_report') }}">
+            ✨ Submit a Report
+          </a>
+          {% if search_performed %}
+            <a class="button secondary" href="{{ url_for('home') }}">
+              Clear Filters
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+</div>
+<script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const hasSearch = params.has('q') || params.has('type') || params.has('status');
+    const isReportsView = params.get("view") === "reports";
+    const backBtn = document.getElementById("back-to-home-btn");
+    const reportsSection = document.getElementById("reports-section");
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    // Show reports section if searching OR in reports view
+    if (hasSearch || isReportsView) {
+      if (reportsSection) reportsSection.style.display = "";
+    } else {
+      if (reportsSection) reportsSection.style.display = "none";
+    }
+
+    if (isReportsView) {
+      document.body.classList.add("reports-only");
+      if (backBtn) backBtn.style.display = "inline-flex";
+      document.title = "All Reports | SLSU JGE FindHub";
+    }
+
+    // Intercept "View Reports" nav link
+    const navLink = document.getElementById("nav-view-reports");
+    if (navLink) {
+      navLink.addEventListener("click", function (e) {
+        if (isReportsView) return;
+        e.preventDefault();
+        document.body.classList.add("reports-only");
+        if (reportsSection) reportsSection.style.display = "";
+        if (backBtn) backBtn.style.display = "inline-flex";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.pushState({}, "", "{{ url_for('home') }}?view=reports");
+        document.title = "All Reports | SLSU JGE FindHub";
+      });
+    }
+
+    // "← Back to Home" button
+    if (backBtn) {
+      backBtn.addEventListener("click", function (e) {
+        if (isReportsView && !hasSearch) return;
+        e.preventDefault();
+        document.body.classList.remove("reports-only");
+        if (!hasSearch && reportsSection) reportsSection.style.display = "none";
+        backBtn.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.pushState({}, "", "{{ url_for('home') }}");
+        document.title = "Home | SLSU JGE FindHub";
+      });
+    }
+  })();
+</script>
+{% endblock %}
