@@ -1,9 +1,16 @@
 {% extends "base.html" %}
-
-{% block title %}{{ report.item_name }} — {{ report.report_type }} Report #{{ report.id }}{% endblock %}
+{% block title %}{{ report.item_name }} — Report #{{ report.id }}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
+  <!-- ✅ BACK TO HOME BUTTON -->
+  <div class="mb-4">
+    <a href="{{ url_for('home') }}" class="back-home-btn">
+      ← Back to Home
+    </a>
+  </div>
+
+  <!-- Breadcrumb -->
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
@@ -12,15 +19,23 @@
   </nav>
 
   <div class="row g-4">
-    <!-- Photo column -->
+    <!-- Photo Column -->
     <div class="col-lg-5">
       <div class="card shadow-sm border-0">
         {% set photo_url = photo_src(report.photo) %}
         {% if photo_url %}
-          <img src="{{ photo_url }}" alt="{{ report.item_name }}" class="card-img-top" style="object-fit: cover; max-height: 420px;">
+          <img 
+            src="{{ photo_url }}" 
+            alt="{{ report.item_name }}" 
+            class="card-img-top" 
+            style="object-fit: cover; max-height: 420px; cursor: zoom-in;"
+          >
         {% else %}
-          <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 300px;">
-            <span class="text-muted">No photo provided</span>
+          <div class="card-img-top d-flex align-items-center justify-content-center" 
+               style="height: 300px; background: var(--surface-alt);">
+            <span style="font-size: 40px; opacity: 0.5;">
+              {% if report.report_type == 'Lost' %}🎒{% else %}🔍{% endif %}
+            </span>
           </div>
         {% endif %}
         <div class="card-body">
@@ -38,107 +53,168 @@
       </div>
     </div>
 
-    <!-- Details column -->
+    <!-- Details Column -->
     <div class="col-lg-7">
+      <!-- Report Details -->
       <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white">
-          <h5 class="mb-0">Report Details</h5>
+          <h5 class="mb-0">📋 Report Details</h5>
         </div>
         <div class="card-body">
           <dl class="row mb-0">
             <dt class="col-sm-4 text-muted">Category</dt>
-            <dd class="col-sm-8">{{ report.category }}</dd>
+            <dd class="col-sm-8">{{ report.category or 'Not specified' }}</dd>
 
-            <dt class="col-sm-4 text-muted">{{ 'Date Lost' if report.report_type == 'Lost' else 'Date Found' }}</dt>
-            <dd class="col-sm-8">{{ report.incident_date.strftime('%B %d, %Y') if report.incident_date else 'N/A' }}</dd>
+            <dt class="col-sm-4 text-muted">
+              {{ 'Date Lost' if report.report_type == 'Lost' else 'Date Found' }}
+            </dt>
+            <dd class="col-sm-8">
+              {{ report.incident_date.strftime('%B %d, %Y') if report.incident_date else 'Not specified' }}
+            </dd>
 
             <dt class="col-sm-4 text-muted">Location</dt>
-            <dd class="col-sm-8">{{ report.location }}</dd>
+            <dd class="col-sm-8">{{ report.location or 'Not specified' }}</dd>
 
             <dt class="col-sm-4 text-muted">Description</dt>
-            <dd class="col-sm-8">{{ report.description }}</dd>
+            <dd class="col-sm-8">{{ report.description or 'No description provided' }}</dd>
 
             {% if report.contact_public or admin_logged_in %}
-            <dt class="col-sm-4 text-muted">Reported by</dt>
-            <dd class="col-sm-8">{{ report.contact_name }}</dd>
-
-            <dt class="col-sm-4 text-muted">Contact</dt>
-            <dd class="col-sm-8">{{ report.contact }}</dd>
+              <dt class="col-sm-4 text-muted">Reported by</dt>
+              <dd class="col-sm-8">{{ report.contact_name }}</dd>
+              <dt class="col-sm-4 text-muted">Contact</dt>
+              <dd class="col-sm-8">{{ report.contact }}</dd>
             {% else %}
-            <dt class="col-sm-4 text-muted">Contact</dt>
-            <dd class="col-sm-8"><em class="text-muted">Contact details are private. Submit a claim request to connect with the owner.</em></dd>
+              <dt class="col-sm-4 text-muted">Contact</dt>
+              <dd class="col-sm-8">
+                <em class="text-muted">
+                  Contact details are private. Submit a claim request to connect with the owner.
+                </em>
+              </dd>
             {% endif %}
           </dl>
         </div>
       </div>
 
-      <!-- Claim form -->
+      <!-- Claim Form -->
       {% if report.status not in ['Returned', 'Archived'] %}
-      <div class="card shadow-sm border-0 mb-4" id="claim-form">
-        <div class="card-header bg-white">
-          <h5 class="mb-0">
-            {% if report.report_type == 'Found' %}Claim This Item{% else %}I Have Information / Claim{% endif %}
-          </h5>
-        </div>
-        <div class="card-body">
-          <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}">
-            <div class="mb-3">
-              <label for="claimant_name" class="form-label">Your Name <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="claimant_name" name="claimant_name" maxlength="120" required>
-            </div>
-            <div class="mb-3">
-              <label for="claimant_contact" class="form-label">Contact Details <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="claimant_contact" name="claimant_contact" maxlength="150" placeholder="Email or phone number" required>
-            </div>
-            <div class="mb-3">
-              <label for="proof" class="form-label">Proof of Ownership <span class="text-danger">*</span></label>
-              <textarea class="form-control" id="proof" name="proof" rows="4" required
-                placeholder="Describe distinguishing marks, contents, or any details that prove this item belongs to you."></textarea>
-              <div class="form-text">Be specific — the administrator will review your proof before approval.</div>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit Claim Request</button>
-          </form>
-        </div>
-      </div>
-      {% else %}
-      <div class="alert {% if report.status == 'Returned' %}alert-success{% else %}alert-secondary{% endif %}">
-        {% if report.status == 'Returned' %}
-          This item has been returned to its owner and is no longer available for claims.
-        {% else %}
-          This report has been archived and is no longer accepting claims.
-        {% endif %}
-      </div>
-      {% endif %}
-
-      <!-- Admin: claims list -->
-      {% if admin_logged_in and report.claims %}
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Claims ({{ report.claims|length }})</h5>
-          <a href="{{ url_for('admin_claims') }}" class="btn btn-sm btn-outline-primary">Manage All Claims</a>
-        </div>
-        <div class="card-body p-0">
-          <div class="list-group list-group-flush">
-            {% for claim in report.claims|sort(attribute='created_at', reverse=True) %}
-            <div class="list-group-item">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <h6 class="mb-1">{{ claim.claimant_name }}</h6>
-                  <p class="mb-1 text-muted small">{{ claim.claimant_contact }}</p>
-                  <p class="mb-1">{{ claim.proof }}</p>
-                  <small class="text-muted">Submitted {{ claim.created_at.strftime('%b %d, %Y %H:%M') if claim.created_at else '' }}</small>
-                </div>
-                <span class="badge {% if claim.status == 'Approved' %}bg-success{% elif claim.status == 'Rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
-                  {{ claim.status }}
-                </span>
+        <div class="card shadow-sm border-0 mb-4" id="claim-form">
+          <div class="card-header bg-white">
+            <h5 class="mb-0">
+              {% if report.report_type == 'Found' %}
+                ✋ Claim This Item
+              {% else %}
+                💡 I Have Information
+              {% endif %}
+            </h5>
+          </div>
+          <div class="card-body">
+            <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}">
+              <div class="mb-3">
+                <label for="claimant_name" class="form-label">Your Name <span class="text-danger">*</span></label>
+                <input 
+                  type="text" class="form-control" id="claimant_name" 
+                  name="claimant_name" maxlength="120" required
+                  placeholder="Enter your full name"
+                >
               </div>
-            </div>
-            {% endfor %}
+              <div class="mb-3">
+                <label for="claimant_contact" class="form-label">Contact Details <span class="text-danger">*</span></label>
+                <input 
+                  type="text" class="form-control" id="claimant_contact" 
+                  name="claimant_contact" maxlength="150" required
+                  placeholder="Email or phone number"
+                >
+              </div>
+              <div class="mb-3">
+                <label for="proof" class="form-label">Proof of Ownership <span class="text-danger">*</span></label>
+                <textarea 
+                  class="form-control" id="proof" name="proof" rows="4" required
+                  placeholder="Describe unique details, marks, or contents to prove ownership..."
+                ></textarea>
+                <div class="form-text">
+                  Be specific — the administrator will review your proof before approval.
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">✅ Submit Claim Request</button>
+            </form>
           </div>
         </div>
-      </div>
+      {% else %}
+        <div class="alert {% if report.status == 'Returned' %}alert-success{% else %}alert-secondary{% endif %}">
+          {% if report.status == 'Returned' %}
+            ✅ This item has been returned to its owner and is no longer available for claims.
+          {% else %}
+            📁 This report has been archived and is no longer accepting claims.
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- Admin: Claims List -->
+      {% if admin_logged_in and report.claims %}
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">📋 Claims ({{ report.claims|length }})</h5>
+            <a href="{{ url_for('admin_claims') }}" class="btn btn-sm btn-outline-primary">Manage All Claims</a>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+              {% for claim in report.claims|sort(attribute='created_at', reverse=True) %}
+                <div class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h6 class="mb-1">{{ claim.claimant_name }}</h6>
+                      <p class="mb-1 text-muted small">{{ claim.claimant_contact }}</p>
+                      <p class="mb-1">{{ claim.proof }}</p>
+                      <small class="text-muted">
+                        Submitted {{ claim.created_at.strftime('%b %d, %Y %H:%M') if claim.created_at else '' }}
+                      </small>
+                    </div>
+                    <span class="badge {% if claim.status == 'Approved' %}bg-success{% elif claim.status == 'Rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                      {{ claim.status }}
+                    </span>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
       {% endif %}
     </div>
   </div>
 </div>
+
+<style>
+  /* Back to Home Button */
+  .back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: 1px solid var(--border, #ddd);
+    border-radius: 10px;
+    background: var(--surface, #fff);
+    color: var(--text, #333);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.25s ease;
+  }
+  .back-home-btn:hover {
+    background: var(--primary-soft, #e6f4ea);
+    border-color: var(--primary, #075c3b);
+    color: var(--primary, #075c3b);
+    transform: translateX(-3px);
+  }
+  /* Card consistency */
+  .card {
+    border-radius: 14px !important;
+    overflow: hidden;
+  }
+  .card-header {
+    border-bottom: 1px solid var(--border, #eee);
+  }
+  /* Required field marker */
+  .text-danger {
+    color: #dc3545 !important;
+  }
+</style>
 {% endblock %}
