@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}Deleted Reports History — SLSU JGE FindHub{% endblock %}
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div>
+      <h1>🕓 Deleted Reports History</h1>
+      <p>Records of all reports deleted from the system.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+      <a href="{{ url_for('export_history_csv') }}" class="btn-export">📊 Export CSV</a>
+      <button onclick="window.print()" class="btn-export" style="background: #2980b9;">🖨️ Print</button>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <!-- DELETED LIST -->
+  <div class="reports-section">
+    {% if deleted_reports %}
+      <div class="reports-table">
+        <div class="table-header">
+          <span>Orig ID</span>
+          <span>Item Name</span>
+          <span>Type</span>
+          <span>Status When Deleted</span>
+          <span>Deleted By</span>
+          <span>Created</span>
+          <span>Deleted At</span>
+        </div>
+        {% for report in deleted_reports %}
+        <div class="table-row">
+          <span class="report-id">#{{ report.original_report_id }}</span>
+          <span class="report-name">{{ report.item_name }}</span>
+          <span class="type-{{ report.report_type|lower }}">{{ report.report_type }}</span>
+          <span class="status-{{ report.status_when_deleted|replace(' ', '-')|lower }}">
+            {{ report.status_when_deleted }}
+          </span>
+          <span>{{ report.deleted_by or 'Unknown' }}</span>
+          <span class="report-date">{{ report.created_at.strftime('%Y-%m-%d') if report.created_at else 'N/A' }}</span>
+          <span class="report-date">{{ report.deleted_at.strftime('%Y-%m-%d %H:%M') if report.deleted_at else 'N/A' }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-state">No reports have been deleted yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    background: #ffffff;
+  }
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .dashboard-header h1 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    font-weight: 700;
+  }
+  .dashboard-header p {
+    margin: 0;
+    color: #555555;
+    font-size: 0.95rem;
+  }
+  .btn-export {
+    background: #075c3b;
+    color: #ffffff;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-export:hover {
+    background: #064d32;
+    color: #ffffff;
+  }
+  .btn-secondary {
+    background: #f0f0f0;
+    color: #333333;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid #dddddd;
+  }
+  .btn-secondary:hover {
+    background: #e0e0e0;
+    color: #333333;
+  }
+  .reports-section h2 {
+    font-size: 1.1rem;
+    color: #333333;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  .reports-table {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  .table-header {
+    display: grid;
+    grid-template-columns: 70px 2fr 100px 180px 150px 120px 160px;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+    background: #f5f5f5;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #333333;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  .table-row {
+    display: grid;
+    grid-template-columns: 70px 2fr 100px 180px 150px 120px 160px;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid #e8e8e8;
+    align-items: center;
+    background: #ffffff;
+  }
+  .table-row:hover {
+    background: #f9f9f9;
+  }
+  .report-id {
+    color: #777777;
+    font-family: monospace;
+    font-weight: 600;
+  }
+  .report-name {
+    color: #333333;
+    font-weight: 600;
+  }
+  .type-lost { color: #c0392b; font-weight: 600; }
+  .type-found { color: #27ae60; font-weight: 600; }
+  .status-open { color: #2980b9; font-weight: 600; }
+  .status-pending-claim { color: #f39c12; font-weight: 600; }
+  .status-returned { color: #27ae60; font-weight: 600; }
+  .status-archived { color: #7f8c8d; font-weight: 600; }
+  .report-date {
+    color: #666666;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #777777;
+    font-weight: 500;
+  }
+  /* PRINT STYLES — clean when printing */
+  @media print {
+    .dashboard-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .btn-export, .btn-secondary, button { display: none !important; }
+    .dashboard-wrapper { padding: 0; }
+    .table-row:hover { background: transparent; }
+  }
+  @media (max-width: 768px) {
+    .table-header { display: none; }
+    .table-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem 1rem;
+    }
+  }
+</style>
+{% endblock %}
