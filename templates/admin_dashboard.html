@@ -81,7 +81,6 @@
             <span class="type-{{ report.report_type|lower }}">{{ report.report_type }}</span>
             <span class="status-{{ report.status|replace(' ', '-')|lower }}">{{ report.status }}</span>
             
-            <!-- ✅ STATUS UPDATE DROPDOWN -->
             <form action="{{ url_for('admin_update_report_status', report_id=report.id) }}" method="POST" class="status-form">
               <select name="status" onchange="this.form.submit()">
                 <option value="Open" {% if report.status == 'Open' %}selected{% endif %}>🟢 Open</option>
@@ -107,6 +106,7 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem 1.5rem;
+    background: #ffffff;
   }
 
   .dashboard-header {
@@ -115,32 +115,35 @@
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 2px solid #e0e0e0;
   }
 
   .dashboard-header h1 {
     margin: 0 0 0.25rem 0;
     font-size: 1.5rem;
     color: #1a1a1a;
+    font-weight: 700;
   }
 
   .dashboard-header p {
     margin: 0;
-    color: #666;
+    color: #555555;
     font-size: 0.95rem;
   }
 
   .btn-export {
     background: #075c3b;
-    color: white;
+    color: #ffffff;
     padding: 0.6rem 1.25rem;
     border-radius: 6px;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    border: none;
   }
 
   .btn-export:hover {
     background: #064d32;
+    color: #ffffff;
   }
 
   .stats-grid {
@@ -151,16 +154,18 @@
   }
 
   .stat-card {
-    background: white;
-    border: 1px solid #e8e8e8;
+    background: #ffffff;
+    border: 2px solid #e8e8e8;
     border-radius: 8px;
     padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
 
   .stat-label {
     font-size: 0.85rem;
-    color: #777;
+    color: #666666;
     margin-bottom: 0.5rem;
+    font-weight: 500;
   }
 
   .stat-value {
@@ -185,50 +190,58 @@
 
   .btn-primary {
     background: #075c3b;
-    color: white;
+    color: #ffffff;
     padding: 0.75rem 1.5rem;
     border-radius: 6px;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    border: none;
   }
 
   .btn-primary:hover {
     background: #064d32;
+    color: #ffffff;
   }
 
   .btn-secondary {
-    background: #f5f5f5;
-    color: #333;
+    background: #f0f0f0;
+    color: #333333;
     padding: 0.75rem 1.5rem;
     border-radius: 6px;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    border: 1px solid #dddddd;
   }
 
   .btn-secondary:hover {
-    background: #e8e8e8;
+    background: #e0e0e0;
+    color: #333333;
   }
 
   .badge {
-    background: rgba(255,255,255,0.3);
-    padding: 0.1rem 0.5rem;
+    background: rgba(0,0,0,0.15);
+    color: #ffffff;
+    padding: 0.15rem 0.5rem;
     border-radius: 10px;
     font-size: 0.8rem;
+    font-weight: 600;
   }
 
   .reports-section h2 {
     font-size: 1.1rem;
-    color: #333;
+    color: #333333;
     margin-bottom: 1rem;
+    font-weight: 600;
   }
 
   .reports-table {
-    border: 1px solid #e8e8e8;
+    border: 2px solid #e0e0e0;
     border-radius: 8px;
     overflow: hidden;
+    background: #ffffff;
   }
 
   .table-header {
@@ -236,10 +249,11 @@
     grid-template-columns: 60px 2fr 100px 140px 160px 120px 90px;
     gap: 0.5rem;
     padding: 0.85rem 1rem;
-    background: #f8f8f8;
-    font-weight: 600;
+    background: #f5f5f5;
+    font-weight: 700;
     font-size: 0.85rem;
-    color: #555;
+    color: #333333;
+    border-bottom: 2px solid #e0e0e0;
   }
 
   .table-row {
@@ -249,68 +263,82 @@
     padding: 1rem;
     border-top: 1px solid #e8e8e8;
     align-items: center;
+    background: #ffffff;
   }
 
   .table-row:hover {
-    background: #fafafa;
+    background: #f9f9f9;
   }
 
   .report-id {
-    color: #999;
+    color: #777777;
     font-family: monospace;
+    font-weight: 600;
   }
 
   .report-name {
     color: #075c3b;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
   }
 
-  .type-lost { color: #c0392b; font-weight: 500; }
-  .type-found { color: #27ae60; font-weight: 500; }
+  .report-name:hover {
+    text-decoration: underline;
+  }
 
-  .status-open { color: #2980b9; font-weight: 500; }
-  .status-pending-claim { color: #f39c12; font-weight: 500; }
-  .status-returned { color: #27ae60; font-weight: 500; }
-  .status-archived { color: #7f8c8d; font-weight: 500; }
+  .type-lost { color: #c0392b; font-weight: 600; }
+  .type-found { color: #27ae60; font-weight: 600; }
+
+  .status-open { color: #2980b9; font-weight: 600; }
+  .status-pending-claim { color: #f39c12; font-weight: 600; }
+  .status-returned { color: #27ae60; font-weight: 600; }
+  .status-archived { color: #7f8c8d; font-weight: 600; }
 
   .status-form select {
     width: 100%;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #ddd;
+    padding: 0.5rem 0.6rem;
+    border: 2px solid #d0d0d0;
     border-radius: 4px;
-    background: white;
+    background: #ffffff;
     cursor: pointer;
+    font-weight: 500;
+    color: #333333;
   }
 
   .status-form select:focus {
     outline: none;
     border-color: #075c3b;
+    background: #f8fff9;
   }
 
   .report-date {
-    color: #888;
+    color: #666666;
     font-size: 0.9rem;
+    font-weight: 500;
   }
 
   .btn-view {
-    background: #f0f0f0;
-    color: #333;
+    background: #e8e8e8;
+    color: #333333;
     padding: 0.4rem 0.8rem;
     border-radius: 4px;
     text-decoration: none;
     font-size: 0.85rem;
+    font-weight: 600;
     text-align: center;
+    border: 1px solid #d0d0d0;
   }
 
   .btn-view:hover {
-    background: #e0e0e0;
+    background: #d8d8d8;
+    color: #333333;
   }
 
   .empty-state {
     text-align: center;
     padding: 3rem;
-    color: #888;
+    color: #777777;
+    font-weight: 500;
   }
 
   @media (max-width: 768px) {
