@@ -909,3 +909,69 @@ html[data-theme="dark"] .theme-toggle {
         animation-duration: 0.01ms !important;
     }
 }
+/* ==========================================
+   PANTAY NA LAPAD NG MGA BOX SA HOMEPAGE
+   Gawing basehan ang No Reports Found box
+   ========================================== */
+
+:root {
+    --findhub-box-width: 800px;
+}
+
+.hero,
+.hero-section,
+.hero-banner,
+.home-hero,
+.home-stats,
+.stats-grid,
+.search-panel,
+.search-card,
+.no-reports,
+.no-results,
+.empty-state,
+.empty-state-card {
+    width: min(var(--findhub-box-width), calc(100% - 40px));
+    max-width: var(--findhub-box-width);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+/* Panatilihin ang tamang pagitan ng mga box */
+.hero,
+.hero-section,
+.hero-banner,
+.home-hero {
+    margin-top: 20px;
+    margin-bottom: 24px;
+}
+
+/* Pantayin ang laki ng mga report card */
+.report-card,
+.item-card {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+/* Para hindi lumampas sa screen sa cellphone */
+@media (max-width: 600px) {
+    :root {
+        --findhub-box-width: 800px;
+    }
+
+    .hero,
+    .hero-section,
+    .hero-banner,
+    .home-hero,
+    .home-stats,
+    .stats-grid,
+    .search-panel,
+    .search-card,
+    .no-reports,
+    .no-results,
+    .empty-state,
+    .empty-state-card {
+        width: calc(100% - 24px);
+        max-width: none;
+    }
+}
