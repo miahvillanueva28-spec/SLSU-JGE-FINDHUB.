@@ -257,7 +257,7 @@
           <!-- ✅ ACTION BUTTONS: Open | Mark as read | Delete -->
           <div class="notification-actions-row">
             {% if notification.report_id %}
-              <a href="{{ url_for('report_detail', report_id=notification.report_id) }}"
+              <a href="{{ url_for('report_detail', report_id=notification.report_id) }}?notification_id={{ notification.id }}"
                  class="btn-base btn-open"
                  aria-label="Open the related report">
                 👁 Open
