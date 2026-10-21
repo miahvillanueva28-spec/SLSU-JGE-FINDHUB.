@@ -428,7 +428,7 @@ def new_report():
             return redirect(url_for("new_report"))
 
         if not all([
-            item_name, category, description, location, incident_date, contact,
+            item_name, description, location, incident_date, contact,
         ]):
             flash("Please complete all required fields.", "danger")
             return redirect(url_for("new_report"))
@@ -439,9 +439,6 @@ def new_report():
 
         if len(item_name) > 150:
             flash("Item name is too long.", "danger")
-            return redirect(url_for("new_report"))
-        if len(category) > 80:
-            flash("Category is too long.", "danger")
             return redirect(url_for("new_report"))
         if len(location) > 200:
             flash("Location is too long.", "danger")
@@ -474,7 +471,7 @@ def new_report():
         report = Report(
             report_type=report_type,
             item_name=item_name,
-            category=category,
+            category=category or "General",
             description=description,
             location=location,
             incident_date=incident_date,
