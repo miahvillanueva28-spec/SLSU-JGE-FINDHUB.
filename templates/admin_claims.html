@@ -1,166 +1,445 @@
 {% extends "base.html" %}
-{% block title %}Claim Requests | FindHub{% endblock %}
-
+{% block title %}Claim Requests — SLSU JGE FindHub{% endblock %}
 {% block content %}
-<section class="panel">
-  <div class="page-heading" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<div class="claims-wrapper">
+  <!-- HEADER -->
+  <div class="claims-header">
     <div>
-      <h2>🤝 Claim Requests</h2>
-      <p class="help">
-        Review ownership proof and update claim decisions.
-        Approved claims mark the associated report as Returned.
-      </p>
+      <h1>🤝 Claim Requests</h1>
+      <p>Review ownership proof and update claim decisions. Approved claims mark the item as Returned.</p>
     </div>
-
-    <a class="button secondary" href="{{ url_for('admin_dashboard') }}">
-      ← Back to Dashboard
-    </a>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn-back">← Back to Dashboard</a>
   </div>
 
-  <div class="stats">
-    <div class="stat">
-      <span>📋 All Claims</span>
-      <strong>{{ claims|length }}</strong>
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">All Claims</div>
+      <div class="stat-value">{{ claims|length }}</div>
     </div>
-    <div class="stat">
-      <span>⏳ Pending</span>
-      <strong>{{ claims|selectattr('status', 'equalto', 'Pending')|list|length }}</strong>
+    <div class="stat-card">
+      <div class="stat-label">⏳ Pending</div>
+      <div class="stat-value pending">{{ claims|selectattr('status', 'equalto', 'Pending')|list|length }}</div>
     </div>
-    <div class="stat">
-      <span>✅ Approved</span>
-      <strong>{{ claims|selectattr('status', 'equalto', 'Approved')|list|length }}</strong>
+    <div class="stat-card">
+      <div class="stat-label">✅ Approved</div>
+      <div class="stat-value approved">{{ claims|selectattr('status', 'equalto', 'Approved')|list|length }}</div>
     </div>
-    <div class="stat">
-      <span>❌ Rejected</span>
-      <strong>{{ claims|selectattr('status', 'equalto', 'Rejected')|list|length }}</strong>
+    <div class="stat-card">
+      <div class="stat-label">❌ Rejected</div>
+      <div class="stat-value rejected">{{ claims|selectattr('status', 'equalto', 'Rejected')|list|length }}</div>
     </div>
   </div>
 
+  <!-- FILTERS -->
   {% if claims %}
-    <div class="filter-grid" style="margin-top:20px">
-      <div>
-        <label for="claim-search">Search claims</label>
-        <input
-          id="claim-search"
-          type="search"
-          placeholder="Search item, claimant, contact, or claim ID..."
-        >
+  <div class="filters-bar">
+    <div class="filter-group">
+      <label for="claim-search">Search claims</label>
+      <input
+        id="claim-search"
+        type="search"
+        placeholder="Search item, claimant, contact, or ID..."
+      >
+    </div>
+    <div class="filter-group">
+      <label for="claim-filter">Filter by status</label>
+      <select id="claim-filter">
+        <option value="all">All statuses</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- CLAIMS TABLE -->
+  {% if claims %}
+  <div class="claims-table-wrapper">
+    <div class="claims-table">
+      <div class="table-header-row">
+        <span>Claim / Item</span>
+        <span>Claimant</span>
+        <span>Proof of Ownership</span>
+        <span>Status / Review</span>
       </div>
-      <div>
-        <label for="claim-filter">Filter by status</label>
-        <select id="claim-filter">
-          <option value="all">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-        </select>
+      <div id="claims-rows">
+        {% for c in claims %}
+        <div class="table-row claim-row" data-status="{{ c.status|lower }}">
+          <div class="claim-item-col">
+            <strong class="claim-id">Claim #{{ c.id }}</strong>
+            {% if c.report %}
+              <p class="item-name">{{ c.report.item_name }}</p>
+              <span class="meta">Report #{{ c.report.id }} · {{ c.report.report_type }}</span>
+              <span class="meta">Status: {{ c.report.status }}</span>
+              <a href="{{ url_for('report_detail', report_id=c.report.id) }}" class="link-view">View Report →</a>
+            {% else %}
+              <span class="meta muted">Associated report unavailable</span>
+            {% endif %}
+          </div>
+
+          <div class="claimant-col">
+            <strong>{{ c.claimant_name }}</strong>
+            <span class="meta">Contact: {{ c.claimant_contact }}</span>
+            <span class="meta">Submitted:
+              {% if c.created_at %}
+                {{ c.created_at.strftime('%b %d, %Y %I:%M %p') }}
+              {% else %}
+                N/A
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="proof-col">
+            {{ c.proof }}
+          </div>
+
+          <div class="status-col">
+            {% if c.status|lower == 'pending' %}
+              <span class="status-tag pending">⏳ Pending</span>
+            {% elif c.status|lower == 'approved' %}
+              <span class="status-tag approved">✅ Approved</span>
+            {% elif c.status|lower == 'rejected' %}
+              <span class="status-tag rejected">❌ Rejected</span>
+            {% else %}
+              <span class="status-tag">{{ c.status }}</span>
+            {% endif %}
+
+            <form
+              method="POST"
+              action="{{ url_for('admin_update_claim_status', claim_id=c.id) }}"
+              class="status-form"
+              onsubmit="return confirm('Save this claim decision?');"
+            >
+              <label for="claim-{{ c.id }}">Update status</label>
+              <select id="claim-{{ c.id }}" name="status" required>
+                {% for s in ['Pending', 'Approved', 'Rejected'] %}
+                  <option value="{{ s }}"
+                    {% if c.status|lower == s|lower %}selected{% endif %}>
+                    {{ s }}
+                  </option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn-save">Save Review</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
       </div>
     </div>
-
-    <div class="table-wrap" style="margin-top:20px">
-      <table id="claims-table">
-        <thead>
-          <tr>
-            <th>Claim / Item</th>
-            <th>Claimant</th>
-            <th>Proof of Ownership</th>
-            <th>Status / Review</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in claims %}
-            <tr class="claim-row" data-status="{{ c.status|lower }}">
-              <td>
-                <strong>Claim #{{ c.id }}</strong><br>
-
-                {% if c.report %}
-                  <strong>{{ c.report.item_name }}</strong><br>
-                  <span class="help">
-                    Report #{{ c.report.id }} · {{ c.report.report_type }}
-                  </span><br>
-                  <span class="help">
-                    Report status: {{ c.report.status }}
-                  </span><br>
-                  <a href="{{ url_for('report_detail', report_id=c.report.id) }}">
-                    View report
-                  </a>
-                {% else %}
-                  <span class="help">Associated report unavailable</span>
-                {% endif %}
-              </td>
-
-              <td>
-                <strong>{{ c.claimant_name }}</strong><br>
-                <span class="help">
-                  Contact: {{ c.claimant_contact }}
-                </span><br>
-                <span class="help">
-                  Submitted:
-                  {% if c.created_at %}
-                    {{ c.created_at.strftime('%b %d, %Y %I:%M %p') }}
-                  {% else %}
-                    N/A
-                  {% endif %}
-                </span>
-              </td>
-
-              <td class="claim-proof">
-                {{ c.proof }}
-              </td>
-
-              <td>
-                {% if c.status|lower == 'pending' %}
-                  <span class="tag pending">⏳ Pending</span>
-                {% elif c.status|lower == 'approved' %}
-                  <span class="tag returned">✅ Approved</span>
-                {% elif c.status|lower == 'rejected' %}
-                  <span class="tag">❌ Rejected</span>
-                {% else %}
-                  <span class="tag">{{ c.status }}</span>
-                {% endif %}
-
-                <form
-                  method="POST"
-                  action="{{ url_for('admin_update_claim_status', claim_id=c.id) }}"
-                  style="margin-top:10px"
-                  onsubmit="return confirm('Save this claim decision?');"
-                >
-                  <label for="claim-{{ c.id }}">Update status</label>
-                  <select id="claim-{{ c.id }}" name="status" required>
-                    {% for s in ['Pending', 'Approved', 'Rejected'] %}
-                      <option value="{{ s }}"
-                        {% if c.status|lower == s|lower %}selected{% endif %}>
-                        {{ s }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                  <button type="submit" class="small" style="margin-top:8px">
-                    Save Review
-                  </button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <p id="claims-no-results" class="help" style="display:none;margin-top:16px">
+    <p id="claims-no-results" class="no-results">
       No claims match your search or selected filter.
     </p>
+  </div>
   {% else %}
-    <div class="empty-state">
-      <div style="font-size:42px">📭</div>
-      <h3>No Claim Requests Yet</h3>
-      <p>
-        New requests will appear here after someone submits a claim for a report.
-      </p>
-      <a class="button secondary" href="{{ url_for('admin_dashboard') }}">
-        Return to Dashboard
-      </a>
-    </div>
+  <div class="empty-state">
+    <div class="empty-icon">📭</div>
+    <h3>No Claim Requests Yet</h3>
+    <p>New requests will appear here after someone submits a claim for a report.</p>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn-primary">Return to Dashboard</a>
+  </div>
   {% endif %}
-</section>
+</div>
+
+<style>
+  .claims-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    background: #ffffff;
+  }
+
+  .claims-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .claims-header h1 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    font-weight: 700;
+  }
+
+  .claims-header p {
+    margin: 0;
+    color: #555;
+    font-size: 0.95rem;
+  }
+
+  .btn-back {
+    background: #f0f0f0;
+    color: #333;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid #ddd;
+  }
+
+  .btn-back:hover {
+    background: #e0e0e0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border: 2px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+
+  .stat-value.pending { color: #f39c12; }
+  .stat-value.approved { color: #27ae60; }
+  .stat-value.rejected { color: #c0392b; }
+
+  .filters-bar {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f8f8;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
+  }
+
+  .filter-group {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .filter-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 0.4rem;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    font-size: 0.95rem;
+  }
+
+  .filter-group input:focus,
+  .filter-group select:focus {
+    outline: none;
+    border-color: #075c3b;
+  }
+
+  .claims-table-wrapper {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .table-header-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
+    gap: 1rem;
+    padding: 0.9rem 1.25rem;
+    background: #f5f5f5;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-top: 1px solid #e8e8e8;
+    align-items: flex-start;
+    background: #ffffff;
+  }
+
+  .table-row:hover {
+    background: #f9f9f9;
+  }
+
+  .claim-id {
+    font-size: 1rem;
+    color: #333;
+  }
+
+  .item-name {
+    margin: 0.4rem 0 0.2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .meta {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0.2rem 0;
+  }
+
+  .meta.muted {
+    color: #999;
+  }
+
+  .link-view {
+    display: inline-block;
+    margin-top: 0.4rem;
+    color: #075c3b;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .link-view:hover {
+    text-decoration: underline;
+  }
+
+  .proof-col {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: #333;
+    line-height: 1.5;
+  }
+
+  .status-tag {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .status-tag.pending { background: #fef3e0; color: #b77900; }
+  .status-tag.approved { background: #e6f9e9; color: #219646; }
+  .status-tag.rejected { background: #fde8e8; color: #b02020; }
+
+  .status-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .status-form label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+  }
+
+  .status-form select {
+    padding: 0.5rem 0.7rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    font-weight: 500;
+  }
+
+  .status-form select:focus {
+    outline: none;
+    border-color: #075c3b;
+  }
+
+  .btn-save {
+    background: #075c3b;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.25rem;
+  }
+
+  .btn-save:hover {
+    background: #064d32;
+  }
+
+  .no-results {
+    padding: 2rem;
+    text-align: center;
+    color: #777;
+    font-weight: 500;
+    display: none;
+    margin: 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h3 {
+    margin: 0 0 0.5rem;
+    color: #333;
+    font-size: 1.25rem;
+  }
+
+  .empty-state p {
+    margin: 0 0 1.5rem;
+    color: #666;
+  }
+
+  .btn-primary {
+    background: #075c3b;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    background: #064d32;
+  }
+
+  @media (max-width: 1024px) {
+    .table-header-row { display: none; }
+    .table-row {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+</style>
 
 {% if claims %}
 <script>
@@ -177,10 +456,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     rows.forEach(function (row) {
       const matchesSearch = row.textContent.toLowerCase().includes(query);
-      const matchesStatus =
-        selectedStatus === "all" || row.dataset.status === selectedStatus;
+      const matchesStatus = selectedStatus === "all" || row.dataset.status === selectedStatus;
       const show = matchesSearch && matchesStatus;
-
       row.style.display = show ? "" : "none";
       if (show) visibleCount++;
     });
@@ -193,19 +470,4 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 {% endif %}
-
-<style>
-  .claim-proof {
-    white-space: pre-wrap;
-    min-width: 220px;
-    max-width: 400px;
-    overflow-wrap: anywhere;
-  }
-
-  @media (max-width: 700px) {
-    .claim-proof {
-      min-width: 160px;
-    }
-  }
-</style>
 {% endblock %}
