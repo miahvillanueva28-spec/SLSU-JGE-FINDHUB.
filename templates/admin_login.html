@@ -1,3 +1,4 @@
+```html
 {% extends "base.html" %}
 
 {% block title %}Admin Login | SLSU JGE FindHub{% endblock %}
@@ -5,132 +6,152 @@
 {% block head %}
 <style>
   .admin-login-panel {
-    width: 100%;
-    max-width: 560px;
-    margin: 28px auto;
-    padding: 28px;
+    width: calc(100% - 24px);
+    max-width: 480px;
+    margin: 36px auto;
+    padding: 30px;
     box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 20px;
   }
 
   .admin-login-panel .sticker-row {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
   }
 
   .admin-login-panel .sticker {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 10px;
+    padding: 7px 11px;
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--surface-alt);
     color: var(--text);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .admin-login-panel h2 {
-    margin: 0 0 12px;
+    margin: 0 0 10px;
     color: var(--text);
-    font-size: clamp(22px, 4vw, 28px);
+    font-size: clamp(23px, 4vw, 30px);
     line-height: 1.3;
   }
 
   .admin-login-panel .help {
-    margin: 0 0 20px;
+    margin: 0 0 24px;
     color: var(--muted);
     font-size: 14px;
     line-height: 1.7;
   }
 
-  .admin-login-panel form {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  .admin-login-panel .login-field {
+    margin-bottom: 18px;
   }
 
-  .admin-login-panel form label {
-    margin: 0 0 6px;
+  .admin-login-panel .login-field label {
+    display: block;
+    margin-bottom: 8px;
     color: var(--text);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
   }
 
-  .admin-login-panel form input[type="text"],
-  .admin-login-panel form input[type="password"] {
+  .admin-login-panel .login-field input {
     display: block;
     width: 100%;
-    min-width: 0;
-    min-height: 44px;
-    margin: 0 0 14px;
-    padding: 10px 12px;
+    min-height: 48px;
+    padding: 12px 14px;
+    box-sizing: border-box;
     border: 1px solid var(--border);
-    border-radius: 9px;
+    border-radius: 11px;
     background: var(--surface);
     color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    box-sizing: border-box;
+    font: inherit;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
   }
 
-  .admin-login-panel .card-actions {
+  .admin-login-panel .login-field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(8, 116, 67, .14);
+  }
+
+  .admin-login-panel .login-actions {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 2px;
+    gap: 12px;
+    margin-top: 24px;
   }
 
-  .admin-login-panel .card-actions button[type="submit"],
-  .admin-login-panel .card-actions a.button {
+  .admin-login-panel .login-actions button,
+  .admin-login-panel .login-actions a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 120px;
-    min-width: 120px;
-    min-height: 42px;
-    margin: 0;
-    padding: 0 10px;
+    flex: 1 1 140px;
+    min-height: 46px;
+    padding: 11px 16px;
     box-sizing: border-box;
     border: 1px solid var(--primary);
-    border-radius: 9px;
-    font-family: inherit;
-    font-size: 14px;
+    border-radius: 11px;
+    font: inherit;
     font-weight: 700;
-    line-height: 1.2;
     text-align: center;
     text-decoration: none;
     cursor: pointer;
-    transition: background .2s ease, transform .2s ease;
+    transition: transform .2s ease, background .2s ease;
   }
 
-  .admin-login-panel .card-actions button[type="submit"] {
+  .admin-login-panel .login-actions button {
     background: var(--primary);
-    color: #fff;
+    color: white;
   }
 
-  .admin-login-panel .card-actions button[type="submit"]:hover {
+  .admin-login-panel .login-actions button:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
   }
 
-  .admin-login-panel .card-actions a.button.secondary {
+  .admin-login-panel .login-actions a {
+    border-color: var(--border);
     background: var(--surface);
     color: var(--text);
-    border-color: var(--border);
   }
 
-  .admin-login-panel .card-actions a.button.secondary:hover {
+  .admin-login-panel .login-actions a:hover {
     background: var(--surface-alt);
   }
 
-  @media (max-width: 600px) {
+  .admin-login-panel .login-security {
+    margin-top: 22px;
+    padding: 12px 14px;
+    border-radius: 11px;
+    background: var(--surface-alt);
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 520px) {
     .admin-login-panel {
-      padding: 20px 16px;
+      margin: 20px auto;
+      padding: 22px 18px;
+    }
+
+    .admin-login-panel .login-actions {
+      flex-direction: column;
+    }
+
+    .admin-login-panel .login-actions button,
+    .admin-login-panel .login-actions a {
+      width: 100%;
+      flex-basis: auto;
     }
   }
 </style>
@@ -138,40 +159,58 @@
 
 {% block content %}
 <section class="panel admin-login-panel">
+
   <div class="sticker-row">
-    <span class="sticker"><span aria-hidden="true">🔐</span> Admin only</span>
-    <span class="sticker"><span aria-hidden="true">🛠️</span> Manage reports</span>
+    <span class="sticker">🔐 Admin Only</span>
+    <span class="sticker">🛠️ Manage Reports</span>
   </div>
 
-  <h2>🔐 Administrator Login</h2>
+  <h2>Administrator Login</h2>
+
   <p class="help">
-    Sign in to review reports, update item statuses, and verify claims.
+    Welcome to SLSU JGE FindHub. Sign in to manage Lost and Found
+    reports, review claims, and update item statuses.
   </p>
 
   <form method="POST" action="{{ url_for('admin_login') }}">
-    <label for="username">Username</label>
-    <input
-      id="username"
-      name="username"
-      type="text"
-      autocomplete="username"
-      maxlength="120"
-      required
-    >
 
-    <label for="password">Password</label>
-    <input
-      id="password"
-      name="password"
-      type="password"
-      autocomplete="current-password"
-      required
-    >
-
-    <div class="card-actions">
-      <button type="submit">Log In</button>
-      <a class="button secondary" href="{{ url_for('home') }}">Back Home</a>
+    <div class="login-field">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        name="username"
+        type="text"
+        autocomplete="username"
+        maxlength="120"
+        placeholder="Enter admin username"
+        required
+        autofocus
+      >
     </div>
+
+    <div class="login-field">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Enter admin password"
+        required
+      >
+    </div>
+
+    <div class="login-actions">
+      <button type="submit">🔓 Log In</button>
+      <a href="{{ url_for('home') }}">← Back Home</a>
+    </div>
+
   </form>
+
+  <div class="login-security">
+    🔒 Administrator access only. Keep your login credentials private.
+  </div>
+
 </section>
 {% endblock %}
+```
