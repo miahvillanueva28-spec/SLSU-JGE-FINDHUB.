@@ -110,37 +110,39 @@
     color: var(--muted, #6b7f72);
     line-height: 1.6;
   }
-  /* Action buttons row */
+  /* Action buttons row — Open, Mark as read, Delete */
   .notification-actions-row {
     display: flex;
     flex-shrink: 0;
-    gap: 8px;
+    gap: 6px;
     align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
   .notification-actions-row form,
   .notification-actions-row a {
     flex-shrink: 0;
   }
-  .notification-actions-row .button {
-    white-space: nowrap;
-    width: auto;
-  }
-  /* Open button — green, matches site theme */
-  .btn-open {
+  .btn-base {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 8px 14px;
-    border: 1px solid var(--primary, #075c3b);
+    padding: 7px 12px;
     border-radius: 8px;
-    background: var(--primary, #075c3b);
-    color: #fff !important;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
     transition: all 0.2s ease;
     line-height: 1.4;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  /* Open — green */
+  .btn-open {
+    background: var(--primary, #075c3b);
+    border-color: var(--primary, #075c3b);
+    color: #fff !important;
   }
   .btn-open:hover {
     background: var(--primary-dark, #05432a);
@@ -148,25 +150,28 @@
     color: #fff !important;
     transform: translateY(-1px);
   }
-  /* Mark as read button — outline style */
+  /* Mark as read — outline */
   .btn-mark-read {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 14px;
-    border: 1px solid var(--border, #d4ded7);
-    border-radius: 8px;
     background: var(--surface, #fff);
+    border-color: var(--border, #d4ded7);
     color: var(--text, #1a2e22);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    line-height: 1.4;
   }
   .btn-mark-read:hover {
     background: var(--primary-soft, rgba(7,92,59,0.12));
     border-color: var(--primary, #075c3b);
     color: var(--primary, #075c3b);
+  }
+  /* Delete — red */
+  .btn-delete {
+    background: #fff;
+    border-color: #f0c0c0;
+    color: #c0392b;
+  }
+  .btn-delete:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+    color: #fff;
+    transform: translateY(-1px);
   }
   @media (max-width: 520px) {
     .notification-item {
@@ -186,9 +191,9 @@
     .notification-actions-row {
       margin-left: 46px;
       width: 100%;
+      justify-content: stretch;
     }
-    .notification-actions-row .btn-open,
-    .notification-actions-row .btn-mark-read {
+    .notification-actions-row .btn-base {
       flex: 1;
       justify-content: center;
     }
@@ -211,7 +216,7 @@
     {% if unread_count|default(0) > 0 %}
       <div class="notification-actions">
         <form method="POST" action="{{ url_for('mark_all_notifications_read') }}">
-          <button type="submit" class="btn-open">
+          <button type="submit" class="btn-base btn-open">
             ✓ Mark all as read
           </button>
         </form>
@@ -252,24 +257,35 @@
             </time>
           </div>
 
-          <!-- ✅ ACTION BUTTONS: Open + Mark as read -->
+          <!-- ✅ ACTION BUTTONS: Open | Mark as read | Delete -->
           <div class="notification-actions-row">
             {% if notification.report_id %}
               <a href="{{ url_for('report_detail', report_id=notification.report_id) }}"
-                 class="btn-open"
+                 class="btn-base btn-open"
                  aria-label="Open the related report">
                 👁 Open
               </a>
             {% endif %}
+
             {% if not notification.is_read %}
               <form method="POST"
                     action="{{ url_for('mark_notification_read', notification_id=notification.id) }}">
-                <button type="submit" class="btn-mark-read"
+                <button type="submit" class="btn-base btn-mark-read"
                         aria-label="Mark notification as read">
-                  Mark as read
+                  ✓ Mark as read
                 </button>
               </form>
             {% endif %}
+
+            <!-- 🗑 DELETE BUTTON with confirmation -->
+            <form method="POST"
+                  action="{{ url_for('delete_notification', notification_id=notification.id) }}"
+                  onsubmit="return confirm('Delete this notification? This cannot be undone.');">
+              <button type="submit" class="btn-base btn-delete"
+                      aria-label="Delete notification">
+                🗑 Delete
+              </button>
+            </form>
           </div>
         </article>
       {% endfor %}
