@@ -340,7 +340,6 @@ def report_detail(report_id):
             except Exception:
                 db.session.rollback()
     return render_template("report_detail.html", report=report)
-
 # ==================================================
 # SUBMIT CLAIM — WITH PROOF PHOTO
 # ==================================================
@@ -366,4 +365,4 @@ def submit_claim(report_id):
         app.logger.exception("Proof photo upload failed")
         flash("Photo upload failed, but claim was submitted.", "warning")
     claim = Claim(
-        report_id=report.id, claimant_name=cname
+        report_id=report
