@@ -150,7 +150,7 @@
 </section>
 
 <style>
-/* Professional Form Styling & Transitions */
+/* Professional Form Styling — MAXIMUM TRANSPARENCY */
 .form-panel {
   max-width: 720px;
   margin: 0 auto;
@@ -190,14 +190,16 @@
 }
 
 .badge.primary {
-  background: var(--primary-soft);
+  background: rgba(8, 116, 67, 0.12);
   color: var(--primary-dark);
+  backdrop-filter: blur(10px);
 }
 
 .badge.secondary {
-  background: rgba(240, 244, 248, 0.6);
-  color: #475467;
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .form-title {
@@ -216,10 +218,11 @@
 }
 
 .form-container {
-  background: transparent; /* ✅ Fully transparent background */
+  background: transparent; /* ✅ 100% TRANSPARENT — NO BACKGROUND */
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: none; /* Removed shadow */
+  box-shadow: none;
+  border: none;
   transition: all 0.3s ease;
 }
 
@@ -258,11 +261,11 @@
 .form-input,
 .form-textarea {
   padding: 0.875rem 1rem;
-  border: 1.5px solid var(--border, #e5e7eb);
+  border: 1.5px solid rgba(229, 231, 235, 0.35);
   border-radius: 10px;
   font-size: 1rem;
-  background: rgba(255, 255, 255, 0.65); /* Semi-transparent inputs */
-  backdrop-filter: blur(8px); /* Blur effect behind inputs */
+  background: rgba(255, 255, 255, 0.2); /* ✅ Very transparent inputs */
+  backdrop-filter: blur(12px);
   color: var(--text);
   transition: all 0.3s ease;
   font-family: inherit;
@@ -272,14 +275,14 @@
 .form-textarea:focus {
   outline: none;
   border-color: var(--primary);
-  background: rgba(255, 255, 255, 0.9); /* More solid on focus */
-  box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.15);
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.1);
   transform: translateY(-1px);
 }
 
 .form-input::placeholder,
 .form-textarea::placeholder {
-  color: var(--muted, #9ca3af);
+  color: rgba(107, 114, 128, 0.7);
 }
 
 .file-input {
@@ -307,12 +310,12 @@
   padding: 0.75rem;
   border-radius: 8px;
   background: rgba(8, 116, 67, 0.08);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
   transition: background 0.3s ease;
 }
 
 .checkbox-label:hover {
-  background: rgba(8, 116, 67, 0.12);
+  background: rgba(8, 116, 67, 0.15);
 }
 
 .checkbox-input {
@@ -331,12 +334,12 @@
 .form-note {
   margin: 1.5rem 0;
   padding: 0.75rem 1rem;
-  background: rgba(249, 250, 251, 0.7);
-  backdrop-filter: blur(6px);
-  border-left: 3px solid var(--primary);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-left: 2px solid rgba(8, 116, 67, 0.5);
   border-radius: 0 8px 8px 0;
   font-size: 0.875rem;
-  color: #4b5563;
+  color: var(--text);
 }
 
 .form-actions {
@@ -380,15 +383,15 @@
 }
 
 .btn.secondary {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(6px);
-  border: 1.5px solid rgba(229, 231, 235, 0.8);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   color: var(--text);
 }
 
 .btn.secondary:hover {
-  border-color: var(--muted);
-  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Responsive */
@@ -415,7 +418,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const dateLabel = document.getElementById("incident-date-label");
   const formTitle = document.querySelector(".form-title");
   const btnText = document.getElementById("btn-text");
-  const submitBtn = document.getElementById("submit-btn");
 
   // Smooth transition for dynamic text
   const fadeUpdate = (element, newText) => {
