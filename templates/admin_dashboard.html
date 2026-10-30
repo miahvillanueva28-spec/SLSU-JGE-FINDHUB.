@@ -17,7 +17,7 @@
   <!-- STATS CARDS -- NICE GRID LAYOUT -->
   <div class="stats-container">
     <div class="stat-card total">
-      <div class="stat-icon">📋</div>
+      <div class="stat-icon"></div>
       <div class="stat-content">
         <p class="stat-label">Total Reports</p>
         <h3 class="stat-number">{{ stats.total }}</h3>
@@ -25,7 +25,7 @@
     </div>
 
     <div class="stat-card lost">
-      <div class="stat-icon">⚠️</div>
+      <div class="stat-icon"></div>
       <div class="stat-content">
         <p class="stat-label">Lost Items</p>
         <h3 class="stat-number">{{ stats.lost }}</h3>
@@ -33,7 +33,7 @@
     </div>
 
     <div class="stat-card found">
-      <div class="stat-icon">✅</div>
+      <div class="stat-icon"></div>
       <div class="stat-content">
         <p class="stat-label">Found Items</p>
         <h3 class="stat-number">{{ stats.found }}</h3>
@@ -41,7 +41,7 @@
     </div>
 
     <div class="stat-card open">
-      <div class="stat-icon">🟢</div>
+      <div class="stat-icon"></div>
       <div class="stat-content">
         <p class="stat-label">Open</p>
         <h3 class="stat-number">{{ stats.open }}</h3>
@@ -49,7 +49,7 @@
     </div>
 
     <div class="stat-card pending">
-      <div class="stat-icon">⏳</div>
+      <div class="stat-icon"></div>
       <div class="stat-content">
         <p class="stat-label">Pending Claims</p>
         <h3 class="stat-number">{{ stats.pending_claims }}</h3>
@@ -57,7 +57,7 @@
     </div>
 
     <div class="stat-card returned">
-      <div class="stat-icon">🎁</div>
+      <div class="stat-icon"></div>
       <div class="stat-content">
         <p class="stat-label">Returned</p>
         <h3 class="stat-number">{{ stats.returned }}</h3>
@@ -65,7 +65,7 @@
     </div>
 
     <div class="stat-card archived">
-      <div class="stat-icon">📁</div>
+      <div class="stat-icon"></div>
       <div class="stat-content">
         <p class="stat-label">Archived</p>
         <h3 class="stat-number">{{ stats.archived }}</h3>
@@ -85,14 +85,14 @@
     <div class="filter-group">
       <a href="{{ url_for('admin_dashboard') }}?filter=Lost" 
          class="filter-btn {% if request.args.get('filter') == 'Lost' %}active{% endif %}">
-        ⚠️ Lost Only
+         Lost 
       </a>
       <a href="{{ url_for('admin_dashboard') }}?filter=Found" 
          class="filter-btn {% if request.args.get('filter') == 'Found' %}active{% endif %}">
-        ✅ Found Only
+        Found 
       </a>
       <a href="{{ url_for('admin_history') }}" class="history-btn">
-        🕓 Deleted
+        Deleted
       </a>
       {% if request.args.get('filter') %}
         <a href="{{ url_for('admin_dashboard') }}" class="clear-btn">
@@ -107,11 +107,11 @@
     <div class="table-heading">
       <h2>
         {% if request.args.get('filter') == 'Lost' %}
-          ⚠️ Lost Reports
+           Lost Reports
         {% elif request.args.get('filter') == 'Found' %}
-          ✅ Found Reports
+           Found Reports
         {% else %}
-          📋 All Reports
+           All Reports
         {% endif %}
       </h2>
     </div>
@@ -146,10 +146,10 @@
             </span>
             <form action="{{ url_for('admin_update_report_status', report_id=report.id) }}" method="POST" class="col-update sel-form">
               <select name="status" onchange="this.form.submit()">
-                <option value="Open" {% if report.status == 'Open' %}selected{% endif %}>🟢 Open</option>
-                <option value="Pending Claim" {% if report.status == 'Pending Claim' %}selected{% endif %}>⏳ Pending</option>
-                <option value="Returned" {% if report.status == 'Returned' %}selected{% endif %}>✅ Returned</option>
-                <option value="Archived" {% if report.status == 'Archived' %}selected{% endif %}>📁 Archived</option>
+                <option value="Open" {% if report.status == 'Open' %}selected{% endif %}> Open</option>
+                <option value="Pending Claim" {% if report.status == 'Pending Claim' %}selected{% endif %}> Pending</option>
+                <option value="Returned" {% if report.status == 'Returned' %}selected{% endif %}> Returned</option>
+                <option value="Archived" {% if report.status == 'Archived' %}selected{% endif %}> Archived</option>
               </select>
             </form>
             <span class="col-date">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
