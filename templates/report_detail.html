@@ -36,6 +36,7 @@
         </div>
       </div>
     </div>
+
     <!-- Details Column -->
     <div class="col-lg-7">
       <!-- Report Details -->
@@ -73,7 +74,8 @@
           </dl>
         </div>
       </div>
-      <!-- Claim Form -->
+
+      <!-- Claim Form — UPDATED LABEL -->
       {% if report.status not in ['Returned', 'Archived'] %}
         <div class="card shadow-sm border-0 mb-4" id="claim-form">
           <div class="card-header bg-white">
@@ -103,16 +105,20 @@
                   placeholder="Email or phone number"
                 >
               </div>
+
+              <!-- ✅ UPDATED: From "Proof of Ownership" to "Information About the Item" -->
               <div class="mb-3">
-                <label for="proof" class="form-label">Proof of Ownership <span class="text-danger">*</span></label>
+                <label for="proof" class="form-label">Information About the Item <span class="text-danger">*</span></label>
                 <textarea 
                   class="form-control" id="proof" name="proof" rows="4" required
-                  placeholder="Describe unique details, marks, or contents to prove ownership..."
+                  placeholder="Describe the item — color, unique marks, contents, serial number, or any details that show you know this item..."
                 ></textarea>
                 <div class="form-text">
-                  Be specific — the administrator will review your proof before approval.
+                  Be specific — the administrator will compare your information with the reported item details.
                 </div>
               </div>
+              <!-- ✅ END OF UPDATE -->
+
               <button type="submit" class="btn btn-primary">✅ Submit Claim Request</button>
             </form>
           </div>
@@ -126,6 +132,7 @@
           {% endif %}
         </div>
       {% endif %}
+
       <!-- Admin: Claims List -->
       {% if admin_logged_in and report.claims %}
         <div class="card shadow-sm border-0">
@@ -159,6 +166,7 @@
     </div>
   </div>
 </div>
+
 <style>
   .card {
     border-radius: 14px !important;
