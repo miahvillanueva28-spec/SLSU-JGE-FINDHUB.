@@ -156,7 +156,7 @@ class Claim(db.Model):
     claimant_name = db.Column(db.String(120), nullable=False)
     claimant_contact = db.Column(db.String(150), nullable=False)
     proof = db.Column(db.Text, nullable=False)
-    proof_file = db.Column(db.String(1000), nullable=True)  # Proof photo upload
+    proof_file = db.Column(db.String(1000), nullable=True)
     status = db.Column(db.String(30), default="Pending", nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
@@ -411,11 +411,4 @@ def new_report():
             flash("Contact details are too long.", "danger")
             return redirect(url_for("new_report"))
         if len(contact_name) > 120:
-            flash("Your name is too long.", "danger")
-            return redirect(url_for("new_report"))
-
-        stored_contact_name = contact_name or "Not provided"
-        saved_photo = None
-
-        try:
-            saved_
+            flash("Your name
