@@ -66,65 +66,12 @@
   }
   .home-hero .hero-description {
     max-width: 680px;
-    margin: 0 auto 24px;
+    margin: 0 auto 32px;
     color: var(--muted);
     font-size: clamp(15px, 2vw, 17px);
     line-height: 1.8;
     animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .3s both;
   }
-
-  /* ✅ HOW IT WORKS SECTION */
-  .how-it-works {
-    max-width: 800px;
-    margin: 0 auto 32px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .35s both;
-  }
-  .step-card {
-    padding: 16px 12px;
-    border-radius: 14px;
-    background: var(--primary-soft);
-    border: 1px solid rgba(7,92,59,0.1);
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  .step-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(7,92,59,0.12);
-  }
-  .step-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: white;
-    font-weight: 800;
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-  .step-card h4 {
-    margin: 0 0 4px;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--primary);
-  }
-  .step-card p {
-    margin: 0;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-  @media (max-width: 600px) {
-    .how-it-works {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-  }
-
   .home-hero .button-group {
     display: flex;
     flex-wrap: wrap;
@@ -587,4 +534,525 @@
     margin-top: 14px;
     font-size: 12px;
   }
-  .home-report-card .card 
+  .home-report-card .card-actions {
+    margin-top: auto;
+    padding-top: 18px;
+  }
+  .home-report-card .card-actions .button {
+    width: 100%;
+  }
+
+  /* ==============================================
+     EMPTY STATE — ENHANCED
+  ============================================== */
+  .home-page .home-empty-state {
+    padding: 48px 28px;
+    border: 1px dashed var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    text-align: center;
+  }
+  .home-empty-state .empty-icon {
+    display: flex;
+    width: 80px;
+    height: 80px;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    font-size: 40px;
+    animation: emptyPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes emptyPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(7,92,59,.15); }
+    50% { box-shadow: 0 0 0 16px rgba(7,92,59,0); }
+  }
+  .home-empty-state h3 {
+    margin: 8px 0 10px;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .home-empty-state p {
+    max-width: 520px;
+    margin: 0 auto 24px;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .home-empty-state .empty-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* ==============================================
+     REPORTS-ONLY VIEW
+  ============================================== */
+  body.reports-only .home-hero,
+  body.reports-only .home-stats,
+  body.reports-only .search-panel {
+    display: none !important;
+  }
+  body.reports-only .reports-section {
+    margin-top: 0;
+    animation: reportsFadeIn .5s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes reportsFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes homeStickerEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ==============================================
+     RESPONSIVE
+  ============================================== */
+  @media (max-width: 950px) {
+    .home-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .filter-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .home-page .report-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 600px) {
+    .home-hero {
+      padding: 28px 20px;
+      border-radius: 20px;
+    }
+    .home-hero .sticker-row {
+      gap: 7px;
+      margin-bottom: 24px;
+    }
+    .home-hero .sticker {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .home-hero h1 {
+      font-size: clamp(26px, 5vw, 36px);
+    }
+    .home-stats {
+      gap: 12px;
+    }
+    .home-stats .stat {
+      padding: 20px 14px;
+    }
+    .filter-grid {
+      grid-template-columns: 1fr;
+    }
+    .search-actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+    .search-actions > * {
+      width: 100%;
+      text-align: center;
+    }
+    .reports-heading {
+      align-items: flex-start;
+    }
+    .home-page .report-grid {
+      grid-template-columns: 1fr;
+    }
+    .home-report-card .report-photo,
+    .home-report-card .placeholder-photo {
+      height: 210px;
+    }
+    .home-page .home-empty-state {
+      padding: 36px 18px;
+    }
+    .home-hero .button-group,
+    .home-empty-state .empty-actions {
+      flex-direction: column;
+    }
+    .home-hero .button,
+    .home-empty-state .button {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home-hero .sticker,
+    .home-report-card,
+    .home-stats .stat,
+    .search-panel,
+    body.reports-only .reports-section {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .home-report-card:hover .report-photo {
+      transform: none;
+    }
+    .home-report-card:hover {
+      transform: none;
+    }
+    .home-empty-state .empty-icon {
+      animation: none;
+    }
+  }
+</style>
+{% endblock %}
+{% block hero %}
+<section class="hero home-hero">
+  <div class="sticker-row" aria-label="Common lost and found categories">
+    <span class="sticker"><span aria-hidden="true">🎒</span> Bags & Wallets</span>
+    <span class="sticker"><span aria-hidden="true">🔑</span> Keys & IDs</span>
+    <span class="sticker"><span aria-hidden="true">📱</span> Gadgets</span>
+    <span class="sticker"><span aria-hidden="true">📚</span> Books & Notes</span>
+  </div>
+
+  <h1>SLSU JGE FindHub</h1>
+  <p class="tagline">Your trusted campus space for lost and found</p>
+  <p class="hero-description">
+    Report items you've lost or discovered, and help reunite them with their rightful owners — building a more connected and caring SLSU JGE community.
+  </p>
+
+  <div class="button-group">
+    <a class="button lost-btn" href="{{ url_for('new_report') }}?type=Lost">
+      ⚠️ Report Lost Item
+    </a>
+    <a class="button found-btn" href="{{ url_for('new_report') }}?type=Found">
+      🔍 Report Found Item
+    </a>
+  </div>
+</section>
+{% endblock %}
+{% block content %}
+<div class="home-page">
+  <section class="stats home-stats" aria-label="Lost and found statistics">
+    <div class="stat">
+      <span class="stat-label">📌 Active Reports</span>
+      <strong data-counter="{{ total_open|default(stats.open|default(0)) }}">0</strong>
+    </div>
+    <div class="stat">
+      <span class="stat-label">⚠️ Items Lost</span>
+      <strong data-counter="{{ total_lost|default(stats.lost|default(0)) }}">0</strong>
+    </div>
+    <div class="stat">
+      <span class="stat-label">🔎 Items Found</span>
+      <strong data-counter="{{ total_found|default(stats.found|default(0)) }}">0</strong>
+    </div>
+    <div class="stat">
+      <span class="stat-label">💛 Serving Since</span>
+      <strong>2026</strong>
+    </div>
+  </section>
+
+  <section class="panel search-panel" id="find-item"
+           aria-labelledby="find-item-heading">
+    <h2 class="search-heading" id="find-item-heading">
+      <span class="heading-icon" aria-hidden="true">🔎</span>
+      <span>Find an Item</span>
+    </h2>
+    <p class="search-description">
+      Search by keyword, filter by type or status, and quickly locate what you're looking for.
+    </p>
+    <form method="GET" action="{{ url_for('home') }}"
+          role="search" aria-label="Search lost and found reports">
+      <div class="filter-grid">
+        <div>
+          <label for="search-query">Search Keywords</label>
+          <input id="search-query" type="search" name="q"
+                 placeholder="Item name, description, or location..."
+                 value="{{ request.args.get('q', '') }}"
+                 maxlength="200" autocomplete="off">
+        </div>
+        <div>
+          <label for="report-type">Report Type</label>
+          <select id="report-type" name="type">
+            <option value="">All Types</option>
+            <option value="Lost"
+              {% if request.args.get('type', '') == 'Lost' %}selected{% endif %}>
+              Lost
+            </option>
+            <option value="Found"
+              {% if request.args.get('type', '') == 'Found' %}selected{% endif %}>
+              Found
+            </option>
+          </select>
+        </div>
+        <div>
+          <label for="report-status">Status</label>
+          <select id="report-status" name="status">
+            <option value="">All Statuses</option>
+            {% for status_option in ['Open', 'Pending Claim', 'Returned', 'Archived'] %}
+              <option value="{{ status_option }}"
+                {% if request.args.get('status', '') == status_option %}selected{% endif %}>
+                {{ status_option }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="search-actions">
+        <button type="submit">🔎 Search Reports</button>
+        <a class="button secondary" href="{{ url_for('home') }}">
+          Clear Filters
+        </a>
+      </div>
+    </form>
+  </section>
+
+  <section class="reports-section" id="reports-section"
+           aria-labelledby="recent-reports-heading">
+    <div class="back-to-home-row">
+      <a class="button secondary small" href="{{ url_for('home') }}" id="back-to-home-btn" style="display:none;">
+        ← Back to Home
+      </a>
+    </div>
+    <div class="reports-heading">
+      <h2 id="recent-reports-heading">
+        {% if search_performed %}
+          🔍 Search Results
+        {% else %}
+          📌 Recent Reports
+        {% endif %}
+        {% if reports %}
+          <span class="reports-count">{{ reports|length }}</span>
+        {% endif %}
+      </h2>
+      <div style="display: flex; gap: 10px;">
+        <a class="button small lost-btn" href="{{ url_for('new_report') }}?type=Lost">
+          + Report Lost
+        </a>
+        <a class="button small found-btn" href="{{ url_for('new_report') }}?type=Found">
+          + Report Found
+        </a>
+      </div>
+    </div>
+
+    {% if reports %}
+      <div class="report-grid">
+        {% for report in reports %}
+          <article class="home-report-card">
+            <div class="report-image-wrap">
+              {% if report.photo %}
+                <img class="report-photo"
+                     src="{{ photo_src(report.photo) }}"
+                     alt="Photo of {{ report.item_name }}"
+                     loading="lazy"
+                     decoding="async">
+              {% else %}
+                <div class="placeholder-photo"
+                     aria-label="No item photo available">
+                  <span aria-hidden="true">
+                    {% if report.report_type|lower == 'lost' %}
+                      ⚠️
+                    {% else %}
+                      🔎
+                    {% endif %}
+                  </span>
+                </div>
+              {% endif %}
+            </div>
+            <div class="report-content">
+              <span class="tag {% if report.report_type|lower == 'found' %}found{% endif %}">
+                {{ report.report_type }}
+              </span>
+              <h3>{{ report.item_name }}</h3>
+              <div class="report-meta">
+                <p>
+                  <strong>📍 Location:</strong>
+                  {{ report.location or 'Not specified' }}
+                </p>
+                {% if report.incident_date %}
+                  <p>
+                    <strong>📅 Date:</strong>
+                    {{ report.incident_date }}
+                  </p>
+                {% endif %}
+              </div>
+              <div class="report-status-row">
+                <strong>Status:</strong>
+                <span class="tag
+                  {% if report.status == 'Pending Claim' %}pending
+                  {% elif report.status in ['Returned', 'Archived'] %}returned
+                  {% endif %}">
+                  {{ report.status or 'Open' }}
+                </span>
+              </div>
+              <div class="card-actions">
+                <a class="button small"
+                   href="{{ url_for('report_detail', report_id=report.id) }}">
+                  View Details →
+                </a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="home-empty-state">
+        <div class="empty-icon" aria-hidden="true">🕵️</div>
+        <h3>
+          {% if search_performed %}
+            No Matching Reports Found
+          {% else %}
+            No Reports Yet — Be the First
+          {% endif %}
+        </h3>
+        <p>
+          {% if search_performed %}
+            We couldn't find any items matching your search. Try different keywords or clear your filters to see all reports.
+          {% else %}
+            Help build our community — report an item today and help reunite it with its rightful owner.
+          {% endif %}
+        </p>
+        <div class="empty-actions">
+          <a class="button lost-btn" href="{{ url_for('new_report') }}?type=Lost">
+            ⚠️ Report Lost Item
+          </a>
+          <a class="button found-btn" href="{{ url_for('new_report') }}?type=Found">
+           🔍 Report Found Item
+          </a>
+          {% if search_performed %}
+            <a class="button secondary" href="{{ url_for('home') }}">
+              Clear Filters
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const hasSearch = params.has('q') || params.has('type') || params.has('status');
+    const isReportsView = params.get("view") === "reports";
+    const backBtn = document.getElementById("back-to-home-btn");
+    const reportsSection = document.getElementById("reports-section");
+
+    if (hasSearch || isReportsView) {
+      if (reportsSection) reportsSection.style.display = "";
+    } else {
+      if (reportsSection) reportsSection.style.display = "none";
+    }
+
+    if (isReportsView) {
+      document.body.classList.add("reports-only");
+      if (backBtn) backBtn.style.display = "inline-flex";
+      document.title = "All Reports | SLSU JGE FindHub";
+    }
+
+    const navLink = document.getElementById("nav-view-reports");
+    if (navLink) {
+      navLink.addEventListener("click", function (e) {
+        if (isReportsView) return;
+        e.preventDefault();
+        document.body.classList.add("reports-only");
+        if (reportsSection) reportsSection.style.display = "";
+        if (backBtn) backBtn.style.display = "inline-flex";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.pushState({}, "", "{{ url_for('home') }}?view=reports");
+        document.title = "All Reports | SLSU JGE FindHub";
+      });
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener("click", function (e) {
+        if (isReportsView && !hasSearch) return;
+        e.preventDefault();
+        document.body.classList.remove("reports-only");
+        if (!hasSearch && reportsSection) reportsSection.style.display = "none";
+        backBtn.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.pushState({}, "", "{{ url_for('home') }}");
+        document.title = "Home | SLSU JGE FindHub";
+      });
+    }
+
+    /* ==============================================
+       SCROLL-TRIGGERED ANIMATIONS (IntersectionObserver)
+    ============================================== */
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: "0px 0px -40px 0px"
+    };
+
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe stat cards
+    document.querySelectorAll(".home-stats .stat").forEach(function (el) {
+      observer.observe(el);
+    });
+
+    // Observe search panel
+    const searchPanel = document.querySelector(".search-panel");
+    if (searchPanel) observer.observe(searchPanel);
+
+    // Observe report cards with staggered delay
+    document.querySelectorAll(".home-report-card").forEach(function (el, index) {
+      el.style.transitionDelay = (index % 3) * 0.1 + "s";
+      observer.observe(el);
+    });
+
+    /* ==============================================
+       ANIMATED COUNTERS FOR STATISTICS
+    ============================================== */
+    function animateCounter(element) {
+      const target = parseInt(element.getAttribute("data-counter"), 10);
+      if (isNaN(target) || target === 0) {
+        element.textContent = target || 0;
+        return;
+      }
+      const duration = 1200;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(eased * target);
+        element.textContent = current;
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          element.textContent = target;
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Trigger counters when stats become visible
+    const statObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          const counter = entry.target.querySelector("[data-counter]");
+          if (counter && !counter.dataset.counted) {
+            counter.dataset.counted = "true";
+            animateCounter(counter);
+          }
+          statObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+
+    document.querySelectorAll(".home-stats .stat").forEach(function (el) {
+      statObserver.observe(el);
+    });
+  })();
+</script>
+{% endblock %}
