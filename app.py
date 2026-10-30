@@ -43,7 +43,7 @@ app = Flask(__name__)
 secret_key = os.environ.get("SECRET_KEY", "").strip()
 if IS_VERCEL and not secret_key:
     raise RuntimeError(
-        "SECRET_KEY must be configured in Vercel Environment Variables."
+        "SECRET_KEY must be configured in Environment Variables."
     )
 app.config["SECRET_KEY"] = secret_key or secrets.token_hex(32)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
@@ -75,7 +75,7 @@ if not database_url:
     if IS_VERCEL:
         raise RuntimeError(
             "DATABASE_URL is missing. Configure PostgreSQL and add "
-            "DATABASE_URL in Vercel Environment Variables."
+            "DATABASE_URL in Environment Variables."
         )
     database_url = f"sqlite:///{DATA_DIR / 'findhub.db'}"
     app.logger.warning(
@@ -89,8 +89,7 @@ if not database_url.startswith(("postgresql+psycopg2://", "sqlite:///")):
 
 if IS_VERCEL and database_url.startswith("sqlite:///"):
     raise RuntimeError(
-        "SQLite is not suitable for persistent Vercel production data. "
-        "Configure PostgreSQL using DATABASE_URL."
+        "SQLite is not suitable for production. Configure PostgreSQL using DATABASE_URL."
     )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
@@ -109,7 +108,7 @@ if USE_CLOUDINARY:
     cloudinary.config(cloudinary_url=CLOUDINARY_URL)
 if IS_VERCEL and not USE_CLOUDINARY:
     app.logger.warning(
-        "CLOUDINARY_URL is missing. Photo uploads will not work on Vercel."
+        "CLOUDINARY_URL is missing. Photo uploads will not work."
     )
 
 # ==================================================
@@ -263,8 +262,7 @@ def save_photo(file_storage):
     if not USE_CLOUDINARY:
         if IS_VERCEL:
             raise RuntimeError(
-                "Photo storage is not configured. Set CLOUDINARY_URL "
-                "in environment variables."
+                "Photo storage is not configured. Set CLOUDINARY_URL."
             )
         filename = f"{secrets.token_hex(12)}_{original_name}"
         file_storage.save(UPLOAD_FOLDER / filename)
@@ -410,4 +408,7 @@ def new_report():
             flash("Contact details are too long.", "danger")
             return redirect(url_for("new_report"))
         if len(contact_name) > 120:
-            flash("Your name is
+            flash("Your name is too long.", "danger")
+            return redirect(url_for("new_report"))
+
+        stored_contact_name = contact_name or "Not provided"
