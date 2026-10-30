@@ -1,466 +1,421 @@
-{% extends "base.html" %}
-{% block title %}Admin Dashboard — SLSU JGE FindHub{% endblock %}
+import os
+import csv
+import io
+import hmac
+import secrets
+from pathlib import Path
+from datetime import date, datetime, timezone
+from functools import wraps
 
-{% block head %}
-<style>
-.dashboard-wrapper {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 1.5rem;
+import cloudinary
+import cloudinary.uploader
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    flash,
+    session,
+    send_from_directory,
+    make_response,
+)
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import or_
+from werkzeug.utils import secure_filename
+
+# ==================================================
+# APP CONFIGURATION
+# ==================================================
+BASE_DIR = Path(__file__).resolve().parent
+IS_VERCEL = os.environ.get("VERCEL", "").lower() == "1"
+DATA_DIR = Path(
+    os.environ.get(
+        "DATA_DIR",
+        "/tmp/findhub" if IS_VERCEL else str(BASE_DIR / "data"),
+    )
+).resolve()
+UPLOAD_FOLDER = DATA_DIR / "uploads"
+if not IS_VERCEL:
+    UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+
+app = Flask(__name__)
+secret_key = os.environ.get("SECRET_KEY", "").strip()
+if IS_VERCEL and not secret_key:
+    raise RuntimeError(
+        "SECRET_KEY must be configured in Vercel Environment Variables."
+    )
+app.config["SECRET_KEY"] = secret_key or secrets.token_hex(32)
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = (
+    os.environ.get("COOKIE_SECURE", "true").lower() == "true"
+)
+
+# ==================================================
+# DATABASE CONFIGURATION
+# ==================================================
+database_url = os.environ.get("DATABASE_URL", "").strip()
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace(
+        "postgres://", "postgresql+psycopg2://", 1
+    )
+elif database_url.startswith("postgresql://"):
+    database_url = database_url.replace(
+        "postgresql://", "postgresql+psycopg2://", 1
+    )
+elif database_url.startswith("postgresql+psycopg://"):
+    database_url = database_url.replace(
+        "postgresql+psycopg://", "postgresql+psycopg2://", 1
+    )
+
+if not database_url:
+    if IS_VERCEL:
+        raise RuntimeError(
+            "DATABASE_URL is missing. Configure PostgreSQL and add "
+            "DATABASE_URL in Vercel Environment Variables."
+        )
+    database_url = f"sqlite:///{DATA_DIR / 'findhub.db'}"
+    app.logger.warning(
+        "DATABASE_URL is missing. Using local SQLite for development only."
+    )
+
+if not database_url.startswith(("postgresql+psycopg2://", "sqlite:///")):
+    raise RuntimeError(
+        "Unsupported DATABASE_URL. Use PostgreSQL or SQLite locally."
+    )
+
+if IS_VERCEL and database_url.startswith("sqlite:///"):
+    raise RuntimeError(
+        "SQLite is not suitable for persistent Vercel production data. "
+        "Configure PostgreSQL using DATABASE_URL."
+    )
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
 }
+db = SQLAlchemy(app)
 
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 16px;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-}
+# ==================================================
+# CLOUDINARY PHOTO STORAGE
+# ==================================================
+CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "").strip()
+USE_CLOUDINARY = bool(CLOUDINARY_URL)
+if USE_CLOUDINARY:
+    cloudinary.config(cloudinary_url=CLOUDINARY_URL)
+if IS_VERCEL and not USE_CLOUDINARY:
+    app.logger.warning(
+        "CLOUDINARY_URL is missing. Photo uploads will not work on Vercel."
+    )
 
-.page-title h1 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.75rem;
-  color: #055c34;
-  font-weight: 800;
-}
+# ==================================================
+# WEBSITE BRANDING
+# ==================================================
+CAMPUS_LOGO = (
+    "https://www.slsu.edu.ph/wp-content/uploads/2023/05/"
+    "Campuses/Campus-Logo/SLSU-JGE-Logo.png"
+)
+CAMPUS_PHOTO = (
+    "https://www.slsu.edu.ph/wp-content/uploads/"
+    "elementor/thumbs/JGE%20bldg-q6759ky68kjrv7f9iklhioqfdjrgb6067ofnjh7qns.jpg"
+)
 
-.page-title p {
-  margin: 0;
-  color: #557563;
-  font-size: 0.95rem;
-}
+# ==================================================
+# DATABASE MODELS
+# ==================================================
+def utcnow():
+    return datetime.now(timezone.utc)
 
-.export-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, #075c3b, #087443);
-  color: #ffffff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
+class Report(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    report_type = db.Column(db.String(20), nullable=False)
+    item_name = db.Column(db.String(150), nullable=False)
+    category = db.Column(db.String(80), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    location = db.Column(db.String(200), nullable=False)
+    incident_date = db.Column(db.Date, nullable=False)
+    contact_name = db.Column(db.String(120), nullable=False)
+    contact = db.Column(db.String(150), nullable=False)
+    contact_public = db.Column(db.Boolean, default=False, nullable=False)
+    photo = db.Column(db.String(1000), nullable=True)
+    status = db.Column(db.String(30), default="Open", nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
+    claims = db.relationship(
+        "Claim", backref="report", cascade="all, delete-orphan", lazy=True
+    )
 
-.export-btn:hover {
-  transform: translateY(-2px);
-}
+class Claim(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    report_id = db.Column(
+        db.Integer, db.ForeignKey("report.id"), nullable=False
+    )
+    claimant_name = db.Column(db.String(120), nullable=False)
+    claimant_contact = db.Column(db.String(150), nullable=False)
+    proof = db.Column(db.Text, nullable=False)
+    proof_file = db.Column(db.String(1000), nullable=True)  # Proof photo upload
+    status = db.Column(db.String(30), default="Pending", nullable=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    notification_type = db.Column(
+        db.String(30), nullable=False, default="info"
+    )
+    report_id = db.Column(db.Integer, nullable=True)
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
-.stat-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  border-radius: 16px;
-  padding: 1.2rem;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-  transition: all 0.3s ease;
-}
+class DeletedReport(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    original_report_id = db.Column(db.Integer, nullable=False)
+    report_type = db.Column(db.String(20), nullable=False)
+    item_name = db.Column(db.String(150), nullable=False)
+    category = db.Column(db.String(80), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    location = db.Column(db.String(200), nullable=False)
+    incident_date = db.Column(db.Date, nullable=False)
+    contact_name = db.Column(db.String(120), nullable=False)
+    contact = db.Column(db.String(150), nullable=False)
+    status_when_deleted = db.Column(db.String(30), nullable=False)
+    photo = db.Column(db.String(1000), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False)
+    deleted_at = db.Column(db.DateTime, default=utcnow, nullable=False)
+    deleted_by = db.Column(db.String(120), nullable=True)
 
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(7, 92, 59, 0.08);
-}
+with app.app_context():
+    db.create_all()
 
-.stat-label {
-  font-size: 0.85rem;
-  color: #668072;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
+# ==================================================
+# TEMPLATE CONTEXT
+# ==================================================
+@app.context_processor
+def inject_global_template_values():
+    return {
+        "today": date.today(),
+        "campus_logo": CAMPUS_LOGO,
+        "campus_photo": CAMPUS_PHOTO,
+        "admin_logged_in": bool(session.get("admin_logged_in")),
+    }
 
-.stat-number {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #1a3024;
-}
+@app.context_processor
+def inject_notification_count():
+    count = 0
+    if session.get("admin_logged_in"):
+        count = Notification.query.filter_by(is_read=False).count()
+    return {"unread_notification_count": count}
 
-.stat-card.lost .stat-number { color: #c0392b; }
-.stat-card.found .stat-number { color: #27ae60; }
-.stat-card.open .stat-number { color: #2980b9; }
-.stat-card.pending .stat-number { color: #f39c12; }
-.stat-card.returned .stat-number { color: #27ae60; }
-.stat-card.archived .stat-number { color: #7f8c8d; }
+# ==================================================
+# CONSTANTS AND HELPERS
+# ==================================================
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+REPORT_STATUSES = {"Open", "Pending Claim", "Returned", "Archived"}
+CLAIM_STATUSES = {"Pending", "Approved", "Rejected"}
 
-.actions-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 1.25rem;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  border-radius: 16px;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-}
+def create_notification(title, message, notification_type="info", report_id=None):
+    notification = Notification(
+        title=title,
+        message=message,
+        notification_type=notification_type,
+        report_id=report_id,
+        is_read=False,
+    )
+    db.session.add(notification)
+    return notification
 
-.main-action-btn {
-  background: linear-gradient(135deg, #075c3b, #087443);
-  color: #fff;
-  padding: 0.8rem 1.6rem;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
+def admin_required(view_function):
+    @wraps(view_function)
+    def wrapped_view(*args, **kwargs):
+        if not session.get("admin_logged_in"):
+            flash("Please log in as an administrator first.", "warning")
+            return redirect(url_for("admin_login"))
+        return view_function(*args, **kwargs)
+    return wrapped_view
 
-.main-action-btn:hover {
-  transform: translateY(-2px);
-}
+def allowed_file(filename):
+    return (
+        bool(filename)
+        and "." in filename
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
 
-.badge-dot {
-  background: rgba(255,255,255,0.25);
-  padding: 0.2rem 0.6rem;
-  border-radius: 20px;
-  margin-left: 0.5rem;
-  font-size: 0.8rem;
-}
+def photo_src(photo):
+    if not photo:
+        return None
+    if photo.startswith(("https://", "http://")):
+        return photo
+    return url_for("uploaded_photo", filename=photo)
 
-.filter-group {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
+@app.context_processor
+def inject_photo_helper():
+    return {"photo_src": photo_src}
 
-.filter-btn, .history-btn, .clear-btn {
-  padding: 0.7rem 1.2rem;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  border: 1px solid transparent;
-  transition: all 0.3s ease;
-}
+def save_photo(file_storage):
+    if not file_storage or not file_storage.filename:
+        return None
+    original_name = secure_filename(file_storage.filename)
+    if not original_name or not allowed_file(original_name):
+        raise ValueError("Use a PNG, JPG, JPEG, GIF, or WEBP image.")
+    if not USE_CLOUDINARY:
+        if IS_VERCEL:
+            raise RuntimeError(
+                "Photo storage is not configured. Set CLOUDINARY_URL "
+                "in Vercel Environment Variables."
+            )
+        filename = f"{secrets.token_hex(12)}_{original_name}"
+        file_storage.save(UPLOAD_FOLDER / filename)
+        return filename
+    result = cloudinary.uploader.upload(
+        file_storage,
+        folder="slsu-jge-findhub",
+        resource_type="image",
+    )
+    photo_url = result.get("secure_url")
+    if not photo_url:
+        raise RuntimeError("Cloudinary did not return a secure photo URL.")
+    return photo_url
 
-.filter-btn {
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(7, 92, 59, 0.15);
-  color: #2d4a3b;
-}
+def delete_photo(photo):
+    if not photo or photo.startswith(("https://", "http://")):
+        return
+    if IS_VERCEL:
+        return
+    filename = Path(photo).name
+    path = UPLOAD_FOLDER / filename
+    try:
+        if path.is_file():
+            path.unlink()
+    except OSError:
+        app.logger.exception("Unable to delete local photo")
 
-.filter-btn:hover {
-  background: rgba(7, 92, 59, 0.08);
-}
+def parse_incident_date(value):
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return None
 
-.filter-btn.active {
-  background: #075c3b;
-  color: #fff;
-  border-color: #075c3b;
-}
+def get_report_form_value(name, default=""):
+    return (request.form.get(name, default) or "").strip()
 
-.history-btn {
-  background: rgba(254, 243, 199, 0.8);
-  color: #92400e;
-}
+# ==================================================
+# HOME AND SEARCH
+# ==================================================
+@app.route("/")
+def home():
+    query = request.args.get("q", "").strip()[:100]
+    report_type = request.args.get("type", "").strip()
+    status = request.args.get("status", "").strip()
+    sort = request.args.get("sort", "newest").strip()
 
-.history-btn:hover {
-  background: rgba(253, 230, 138, 0.9);
-}
+    search_performed = bool(query or report_type or status)
+    reports_query = Report.query
 
-.clear-btn {
-  background: rgba(7, 92, 59, 0.08);
-  color: #075c3b;
-}
+    if report_type in {"Lost", "Found"}:
+        reports_query = reports_query.filter(Report.report_type == report_type)
+    if status in REPORT_STATUSES:
+        reports_query = reports_query.filter(Report.status == status)
+    if query:
+        search_term = f"%{query}%"
+        reports_query = reports_query.filter(
+            or_(
+                Report.item_name.ilike(search_term),
+                Report.description.ilike(search_term),
+                Report.location.ilike(search_term),
+            )
+        )
 
-.table-wrapper {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  border-radius: 20px;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-  overflow: hidden;
-}
+    if sort == "oldest":
+        reports_query = reports_query.order_by(
+            Report.created_at.asc(), Report.id.asc()
+        )
+    elif sort == "name":
+        reports_query = reports_query.order_by(
+            Report.item_name.asc(), Report.id.asc()
+        )
+    else:
+        sort = "newest"
+        reports_query = reports_query.order_by(
+            Report.created_at.desc(), Report.id.desc()
+        )
 
-.table-heading {
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(7, 92, 59, 0.08);
-}
+    reports = reports_query.all()
 
-.table-heading h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1a3024;
-}
+    total_reports = Report.query.count()
+    total_lost = Report.query.filter_by(report_type="Lost").count()
+    total_found = Report.query.filter_by(report_type="Found").count()
+    total_open = Report.query.filter_by(status="Open").count()
 
-.table-head-row {
-  display: grid;
-  grid-template-columns: 65px 2fr 100px 140px 160px 110px 130px;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  background: rgba(7, 92, 59, 0.04);
-  font-weight: 700;
-  color: #557563;
-  border-bottom: 1px solid rgba(7, 92, 59, 0.08);
-}
+    stats = {
+        "total": total_reports,
+        "lost": total_lost,
+        "found": total_found,
+        "open": total_open,
+    }
 
-.table-data-row {
-  display: grid;
-  grid-template-columns: 65px 2fr 100px 140px 160px 110px 130px;
-  gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(7, 92, 59, 0.05);
-  align-items: center;
-  transition: background 0.25s ease;
-}
+    return render_template(
+        "home.html",
+        reports=reports,
+        stats=stats,
+        total_reports=total_reports,
+        total_lost=total_lost,
+        total_found=total_found,
+        total_open=total_open,
+        search_performed=search_performed,
+        query=query,
+        selected_type=report_type,
+        selected_status=status,
+        selected_sort=sort,
+    )
 
-.table-data-row:hover {
-  background: rgba(7, 92, 59, 0.03);
-}
+# ==================================================
+# CREATE A REPORT
+# ==================================================
+@app.route("/report/new", methods=["GET", "POST"])
+def new_report():
+    if request.method == "POST":
+        report_type = get_report_form_value("report_type")
+        item_name = get_report_form_value("item_name")
+        category = get_report_form_value("category")
+        description = get_report_form_value("description")
+        location = get_report_form_value("location")
+        incident_date = parse_incident_date(
+            get_report_form_value("incident_date")
+        )
+        contact_name = get_report_form_value("contact_name")
+        contact = get_report_form_value("contact")
+        contact_public = request.form.get("contact_public") in {
+            "1", "true", "on", "yes"
+        }
 
-.col-id {
-  color: #7a9485;
-  font-family: monospace;
-  font-weight: 600;
-}
+        if report_type not in {"Lost", "Found"}:
+            flash("Please select Lost or Found.", "danger")
+            return redirect(url_for("new_report"))
+        if not all([item_name, description, location, incident_date, contact]):
+            flash("Please complete all required fields.", "danger")
+            return redirect(url_for("new_report"))
+        if incident_date > date.today():
+            flash("The lost or found date cannot be in the future.", "danger")
+            return redirect(url_for("new_report"))
+        if len(item_name) > 150:
+            flash("Item name is too long.", "danger")
+            return redirect(url_for("new_report"))
+        if len(location) > 200:
+            flash("Location is too long.", "danger")
+            return redirect(url_for("new_report"))
+        if len(contact) > 150:
+            flash("Contact details are too long.", "danger")
+            return redirect(url_for("new_report"))
+        if len(contact_name) > 120:
+            flash("Your name is too long.", "danger")
+            return redirect(url_for("new_report"))
 
-.item-link {
-  color: #075c3b;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
+        stored_contact_name = contact_name or "Not provided"
+        saved_photo = None
 
-.item-link:hover {
-  text-decoration: underline;
-  color: #055c34;
-}
-
-.type-lost { color: #c0392b; font-weight: 600; }
-.type-found { color: #27ae60; font-weight: 600; }
-
-.stat-open { color: #2980b9; font-weight: 600; }
-.stat-pending-claim { color: #f39c12; font-weight: 600; }
-.stat-returned { color: #27ae60; font-weight: 600; }
-.stat-archived { color: #7f8c8d; font-weight: 600; }
-
-.sel-form select {
-  width: 100%;
-  padding: 0.5rem 0.6rem;
-  border: 1.5px solid rgba(7, 92, 59, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.sel-form select:focus {
-  outline: none;
-  border-color: #075c3b;
-}
-
-.col-date {
-  color: #668072;
-  font-size: 0.85rem;
-}
-
-.action-set {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.view-btn {
-  background: rgba(7, 92, 59, 0.08);
-  color: #075c3b;
-  padding: 0.5rem 0.8rem;
-  border-radius: 7px;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: all 0.25s ease;
-}
-
-.view-btn:hover {
-  background: rgba(7, 92, 59, 0.15);
-}
-
-.del-form {
-  margin: 0;
-}
-
-.del-btn {
-  background: rgba(220, 53, 69, 0.08);
-  color: #c0392b;
-  padding: 0.5rem 0.8rem;
-  border-radius: 7px;
-  border: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.del-btn:hover {
-  background: rgba(220, 53, 69, 0.15);
-}
-
-.empty-box {
-  padding: 3rem;
-  text-align: center;
-  color: #668072;
-}
-
-@media (max-width: 900px) {
-  .top-bar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .table-head-row,
-  .table-data-row {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.8rem 1rem;
-  }
-  .col-id, .col-date { display: none; }
-  .actions-wrapper { flex-direction: column; align-items: stretch; }
-  .filter-group { justify-content: center; }
-}
-
-@media (max-width: 550px) {
-  .stats-container { grid-template-columns: 1fr 1fr; }
-}
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="dashboard-wrapper">
-
-  <!-- TOP HEADER -->
-  <div class="top-bar">
-    <div class="page-title">
-      <h1>Admin Dashboard</h1>
-      <p>Manage reports, review claims, and update item statuses</p>
-    </div>
-    <a href="{{ url_for('export_reports') }}" class="export-btn">Export CSV</a>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats-container">
-    <div class="stat-card">
-      <p class="stat-label">Total Reports</p>
-      <p class="stat-number">{{ stats.total }}</p>
-    </div>
-    <div class="stat-card lost">
-      <p class="stat-label">Lost Items</p>
-      <p class="stat-number">{{ stats.lost }}</p>
-    </div>
-    <div class="stat-card found">
-      <p class="stat-label">Found Items</p>
-      <p class="stat-number">{{ stats.found }}</p>
-    </div>
-    <div class="stat-card open">
-      <p class="stat-label">Open</p>
-      <p class="stat-number">{{ stats.open }}</p>
-    </div>
-    <div class="stat-card pending">
-      <p class="stat-label">Pending Claims</p>
-      <p class="stat-number">{{ stats.pending_claims }}</p>
-    </div>
-    <div class="stat-card returned">
-      <p class="stat-label">Returned</p>
-      <p class="stat-number">{{ stats.returned }}</p>
-    </div>
-    <div class="stat-card archived">
-      <p class="stat-label">Archived</p>
-      <p class="stat-number">{{ stats.archived }}</p>
-    </div>
-  </div>
-
-  <!-- ACTIONS -->
-  <div class="actions-wrapper">
-    <a href="{{ url_for('admin_claims') }}" class="main-action-btn">
-      Review Claims
-      {% if stats.pending_claims > 0 %}
-        <span class="badge-dot">{{ stats.pending_claims }}</span>
-      {% endif %}
-    </a>
-    <div class="filter-group">
-      <a href="{{ url_for('admin_dashboard') }}?filter=Lost" 
-         class="filter-btn {% if request.args.get('filter') == 'Lost' %}active{% endif %}">Lost Only</a>
-      <a href="{{ url_for('admin_dashboard') }}?filter=Found" 
-         class="filter-btn {% if request.args.get('filter') == 'Found' %}active{% endif %}">Found Only</a>
-      <a href="{{ url_for('admin_history') }}" class="history-btn">Deleted</a>
-      {% if request.args.get('filter') %}
-        <a href="{{ url_for('admin_dashboard') }}" class="clear-btn">Show All</a>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- REPORTS TABLE -->
-  <div class="table-wrapper">
-    <div class="table-heading">
-      <h2>
-        {% if request.args.get('filter') == 'Lost' %}Lost Reports
-        {% elif request.args.get('filter') == 'Found' %}Found Reports
-        {% else %}All Reports{% endif %}
-      </h2>
-    </div>
-
-    {% if reports %}
-      <div>
-        <div class="table-head-row">
-          <span class="col-id">ID</span>
-          <span>Item Name</span>
-          <span>Type</span>
-          <span>Status</span>
-          <span>Update Status</span>
-          <span>Date</span>
-          <span>Actions</span>
-        </div>
-
-        {% for report in reports %}
-          {% set current_filter = request.args.get('filter') %}
-          {% if not current_filter or current_filter == report.report_type %}
-          <div class="table-data-row">
-            <span class="col-id">#{{ report.id }}</span>
-            <a href="{{ url_for('report_detail', report_id=report.id) }}" class="item-link">
-              {{ report.item_name }}
-            </a>
-            <span class="type-{{ report.report_type|lower }}">
-              {{ report.report_type }}
-            </span>
-            <span class="stat-{{ report.status|replace(' ', '-')|lower }}">
-              {{ report.status }}
-            </span>
-            <form action="{{ url_for('admin_update_report_status', report_id=report.id) }}" method="POST" class="sel-form">
-              <select name="status" onchange="this.form.submit()">
-                <option value="Open" {% if report.status == 'Open' %}selected{% endif %}>Open</option>
-                <option value="Pending Claim" {% if report.status == 'Pending Claim' %}selected{% endif %}>Pending Claim</option>
-                <option value="Returned" {% if report.status == 'Returned' %}selected{% endif %}>Returned</option>
-                <option value="Archived" {% if report.status == 'Archived' %}selected{% endif %}>Archived</option>
-              </select>
-            </form>
-            <span class="col-date">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
-            <div class="action-set">
-              <a href="{{ url_for('report_detail', report_id=report.id) }}" class="view-btn">View</a>
-              <form action="{{ url_for('admin_delete_report', report_id=report.id) }}" method="POST" class="del-form"
-                    onsubmit="return confirm('Delete this report?');">
-                <button type="submit" class="del-btn">Delete</button>
-              </form>
-            </div>
-          </div>
-          {% endif %}
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty-box">
-        <p>No reports found.</p>
-      </div>
-    {% endif %}
-  </div>
-
-</div>
-{% endblock %}
+        try:
+            saved_
