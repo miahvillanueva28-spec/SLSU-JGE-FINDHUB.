@@ -156,7 +156,6 @@ class Claim(db.Model):
     claimant_name = db.Column(db.String(120), nullable=False)
     claimant_contact = db.Column(db.String(150), nullable=False)
     proof = db.Column(db.Text, nullable=False)
-    proof_photo = db.Column(db.String(1000), nullable=True)  # ✅ Added: proof photo
     status = db.Column(db.String(30), default="Pending", nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
@@ -265,7 +264,7 @@ def save_photo(file_storage):
         if IS_VERCEL:
             raise RuntimeError(
                 "Photo storage is not configured. Set CLOUDINARY_URL "
-                "in Vercel Environment Variables."
+                "in environment variables."
             )
         filename = f"{secrets.token_hex(12)}_{original_name}"
         file_storage.save(UPLOAD_FOLDER / filename)
@@ -411,5 +410,4 @@ def new_report():
             flash("Contact details are too long.", "danger")
             return redirect(url_for("new_report"))
         if len(contact_name) > 120:
-            flash("Your name is too long.", "danger")
-            return redirect(url_for("new_report
+            flash("Your name is
