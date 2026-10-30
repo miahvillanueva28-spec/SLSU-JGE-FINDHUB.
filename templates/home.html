@@ -4,11 +4,13 @@
 {% endblock %}
 {% block head %}
 <style>
-  /* Home hero */
+  /* ==============================================
+     HOME HERO — ENHANCED
+  ============================================== */
   .home-hero {
     position: relative;
     overflow: hidden;
-    padding: clamp(36px, 6vw, 64px);
+    padding: clamp(40px, 6vw, 72px);
     border: 1px solid var(--border);
     border-radius: 24px;
     background: var(--surface);
@@ -33,25 +35,34 @@
     color: var(--text);
     font-size: 13px;
     font-weight: 700;
-    animation: homeStickerEnter .45s ease both;
+    animation: homeStickerEnter .5s cubic-bezier(.22,1,.36,1) both;
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
   }
-  .home-hero .sticker:nth-child(2) { animation-delay: .06s; }
-  .home-hero .sticker:nth-child(3) { animation-delay: .12s; }
-  .home-hero .sticker:nth-child(4) { animation-delay: .18s; }
+  .home-hero .sticker:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    background: var(--primary-soft);
+  }
+  .home-hero .sticker:nth-child(2) { animation-delay: .08s; }
+  .home-hero .sticker:nth-child(3) { animation-delay: .16s; }
+  .home-hero .sticker:nth-child(4) { animation-delay: .24s; }
   .home-hero h1 {
     max-width: 800px;
     margin: 0 auto 12px;
     color: var(--primary);
-    font-size: clamp(32px, 6vw, 52px);
-    line-height: 1.1;
-    letter-spacing: -.5px;
+    font-size: clamp(34px, 6vw, 56px);
+    line-height: 1.08;
+    letter-spacing: -.8px;
+    font-weight: 800;
+    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .1s both;
   }
   .home-hero .tagline {
     max-width: 650px;
-    margin: 0 auto 16px;
+    margin: 0 auto 14px;
     color: var(--text);
     font-size: clamp(18px, 3vw, 24px);
     font-weight: 600;
+    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .2s both;
   }
   .home-hero .hero-description {
     max-width: 680px;
@@ -59,20 +70,41 @@
     color: var(--muted);
     font-size: clamp(15px, 2vw, 17px);
     line-height: 1.8;
+    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .3s both;
   }
   .home-hero .button-group {
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
     justify-content: center;
+    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .4s both;
   }
   .home-hero .button {
     box-shadow: 0 5px 13px rgba(0, 75, 43, .16);
-    min-width: 200px;
+    min-width: 210px;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-hero .button::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    transform: translate(-50%, -50%);
+    transition: width .5s ease, height .5s ease;
+  }
+  .home-hero .button:active::after {
+    width: 300px;
+    height: 300px;
   }
   .home-hero .button:hover {
-    box-shadow: 0 8px 19px rgba(0, 75, 43, .24);
+    box-shadow: 0 10px 24px rgba(0, 75, 43, .28);
+    transform: translateY(-3px);
   }
   .button.lost-btn {
     background: #fff3e0;
@@ -112,7 +144,10 @@
     background: #265c28;
     color: #c8e6c9;
   }
-  /* Statistics */
+
+  /* ==============================================
+     STATISTICS — ENHANCED WITH COUNTER ANIMATION
+  ============================================== */
   .home-stats {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -125,16 +160,28 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 24px 20px;
+    padding: 26px 20px;
     border: 1px solid var(--border);
     border-radius: 16px;
     background: var(--surface);
     box-shadow: var(--shadow);
     text-align: center;
-    transition: transform .25s ease;
+    transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
+    opacity: 0;
+    transform: translateY(20px);
   }
+  .home-stats .stat.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1);
+  }
+  .home-stats .stat:nth-child(1).visible { transition-delay: .05s; }
+  .home-stats .stat:nth-child(2).visible { transition-delay: .15s; }
+  .home-stats .stat:nth-child(3).visible { transition-delay: .25s; }
+  .home-stats .stat:nth-child(4).visible { transition-delay: .35s; }
   .home-stats .stat:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.1);
   }
   .home-stats .stat::before {
     content: "";
@@ -146,7 +193,8 @@
     height: 4px;
     background: var(--primary);
     opacity: .72;
-    transition: width .25s ease, opacity .25s ease;
+    border-radius: 0 0 4px 4px;
+    transition: width .3s ease, opacity .3s ease;
   }
   .home-stats .stat:hover::before {
     width: 100%;
@@ -156,18 +204,37 @@
     color: var(--muted);
     font-size: 13px;
     font-weight: 600;
+    letter-spacing: .3px;
+    text-transform: uppercase;
   }
   .home-stats .stat strong {
     color: var(--primary);
-    font-size: clamp(26px, 3vw, 36px);
+    font-size: clamp(28px, 3vw, 38px);
     line-height: 1.2;
     overflow-wrap: anywhere;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
   }
-  /* Search panel */
+
+  /* ==============================================
+     SEARCH PANEL — ENHANCED
+  ============================================== */
   .search-panel {
     scroll-margin-top: 95px;
     margin-bottom: 30px;
     text-align: center;
+    padding: 32px 28px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1);
+  }
+  .search-panel.visible {
+    opacity: 1;
+    transform: translateY(0);
   }
   .search-heading {
     display: inline-flex;
@@ -178,20 +245,24 @@
   }
   .search-heading .heading-icon {
     display: inline-flex;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 11px;
+    border-radius: 12px;
     background: var(--primary-soft);
-    font-size: 19px;
+    font-size: 20px;
+    transition: transform .3s ease;
+  }
+  .search-panel:hover .heading-icon {
+    transform: rotate(-8deg) scale(1.05);
   }
   .search-description {
     margin: 0 auto 22px;
     max-width: 600px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 14px;
   }
   .filter-grid {
     display: grid;
@@ -199,17 +270,35 @@
     gap: 14px;
     max-width: 900px;
     margin: 0 auto;
+    text-align: left;
   }
   .filter-grid > div {
     min-width: 0;
   }
   .filter-grid label {
     font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: block;
   }
   .filter-grid input,
   .filter-grid select {
     width: 100%;
     min-width: 0;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    transition: border-color .25s ease, box-shadow .25s ease;
+  }
+  .filter-grid input:focus,
+  .filter-grid select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
   }
   .search-actions {
     display: flex;
@@ -217,9 +306,12 @@
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    margin-top: 20px;
+    margin-top: 22px;
   }
-  /* Buttons */
+
+  /* ==============================================
+     BUTTONS — ENHANCED
+  ============================================== */
   .home-page .button {
     display: inline-flex;
     justify-content: center;
@@ -235,12 +327,16 @@
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
-    transition: transform .2s ease, background .2s ease;
+    transition: transform .25s cubic-bezier(.22,1,.36,1), background .25s ease, box-shadow .25s ease;
   }
   .home-page .button:hover {
     background: var(--primary-dark);
     color: #fff;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(7,92,59,.25);
+  }
+  .home-page .button:active {
+    transform: translateY(0);
   }
   .home-page .button.secondary {
     border-color: var(--border);
@@ -250,13 +346,17 @@
   .home-page .button.secondary:hover {
     background: var(--surface-alt);
     color: var(--text);
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
   }
   .home-page .button.small {
     min-height: 36px;
     padding: 8px 14px;
     font-size: 13px;
   }
-  /* Reports section */
+
+  /* ==============================================
+     REPORTS SECTION — ENHANCED
+  ============================================== */
   .reports-section {
     margin-top: 36px;
   }
@@ -271,6 +371,7 @@
   .reports-heading h2 {
     margin: 0;
     font-size: clamp(19px, 3vw, 24px);
+    font-weight: 700;
   }
   .reports-count {
     display: inline-flex;
@@ -305,18 +406,19 @@
     border-radius: 18px;
     background: var(--surface);
     box-shadow: var(--shadow);
-    animation: homeCardEnter .45s ease both;
-    transition: transform .25s ease, box-shadow .25s ease;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
+  }
+  .home-report-card.visible {
+    opacity: 1;
+    transform: translateY(0);
   }
   .home-report-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 50, 30, 0.1);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(0, 50, 30, 0.12);
+    border-color: var(--primary);
   }
-  .home-report-card:nth-child(2) { animation-delay: .04s; }
-  .home-report-card:nth-child(3) { animation-delay: .08s; }
-  .home-report-card:nth-child(4) { animation-delay: .12s; }
-  .home-report-card:nth-child(5) { animation-delay: .16s; }
-  .home-report-card:nth-child(6) { animation-delay: .20s; }
   .home-report-card .report-image-wrap {
     position: relative;
     overflow: hidden;
@@ -326,7 +428,7 @@
   .home-report-card .placeholder-photo {
     display: flex;
     width: 100%;
-    height: 180px;
+    height: 190px;
     margin: 0;
     align-items: center;
     justify-content: center;
@@ -335,30 +437,41 @@
     display: block;
     object-fit: cover;
     cursor: zoom-in;
-    transition: transform .45s ease;
+    transition: transform .5s cubic-bezier(.22,1,.36,1);
   }
   .home-report-card:hover .report-photo {
-    transform: scale(1.05);
+    transform: scale(1.08);
   }
   .home-report-card .placeholder-photo {
-    background: var(--surface-alt);
-    font-size: 42px;
+    background: linear-gradient(135deg, var(--primary-soft), var(--surface-alt));
+    font-size: 48px;
+    transition: transform .5s ease;
+  }
+  .home-report-card:hover .placeholder-photo span {
+    transform: scale(1.15);
+    display: inline-block;
   }
   .home-report-card .report-content {
     display: flex;
     flex: 1;
     flex-direction: column;
     min-width: 0;
-    padding: 18px;
+    padding: 20px;
   }
   .home-report-card .report-content h3 {
-    margin: 10px 0 8px;
+    margin: 10px 0 10px;
     line-height: 1.4;
     overflow-wrap: anywhere;
+    font-size: 17px;
+    font-weight: 700;
+    transition: color .25s ease;
+  }
+  .home-report-card:hover .report-content h3 {
+    color: var(--primary);
   }
   .report-meta {
     display: grid;
-    gap: 5px;
+    gap: 6px;
     margin-top: 5px;
   }
   .report-meta p {
@@ -366,22 +479,28 @@
     color: var(--muted);
     font-size: 13px;
     overflow-wrap: anywhere;
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
   }
   .report-meta strong,
   .report-status-row > strong {
     color: var(--text);
+    flex-shrink: 0;
   }
   .home-page .tag {
     display: inline-flex;
     align-items: center;
     align-self: flex-start;
-    padding: 5px 10px;
+    padding: 5px 12px;
     border-radius: 999px;
     background: var(--primary-soft);
     color: var(--primary);
     font-size: 11px;
     font-weight: 800;
     line-height: 1.3;
+    letter-spacing: .3px;
+    text-transform: uppercase;
   }
   .home-page .tag.found {
     background: #dff4e7;
@@ -417,36 +536,48 @@
   }
   .home-report-card .card-actions {
     margin-top: auto;
-    padding-top: 16px;
+    padding-top: 18px;
   }
-  /* Empty state */
+  .home-report-card .card-actions .button {
+    width: 100%;
+  }
+
+  /* ==============================================
+     EMPTY STATE — ENHANCED
+  ============================================== */
   .home-page .home-empty-state {
-    padding: 40px 24px;
+    padding: 48px 28px;
     border: 1px dashed var(--border);
-    border-radius: 18px;
+    border-radius: 20px;
     background: var(--surface);
     text-align: center;
   }
   .home-empty-state .empty-icon {
     display: flex;
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 16px;
+    margin: 0 auto 20px;
     border-radius: 50%;
     background: var(--primary-soft);
-    font-size: 36px;
+    font-size: 40px;
+    animation: emptyPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes emptyPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(7,92,59,.15); }
+    50% { box-shadow: 0 0 0 16px rgba(7,92,59,0); }
   }
   .home-empty-state h3 {
-    margin: 8px 0;
-    font-size: 20px;
+    margin: 8px 0 10px;
+    font-size: 22px;
+    font-weight: 700;
   }
   .home-empty-state p {
-    max-width: 500px;
-    margin: 0 auto 20px;
+    max-width: 520px;
+    margin: 0 auto 24px;
     color: var(--muted);
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.7;
   }
   .home-empty-state .empty-actions {
@@ -456,7 +587,10 @@
     flex-wrap: wrap;
     gap: 10px;
   }
-  /* REPORTS-ONLY VIEW */
+
+  /* ==============================================
+     REPORTS-ONLY VIEW
+  ============================================== */
   body.reports-only .home-hero,
   body.reports-only .home-stats,
   body.reports-only .search-panel {
@@ -464,20 +598,24 @@
   }
   body.reports-only .reports-section {
     margin-top: 0;
-    animation: reportsFadeIn .4s ease both;
+    animation: reportsFadeIn .5s cubic-bezier(.22,1,.36,1) both;
   }
   @keyframes reportsFadeIn {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes homeStickerEnter {
-    from { opacity: 0; transform: translateY(7px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes homeCardEnter {
-    from { opacity: 0; transform: translateY(9px); }
+  @keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* ==============================================
+     RESPONSIVE
+  ============================================== */
   @media (max-width: 950px) {
     .home-stats {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -509,7 +647,7 @@
       gap: 12px;
     }
     .home-stats .stat {
-      padding: 18px 14px;
+      padding: 20px 14px;
     }
     .filter-grid {
       grid-template-columns: 1fr;
@@ -530,10 +668,10 @@
     }
     .home-report-card .report-photo,
     .home-report-card .placeholder-photo {
-      height: 200px;
+      height: 210px;
     }
     .home-page .home-empty-state {
-      padding: 30px 16px;
+      padding: 36px 18px;
     }
     .home-hero .button-group,
     .home-empty-state .empty-actions {
@@ -548,8 +686,12 @@
   @media (prefers-reduced-motion: reduce) {
     .home-hero .sticker,
     .home-report-card,
+    .home-stats .stat,
+    .search-panel,
     body.reports-only .reports-section {
-      animation: none;
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
     }
     .home-report-card:hover .report-photo {
       transform: none;
@@ -557,28 +699,30 @@
     .home-report-card:hover {
       transform: none;
     }
+    .home-empty-state .empty-icon {
+      animation: none;
+    }
   }
 </style>
 {% endblock %}
 {% block hero %}
 <section class="hero home-hero">
   <div class="sticker-row" aria-label="Common lost and found categories">
-    <span class="sticker"><span aria-hidden="true">🎒</span> Bags</span>
-    <span class="sticker"><span aria-hidden="true">🔑</span> Keys</span>
+    <span class="sticker"><span aria-hidden="true">🎒</span> Bags & Wallets</span>
+    <span class="sticker"><span aria-hidden="true">🔑</span> Keys & IDs</span>
     <span class="sticker"><span aria-hidden="true">📱</span> Gadgets</span>
-    <span class="sticker"><span aria-hidden="true">🪪</span> School IDs</span>
+    <span class="sticker"><span aria-hidden="true">📚</span> Books & Notes</span>
   </div>
 
   <h1>SLSU JGE FindHub</h1>
   <p class="tagline">Your trusted campus space for lost and found</p>
   <p class="hero-description">
-    Welcome to your campus lost-and-found hub. Submit reports for items you've lost or discovered,
-    and help build a more caring and connected SLSU JGE community.
+    Report items you've lost or discovered, and help reunite them with their rightful owners — building a more connected and caring SLSU JGE community.
   </p>
 
   <div class="button-group">
     <a class="button lost-btn" href="{{ url_for('new_report') }}?type=Lost">
-       ⚠️ Report Lost Item
+      ⚠️ Report Lost Item
     </a>
     <a class="button found-btn" href="{{ url_for('new_report') }}?type=Found">
       🔍 Report Found Item
@@ -591,15 +735,15 @@
   <section class="stats home-stats" aria-label="Lost and found statistics">
     <div class="stat">
       <span class="stat-label">📌 Active Reports</span>
-      <strong>{{ total_open|default(stats.open|default(0)) }}</strong>
+      <strong data-counter="{{ total_open|default(stats.open|default(0)) }}">0</strong>
     </div>
     <div class="stat">
       <span class="stat-label">⚠️ Items Lost</span>
-      <strong>{{ total_lost|default(stats.lost|default(0)) }}</strong>
+      <strong data-counter="{{ total_lost|default(stats.lost|default(0)) }}">0</strong>
     </div>
     <div class="stat">
       <span class="stat-label">🔎 Items Found</span>
-      <strong>{{ total_found|default(stats.found|default(0)) }}</strong>
+      <strong data-counter="{{ total_found|default(stats.found|default(0)) }}">0</strong>
     </div>
     <div class="stat">
       <span class="stat-label">💛 Serving Since</span>
@@ -614,7 +758,7 @@
       <span>Find an Item</span>
     </h2>
     <p class="search-description">
-      Search reports by keyword, type, or status to locate what you're looking for.
+      Search by keyword, filter by type or status, and quickly locate what you're looking for.
     </p>
     <form method="GET" action="{{ url_for('home') }}"
           role="search" aria-label="Search lost and found reports">
@@ -721,12 +865,12 @@
               <h3>{{ report.item_name }}</h3>
               <div class="report-meta">
                 <p>
-                  <strong>Location:</strong>
+                  <strong>📍 Location:</strong>
                   {{ report.location or 'Not specified' }}
                 </p>
                 {% if report.incident_date %}
                   <p>
-                    <strong>Date:</strong>
+                    <strong>📅 Date:</strong>
                     {{ report.incident_date }}
                   </p>
                 {% endif %}
@@ -755,16 +899,16 @@
         <div class="empty-icon" aria-hidden="true">🕵️</div>
         <h3>
           {% if search_performed %}
-            No Matching Reports
+            No Matching Reports Found
           {% else %}
-            Be the First to Report
+            No Reports Yet — Be the First
           {% endif %}
         </h3>
         <p>
           {% if search_performed %}
-            No items match your search right now. Try different keywords or clear your filters.
+            We couldn't find any items matching your search. Try different keywords or clear your filters to see all reports.
           {% else %}
-            Help build our community — report an item and reunite it with its owner today.
+            Help build our community — report an item today and help reunite it with its rightful owner.
           {% endif %}
         </p>
         <div class="empty-actions">
@@ -831,6 +975,84 @@
         document.title = "Home | SLSU JGE FindHub";
       });
     }
+
+    /* ==============================================
+       SCROLL-TRIGGERED ANIMATIONS (IntersectionObserver)
+    ============================================== */
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: "0px 0px -40px 0px"
+    };
+
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe stat cards
+    document.querySelectorAll(".home-stats .stat").forEach(function (el) {
+      observer.observe(el);
+    });
+
+    // Observe search panel
+    const searchPanel = document.querySelector(".search-panel");
+    if (searchPanel) observer.observe(searchPanel);
+
+    // Observe report cards with staggered delay
+    document.querySelectorAll(".home-report-card").forEach(function (el, index) {
+      el.style.transitionDelay = (index % 3) * 0.1 + "s";
+      observer.observe(el);
+    });
+
+    /* ==============================================
+       ANIMATED COUNTERS FOR STATISTICS
+    ============================================== */
+    function animateCounter(element) {
+      const target = parseInt(element.getAttribute("data-counter"), 10);
+      if (isNaN(target) || target === 0) {
+        element.textContent = target || 0;
+        return;
+      }
+      const duration = 1200;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(eased * target);
+        element.textContent = current;
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          element.textContent = target;
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Trigger counters when stats become visible
+    const statObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          const counter = entry.target.querySelector("[data-counter]");
+          if (counter && !counter.dataset.counted) {
+            counter.dataset.counted = "true";
+            animateCounter(counter);
+          }
+          statObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+
+    document.querySelectorAll(".home-stats .stat").forEach(function (el) {
+      statObserver.observe(el);
+    });
   })();
 </script>
 {% endblock %}
