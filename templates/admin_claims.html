@@ -93,11 +93,6 @@
 
           <div class="proof-col">
             {{ c.proof }}
-            {% if c.proof_photo %}
-              <a href="{{ photo_src(c.proof_photo) }}" target="_blank" class="btn-proof-photo">
-                📷 View Proof Photo
-              </a>
-            {% endif %}
           </div>
 
           <div class="status-col">
@@ -148,28 +143,11 @@
 </div>
 
 <style>
-  :root {
-    --primary: #087443;
-    --primary-dark: #055c34;
-    --primary-light: #15965a;
-    --primary-soft: #e7f4ec;
-    --accent: #e4b64f;
-    --danger: #c62828;
-    --danger-soft: #ffebee;
-    --warning: #f39c12;
-    --success: #27ae60;
-    --text: #1c2d25;
-    --muted: #6b7b72;
-    --border: #d1ddd6;
-    --surface: #ffffff;
-    --surface-alt: #f4f8f5;
-  }
-
   .claims-wrapper {
     max-width: 1400px;
     margin: 0 auto;
     padding: 2rem 1.5rem;
-    background: var(--surface);
+    background: #ffffff;
   }
 
   .claims-header {
@@ -177,40 +155,37 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 2px solid var(--border);
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
     flex-wrap: wrap;
     gap: 1rem;
   }
 
   .claims-header h1 {
     margin: 0 0 0.25rem 0;
-    font-size: 1.75rem;
-    color: var(--primary);
-    font-weight: 800;
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    font-weight: 700;
   }
 
   .claims-header p {
     margin: 0;
-    color: var(--muted);
+    color: #555;
     font-size: 0.95rem;
   }
 
   .btn-back {
-    background: var(--surface-alt);
-    color: var(--text);
-    padding: 0.7rem 1.4rem;
-    border-radius: 10px;
+    background: #f0f0f0;
+    color: #333;
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
     text-decoration: none;
-    font-weight: 700;
-    border: 1.5px solid var(--border);
-    transition: all 0.25s ease;
+    font-weight: 600;
+    border: 1px solid #ddd;
   }
 
   .btn-back:hover {
-    background: var(--primary-soft);
-    color: var(--primary);
-    transform: translateY(-1px);
+    background: #e0e0e0;
   }
 
   .stats-grid {
@@ -221,48 +196,39 @@
   }
 
   .stat-card {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
+    background: #ffffff;
+    border: 2px solid #e8e8e8;
+    border-radius: 8px;
     padding: 1.25rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(8, 116, 67, 0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
 
   .stat-label {
     font-size: 0.85rem;
-    color: var(--muted);
+    color: #666;
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    font-weight: 500;
   }
 
   .stat-value {
     font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: #1a1a1a;
   }
 
-  .stat-value.pending { color: var(--warning); }
-  .stat-value.approved { color: var(--success); }
-  .stat-value.rejected { color: var(--danger); }
+  .stat-value.pending { color: #f39c12; }
+  .stat-value.approved { color: #27ae60; }
+  .stat-value.rejected { color: #c0392b; }
 
   .filters-bar {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
     margin-bottom: 1.5rem;
-    padding: 1.25rem;
-    background: var(--surface-alt);
-    border-radius: 14px;
-    border: 1.5px solid var(--border);
+    padding: 1rem;
+    background: #f8f8f8;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
   }
 
   .filter-group {
@@ -272,48 +238,45 @@
 
   .filter-group label {
     display: block;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.85rem;
-    color: var(--text);
-    margin-bottom: 0.5rem;
+    color: #555;
+    margin-bottom: 0.4rem;
   }
 
   .filter-group input,
   .filter-group select {
     width: 100%;
-    padding: 0.7rem 0.9rem;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
+    padding: 0.6rem 0.8rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: white;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
   }
 
   .filter-group input:focus,
   .filter-group select:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.12);
+    border-color: #075c3b;
   }
 
   .claims-table-wrapper {
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
     overflow: hidden;
-    background: var(--surface);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    background: #fff;
   }
 
   .table-header-row {
     display: grid;
     grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
     gap: 1rem;
-    padding: 1rem 1.25rem;
-    background: var(--surface-alt);
-    font-weight: 800;
+    padding: 0.9rem 1.25rem;
+    background: #f5f5f5;
+    font-weight: 700;
     font-size: 0.85rem;
-    color: var(--primary);
-    border-bottom: 1.5px solid var(--border);
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
   }
 
   .table-row {
@@ -321,32 +284,30 @@
     grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
     gap: 1rem;
     padding: 1.25rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #e8e8e8;
     align-items: flex-start;
-    background: var(--surface);
-    transition: background 0.15s ease;
+    background: #ffffff;
   }
 
   .table-row:hover {
-    background: var(--primary-soft);
+    background: #f9f9f9;
   }
 
   .claim-id {
     font-size: 1rem;
-    color: var(--text);
-    font-weight: 700;
+    color: #333;
   }
 
   .item-name {
     margin: 0.4rem 0 0.2rem;
-    font-weight: 700;
-    color: var(--primary);
+    font-weight: 600;
+    color: #1a1a1a;
   }
 
   .meta {
     display: block;
     font-size: 0.85rem;
-    color: var(--muted);
+    color: #666;
     margin: 0.2rem 0;
   }
 
@@ -357,55 +318,35 @@
   .link-view {
     display: inline-block;
     margin-top: 0.4rem;
-    color: var(--primary);
+    color: #075c3b;
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.9rem;
-    transition: color 0.2s ease;
   }
 
   .link-view:hover {
-    color: var(--primary-dark);
     text-decoration: underline;
   }
 
   .proof-col {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    color: var(--text);
+    color: #333;
     line-height: 1.5;
-  }
-
-  .btn-proof-photo {
-    display: inline-block;
-    margin-top: 0.75rem;
-    padding: 0.5rem 0.9rem;
-    background: var(--primary-soft);
-    color: var(--primary);
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: all 0.2s ease;
-  }
-
-  .btn-proof-photo:hover {
-    background: var(--primary);
-    color: white;
   }
 
   .status-tag {
     display: inline-block;
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
-    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
     font-size: 0.85rem;
     margin-bottom: 0.75rem;
   }
 
   .status-tag.pending { background: #fef3e0; color: #b77900; }
-  .status-tag.approved { background: var(--primary-soft); color: var(--primary-dark); }
-  .status-tag.rejected { background: var(--danger-soft); color: var(--danger); }
+  .status-tag.approved { background: #e6f9e9; color: #219646; }
+  .status-tag.rejected { background: #fde8e8; color: #b02020; }
 
   .status-form {
     display: flex;
@@ -415,48 +356,43 @@
 
   .status-form label {
     font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--muted);
+    font-weight: 600;
+    color: #555;
   }
 
   .status-form select {
-    padding: 0.6rem 0.8rem;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    font-weight: 600;
-    transition: all 0.2s ease;
+    padding: 0.5rem 0.7rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    font-weight: 500;
   }
 
   .status-form select:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.12);
+    border-color: #075c3b;
   }
 
   .btn-save {
-    background: var(--primary);
+    background: #075c3b;
     color: white;
     border: none;
-    padding: 0.7rem 1rem;
-    border-radius: 10px;
-    font-weight: 700;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
     cursor: pointer;
     margin-top: 0.25rem;
-    transition: all 0.25s ease;
   }
 
   .btn-save:hover {
-    background: var(--primary-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(8, 116, 67, 0.2);
+    background: #064d32;
   }
 
   .no-results {
     padding: 2rem;
     text-align: center;
-    color: var(--muted);
-    font-weight: 600;
+    color: #777;
+    font-weight: 500;
     display: none;
     margin: 0;
   }
@@ -473,31 +409,27 @@
 
   .empty-state h3 {
     margin: 0 0 0.5rem;
-    color: var(--text);
+    color: #333;
     font-size: 1.25rem;
-    font-weight: 700;
   }
 
   .empty-state p {
     margin: 0 0 1.5rem;
-    color: var(--muted);
+    color: #666;
   }
 
   .btn-primary {
-    background: var(--primary);
+    background: #075c3b;
     color: white;
     padding: 0.75rem 1.5rem;
-    border-radius: 10px;
+    border-radius: 6px;
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
     display: inline-block;
-    transition: all 0.25s ease;
   }
 
   .btn-primary:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(8, 116, 67, 0.25);
+    background: #064d32;
   }
 
   @media (max-width: 1024px) {
