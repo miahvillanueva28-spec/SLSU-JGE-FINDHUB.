@@ -1,30 +1,32 @@
 /* ==========================================
-   SLSU JGE FINDHUB — ENHANCED TEXT VISIBILITY
+   SLSU JGE FINDHUB — MALINAW NA TEKSTO
+   ✅ Transparent boxes remain unchanged
+   ✅ Only text contrast & visibility improved
    ========================================== */
 
-/* 1. THEME VARIABLES — BOOSTED CONTRAST */
+/* 1. THEME VARIABLES — TEXT BOOSTED */
 :root {
     color-scheme: light;
     --primary: #087443;
     --primary-dark: #055c34;
     --primary-light: #15965a;
-    --primary-soft: rgba(231, 244, 236, 0.85);
+    --primary-soft: rgba(231, 244, 236, 0.55);
     --accent: #e4b64f;
     --page: #f4f8f5;
     
-    /* ✨ More opaque backgrounds for better text contrast */
-    --surface: rgba(255, 255, 255, 0.92);
-    --surface-alt: rgba(237, 244, 239, 0.90);
+    /* ✅ BOXES — NANATILING TRANSPARENT */
+    --surface: rgba(255, 255, 255, 0.50);
+    --surface-alt: rgba(237, 244, 239, 0.55);
     
-    /* ✨ Darker, sharper text */
-    --text: #0f1a13;
-    --muted: #3a4d41;
+    /* ✅ TEKSTO — MAS MALINAW AT MADIIN */
+    --text: #0a120d;          /* Darker sharper text */
+    --muted: #2d4235;         /* Darker muted for readability */
     
-    --border: rgba(180, 200, 185, 0.50);
+    --border: rgba(215, 227, 218, 0.35);
     --danger: #b42318;
     --success: #176b45;
-    --shadow: 0 8px 32px rgba(20, 55, 35, 0.12);
-    --shadow-hover: 0 16px 48px rgba(20, 55, 35, 0.18);
+    --shadow: 0 8px 32px rgba(20, 55, 35, 0.10);
+    --shadow-hover: 0 16px 48px rgba(20, 55, 35, 0.15);
     --radius: 18px;
     --homepage-box-width: 800px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -32,28 +34,28 @@
 
 html[data-theme="dark"] {
     color-scheme: dark;
-    --primary: #7dd5a4;
-    --primary-dark: #a5e2c0;
+    --primary: #69c394;
+    --primary-dark: #8ed9ad;
     --primary-light: #15965a;
-    --primary-soft: rgba(45, 80, 62, 0.85);
-    --page: #0d1510;
+    --primary-soft: rgba(32, 58, 45, 0.45);
+    --page: #101a14;
     
-    /* ✨ Dark mode — more solid surfaces */
-    --surface: rgba(22, 38, 29, 0.90);
-    --surface-alt: rgba(30, 48, 38, 0.92);
+    /* ✅ BOXES — NANATILING TRANSPARENT SA DARK MODE */
+    --surface: rgba(18, 32, 24, 0.45);
+    --surface-alt: rgba(26, 42, 33, 0.50);
     
-    /* ✨ Brighter, clearer text */
-    --text: #f0f7f3;
-    --muted: #b8c7bd;
+    /* ✅ TEKSTO — MAS MALINAW SA DARK MODE */
+    --text: #f2f9f5;          /* Brighter white */
+    --muted: #b2c7b9;         /* Lighter muted */
     
-    --border: rgba(70, 100, 80, 0.45);
-    --danger: #ff9e9e;
-    --success: #8ee0b0;
-    --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-    --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.45);
+    --border: rgba(52, 72, 58, 0.30);
+    --danger: #ff8a80;
+    --success: #7ed5a1;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.20);
+    --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.28);
 }
 
-/* 2. RESET & BASE */
+/* 2. BASE — Improved text readability */
 *, *::before, *::after { box-sizing: border-box; }
 html { min-height: 100%; scroll-behavior: smooth; }
 body {
@@ -64,11 +66,11 @@ body {
     color: var(--text);
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 15px;
-    line-height: 1.7; /* ✨ Increased line height */
-    font-weight: 500; /* ✨ Slightly bolder base text */
+    line-height: 1.7;           /* ✅ Mas maayos na pagitan ng linya */
+    font-weight: 500;           /* ✅ Medyo mas makapal na teksto */
     background-color: var(--page);
     background-image:
-        linear-gradient(rgba(7, 40, 28, 0.55), rgba(7, 40, 28, 0.65)),
+        linear-gradient(rgba(7, 40, 28, 0.45), rgba(7, 40, 28, 0.55)),
         url("/static/images/campus-bg.jpg");
     background-position: center;
     background-size: cover;
@@ -77,16 +79,28 @@ body {
 }
 html[data-theme="dark"] body {
     background-image:
-        linear-gradient(rgba(5, 24, 16, 0.70), rgba(5, 24, 16, 0.85)),
+        linear-gradient(rgba(5, 24, 16, 0.60), rgba(5, 24, 16, 0.75)),
         url("/static/images/campus-bg.jpg");
 }
-b, strong, h1, h2, h3, h4, h5, h6 {
-    font-weight: 700; /* ✨ Bold headings */
+
+/* ✅ HEADINGS — Mas malinaw at makapal */
+h1, h2, h3, h4, h5, h6, strong, b {
+    font-weight: 700;
 }
+
 img { max-width: 100%; transition: var(--transition); }
-a { color: var(--primary); text-underline-offset: 3px; transition: var(--transition); font-weight: 600; }
+a { 
+    color: var(--primary); 
+    text-underline-offset: 3px; 
+    transition: var(--transition);
+    font-weight: 600;  /* ✅ Makapal na link */
+}
 a:hover { color: var(--primary-dark); }
-button, input, select, textarea { font: inherit; transition: var(--transition); font-weight: 500; }
+button, input, select, textarea { 
+    font: inherit; 
+    transition: var(--transition);
+    font-weight: 500;
+}
 button { cursor: pointer; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
     outline: 3px solid var(--accent);
@@ -104,10 +118,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .site-header {
     position: relative; z-index: 100; flex: 0 0 auto;
     color: white;
-    background: rgba(5, 82, 52, 0.85); /* ✨ More solid header */
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 4px 20px rgba(15, 50, 30, 0.15);
+    background: rgba(5, 82, 52, 0.70);  /* ✅ Hindi binago */
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 20px rgba(15, 50, 30, 0.12);
     transition: var(--transition);
 }
 .header-inner {
@@ -127,7 +141,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .brand-mark { display: grid; place-items: center; background: white; color: var(--primary); font-weight: 800; }
 .brand-copy { display: flex; flex-direction: column; line-height: 1.25; }
 .brand-copy strong { font-size: 1rem; letter-spacing: -0.02em; font-weight: 700; }
-.brand-copy small { margin-top: 3px; color: #b8d9c8; font-size: 0.75rem; }
+.brand-copy small { margin-top: 3px; color: #c6e6d4; font-size: 0.75rem; font-weight: 500; }
 .primary-navigation { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 .primary-navigation > a, .theme-toggle {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
@@ -136,7 +150,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     text-decoration: none; transition: var(--transition);
 }
 .primary-navigation > a:hover, .theme-toggle:hover {
-    color: white; background: rgba(255, 255, 255, 0.18); transform: translateY(-2px);
+    color: white; background: rgba(255, 255, 255, 0.15); transform: translateY(-2px);
 }
 .nav-count {
     display: inline-grid; place-items: center; min-width: 20px; height: 20px;
@@ -161,25 +175,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 /* 5. FOOTER */
 .site-footer {
     width: 100%; flex: 0 0 auto; margin-top: auto;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(4, 54, 35, 0.85); /* ✨ More solid footer */
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    color: #d4eade; transition: var(--transition);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(4, 54, 35, 0.65);  /* ✅ Hindi binago */
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    color: #cfe8d9; transition: var(--transition);
 }
 .footer-inner {
     width: min(1000px, calc(100% - 40px)); min-height: 52px; margin: 0 auto; padding: 16px 0;
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
 }
-.footer-inner p { margin: 0; color: #d4eade; font-size: 13px; font-weight: 500; }
+.footer-inner p { margin: 0; color: #cfe8d9; font-size: 13px; font-weight: 500; }
 .footer-inner strong { color: white; font-weight: 700; }
 
-/* 6. HOMEPAGE HERO */
+/* 6. HOMEPAGE HERO — BOX UNCHANGED, TEXT IMPROVED */
 .home-hero {
     position: relative; overflow: hidden;
     width: min(var(--homepage-box-width), calc(100% - 40px)); max-width: var(--homepage-box-width);
     margin: 24px auto; padding: clamp(32px, 6vw, 56px);
     border: 1px solid var(--border); border-radius: 20px;
-    background: var(--surface);
+    background: var(--surface);  /* ✅ NANATILING TRANSPARENT */
     backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     color: var(--text); box-shadow: var(--shadow); transition: var(--transition);
     animation: fadeInUp 0.6s ease both;
@@ -187,25 +201,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .home-hero:hover { box-shadow: var(--shadow-hover); transform: translateY(-4px); border-color: var(--primary); }
 .home-hero h1 {
     color: var(--primary);
-    font-weight: 800; /* ✨ Extra bold */
+    font-weight: 800;  /* ✅ Mas makapal */
     margin-bottom: 12px;
 }
 .home-hero .tagline {
     color: var(--text);
-    font-weight: 600; /* ✨ Bolder */
+    font-weight: 600;  /* ✅ Mas malinaw */
     font-size: 19px;
 }
 .home-hero .hero-description {
     color: var(--muted);
     font-weight: 500;
-    font-size: 16px; /* ✨ Slightly larger */
+    font-size: 16px;  /* ✅ Medyo mas malaki */
 }
 .home-page { width: 100%; max-width: var(--homepage-box-width); margin: 0 auto; }
 .home-page .home-stats, .home-page .search-panel, .home-page .reports-section {
     width: 100%; max-width: 100%; margin: 0; box-sizing: border-box;
 }
 
-/* 7. STATISTICS CARDS */
+/* 7. STATISTICS CARDS — BOX UNCHANGED, TEXT BOLDER */
 .home-page .home-stats {
     display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;
     margin: 0 0 24px;
@@ -213,7 +227,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .home-stats .stat {
     position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 8px;
     padding: 22px 20px; border: 1px solid var(--border); border-radius: 16px;
-    background: var(--surface);
+    background: var(--surface);  /* ✅ NANATILING TRANSPARENT */
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     color: var(--text); box-shadow: var(--shadow); transition: var(--transition);
     animation: fadeInUp 0.6s ease both;
@@ -221,30 +235,30 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .home-stats .stat:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
 .home-stats .stat::before {
     content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-    background: var(--primary); opacity: 0.7; transition: var(--transition);
+    background: var(--primary); opacity: 0.6; transition: var(--transition);
 }
 .home-stats .stat:hover::before { width: 5px; opacity: 1; }
 .home-stats .stat-label { 
     color: var(--muted); 
     font-size: 13px; 
-    font-weight: 700; /* ✨ Bolder labels */
+    font-weight: 700;  /* ✅ Mas makapal */
     text-transform: uppercase; 
-    letter-spacing: 0.05em; 
+    letter-spacing: 0.03em; 
 }
 .home-stats .stat strong { 
     color: var(--primary); 
-    font-size: clamp(26px, 3vw, 36px); /* ✨ Larger numbers */
-    font-weight: 800; /* ✨ Extra bold */
+    font-size: clamp(26px, 3vw, 34px);  /* ✅ Mas malaki */
+    font-weight: 800;  /* ✅ Pinakamakapal */
     line-height: 1.1; 
     transition: var(--transition); 
 }
 .home-stats .stat:hover strong { transform: scale(1.08); display: inline-block; }
 
-/* 8. SEARCH PANEL */
+/* 8. SEARCH PANEL — BOX UNCHANGED, TEXT CLEARER */
 .home-page .search-panel {
     margin: 0 0 30px; padding: clamp(22px, 4vw, 30px);
     border: 1px solid var(--border); border-radius: var(--radius);
-    background: var(--surface);
+    background: var(--surface);  /* ✅ NANATILING TRANSPARENT */
     backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
     box-shadow: var(--shadow); transition: var(--transition);
     animation: fadeInUp 0.65s ease both;
@@ -260,7 +274,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .search-description { margin: 0 0 20px; color: var(--muted); font-size: 15px; font-weight: 500; }
 .filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .filter-grid label {
-    font-weight: 700; /* ✨ Bold labels */
+    font-weight: 700;  /* ✅ Mas malinaw na label */
     font-size: 13px;
     margin-bottom: 6px;
     display: block;
@@ -268,24 +282,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .filter-grid input, .filter-grid select {
     width: 100%; 
-    background: rgba(255, 255, 255, 0.75); /* ✨ More solid input fields */
+    background: rgba(255, 255, 255, 0.55);  /* ✅ Hindi masyadong nagbago */
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border: 1.5px solid var(--border); border-radius: 10px;
+    border: 1px solid var(--border); border-radius: 10px;
     color: var(--text); 
     font-weight: 500;
     transition: var(--transition);
 }
 .filter-grid input:focus, .filter-grid select:focus {
-    transform: scale(1.02); background: rgba(255, 255, 255, 0.95);
+    transform: scale(1.02); background: rgba(255, 255, 255, 0.75);
     border-color: var(--primary); box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.15);
 }
 .search-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 
-/* 9. BUTTONS */
+/* 9. BUTTONS — Text bolder */
 .button, .btn, button.btn, input[type="submit"] {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 46px; padding: 12px 22px; border: 1px solid transparent; border-radius: 10px;
-    background: var(--primary); color: white; font-weight: 700; /* ✨ Bolder button text */
+    min-height: 44px; padding: 11px 20px; border: 1px solid transparent; border-radius: 10px;
+    background: var(--primary); color: white; font-weight: 700;  /* ✅ Makapal na text */
     text-decoration: none; transition: var(--transition); cursor: pointer;
 }
 .button:hover, .btn:hover, button.btn:hover, input[type="submit"]:hover {
@@ -294,19 +308,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .button.secondary, .btn-secondary {
     border-color: var(--border);
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.50);  /* ✅ Hindi binago */
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     color: var(--text);
     font-weight: 600;
 }
 .button.secondary:hover, .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.95); border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.70); border-color: var(--primary);
     transform: translateY(-2px);
 }
 .btn-danger { background: #b42318; color: white; font-weight: 700; }
 .btn-danger:hover { background: #961e14; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(180, 35, 24, 0.25); }
 
-/* 10. REPORTS GRID */
+/* 10. REPORTS GRID — BOX UNCHANGED, TEXT IMPROVED */
 .home-page .reports-section { margin-top: 32px; animation: fadeInUp 0.7s ease both; }
 .reports-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 8px 0 18px; }
 .reports-heading h2 { margin: 0; font-size: clamp(19px, 3vw, 24px); font-weight: 700; transition: var(--transition); }
@@ -322,7 +336,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .home-report-card {
     display: flex; flex-direction: column; overflow: hidden;
     border: 1px solid var(--border); border-radius: 18px;
-    background: var(--surface);
+    background: var(--surface);  /* ✅ NANATILING TRANSPARENT */
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     box-shadow: var(--shadow); transition: var(--transition);
     animation: homeCardEnter 0.5s ease both;
@@ -331,22 +345,3 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .home-report-card .report-image-wrap { position: relative; overflow: hidden; background: var(--surface-alt); }
 .home-report-card .report-photo, .home-report-card .placeholder-photo {
     width: 100%; height: 190px; object-fit: cover; transition: var(--transition);
-}
-.home-report-card:hover .report-photo { transform: scale(1.08); }
-.home-report-card .placeholder-photo { display: flex; align-items: center; justify-content: center; font-size: 44px; }
-.home-report-card .report-content { padding: 18px; flex: 1; }
-.home-report-card .report-content h3 { 
-    margin: 8px 0 10px; 
-    line-height: 1.4; 
-    font-size: 1.05rem; 
-    font-weight: 700; /* ✨ Bold card titles */
-    transition: var(--transition); 
-}
-.home-report-card:hover .report-content h3 { color: var(--primary); }
-.home-report-card .report-meta p { 
-    margin: 4px 0; 
-    color: var(--muted); 
-    font-size: 13px; 
-    font-weight: 500;
-}
-.home-report-card .report-m
