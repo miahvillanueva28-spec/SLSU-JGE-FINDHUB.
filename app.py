@@ -170,7 +170,7 @@ class Notification(db.Model):
     is_read = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
-# ========== NEW: DELETED REPORTS HISTORY MODEL ==========
+# ========== DELETED REPORTS HISTORY MODEL ==========
 class DeletedReport(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     original_report_id = db.Column(db.Integer, nullable=False)
@@ -489,7 +489,7 @@ def report_detail(report_id):
     return render_template("report_detail.html", report=report)
 
 # ==================================================
-# CLAIM SUBMISSION
+# CLAIM SUBMISSION — UPDATED FLASH MESSAGE
 # ==================================================
 @app.route("/report/<int:report_id>/claim", methods=["POST"])
 def submit_claim(report_id):
@@ -506,8 +506,9 @@ def submit_claim(report_id):
     proof = get_report_form_value("proof")
 
     if not all([claimant_name, claimant_contact, proof]):
+        # ✅ UPDATED: from "ownership proof" to "information about the item"
         flash(
-            "Complete your name, contact details, and ownership proof.",
+            "Complete your name, contact details, and information about the item.",
             "danger",
         )
         return redirect(url_for("report_detail", report_id=report.id))
