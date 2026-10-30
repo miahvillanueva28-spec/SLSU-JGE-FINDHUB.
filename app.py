@@ -158,10 +158,12 @@ class Claim(db.Model):
     claimant_name = db.Column(db.String(120), nullable=False)
     claimant_contact = db.Column(db.String(150), nullable=False)
     proof = db.Column(db.Text, nullable=False)
+    # ✅ NEW: Claim proof photo upload
     proof_file = db.Column(db.String(255), nullable=True)
     proof_filename = db.Column(db.String(255), nullable=True)
     status = db.Column(db.String(30), default="Pending", nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
+    # ✅ NEW: Notify claimant when status changes
     claimant_notified = db.Column(db.Boolean, default=False, nullable=False)
 
 class Notification(db.Model):
@@ -223,7 +225,7 @@ CLAIM_ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "pdf", "doc", "docx"}
 MAX_FILE_SIZE = 5 * 1024 * 1024
 REPORT_STATUSES = {"Open", "Pending Claim", "Returned", "Archived"}
 CLAIM_STATUSES = {"Pending", "Approved", "Rejected"}
-AUTO_ARCHIVE_MONTHS = 6
+AUTO_ARCHIVE_MONTHS = 6  # Auto-archive reports older than this
 
 def create_notification(title, message, notification_type="info", report_id=None, claim_id=None):
     notification = Notification(
@@ -365,6 +367,7 @@ def auto_archive_old_reports():
 # ==================================================
 @app.route("/")
 def home():
+    # Run auto-archive once per day
     try:
         auto_archive_old_reports()
     except Exception:
@@ -409,11 +412,5 @@ def home():
     reports = reports_query.all()
 
     total_reports = Report.query.count()
-    total_lost = Report.query.filter_by(report_type="Lost").count()
-    total_found = Report.query.filter_by(report_type="Found").count()
-    total_open = Report.query.filter_by(status="Open").count()
-    total_pending_claims = Claim.query.filter_by(status="Pending").count()
-    total_returned = Report.query.filter_by(status="Returned").count()
-    total_archived = Report.query.filter_by(status="Archived").count()
-
-   
+    total_lost = Report.query.filter_by(report_type
+    
