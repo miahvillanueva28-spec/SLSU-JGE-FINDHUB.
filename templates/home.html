@@ -5,340 +5,410 @@
 {% block head %}
 <style>
   /* ==============================================
-     SLSU JGE FINDHUB — PROFESSIONAL HOME PAGE
+     HOME HERO — ENHANCED
   ============================================== */
-
-  /* ---------- HERO SECTION ---------- */
   .home-hero {
     position: relative;
     overflow: hidden;
-    padding: clamp(48px, 7vw, 80px);
+    padding: clamp(40px, 6vw, 72px);
     border: 1px solid var(--border);
     border-radius: 24px;
     background: var(--surface);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
     box-shadow: var(--shadow);
     text-align: center;
-    margin-bottom: 32px;
   }
-
-  .sticker-row {
+  .home-hero .sticker-row {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     justify-content: center;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
-
-  .sticker {
+  .home-hero .sticker {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
+    gap: 7px;
+    padding: 8px 14px;
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--surface-alt);
     color: var(--text);
     font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    transition: all 0.3s ease;
-    animation: fadeInUp 0.5s ease both;
+    font-weight: 700;
+    animation: homeStickerEnter .5s cubic-bezier(.22,1,.36,1) both;
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
   }
-  .sticker:nth-child(2) { animation-delay: 0.08s; }
-  .sticker:nth-child(3) { animation-delay: 0.16s; }
-  .sticker:nth-child(4) { animation-delay: 0.24s; }
-
-  .sticker:hover {
-    transform: translateY(-3px);
+  .home-hero .sticker:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
     background: var(--primary-soft);
-    border-color: var(--primary);
-    box-shadow: 0 6px 16px rgba(8, 116, 67, 0.12);
   }
-
+  .home-hero .sticker:nth-child(2) { animation-delay: .08s; }
+  .home-hero .sticker:nth-child(3) { animation-delay: .16s; }
+  .home-hero .sticker:nth-child(4) { animation-delay: .24s; }
   .home-hero h1 {
-    max-width: 850px;
-    margin: 0 auto 16px;
-    color: var(--primary);
-    font-size: clamp(32px, 6vw, 52px);
-    line-height: 1.1;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    animation: fadeInUp 0.6s ease 0.1s both;
-  }
-
-  .tagline {
-    max-width: 650px;
+    max-width: 800px;
     margin: 0 auto 12px;
+    color: var(--primary);
+    font-size: clamp(34px, 6vw, 56px);
+    line-height: 1.08;
+    letter-spacing: -.8px;
+    font-weight: 800;
+    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .1s both;
+  }
+  .home-hero .tagline {
+    max-width: 650px;
+    margin: 0 auto 14px;
     color: var(--text);
     font-size: clamp(18px, 3vw, 24px);
     font-weight: 600;
-    line-height: 1.3;
-    animation: fadeInUp 0.6s ease 0.2s both;
+    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .2s both;
   }
-
-  .hero-description {
-    max-width: 700px;
-    margin: 0 auto 36px;
+  .home-hero .hero-description {
+    max-width: 680px;
+    margin: 0 auto 32px;
     color: var(--muted);
-    font-size: 16px;
-    line-height: 1.7;
-    animation: fadeInUp 0.6s ease 0.3s both;
+    font-size: clamp(15px, 2vw, 17px);
+    line-height: 1.8;
+    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .3s both;
   }
-
-  .button-group {
+  .home-hero .button-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 14px;
     justify-content: center;
-    animation: fadeInUp 0.6s ease 0.4s both;
+    animation: heroFadeUp .7s cubic-bezier(.22,1,.36,1) .4s both;
   }
-
-  .button-group .button {
-    min-width: 220px;
-    padding: 14px 24px;
-    font-size: 15px;
-    font-weight: 700;
-    border-radius: 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  .home-hero .button {
+    box-shadow: 0 5px 13px rgba(0, 75, 43, .16);
+    min-width: 210px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
   }
-
-  .lost-btn {
+  .home-hero .button::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    transform: translate(-50%, -50%);
+    transition: width .5s ease, height .5s ease;
+  }
+  .home-hero .button:active::after {
+    width: 300px;
+    height: 300px;
+  }
+  .home-hero .button:hover {
+    box-shadow: 0 10px 24px rgba(0, 75, 43, .28);
+    transform: translateY(-3px);
+  }
+  .button.lost-btn {
     background: #fff3e0;
-    color: #c24e00;
-    border: 1px solid #ffcc80;
+    color: #e65100;
+    border-color: #ffcc80;
   }
-  .lost-btn:hover {
+  .button.lost-btn:hover {
     background: #ffe0b2;
-    color: #b34500;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(194, 78, 0, 0.18);
+    color: #e65100;
+    border-color: #ffb74d;
   }
-
-  .found-btn {
+  .button.found-btn {
     background: #e8f5e9;
-    color: #1b5e20;
-    border: 1px solid #a5d6a7;
+    color: #2e7d32;
+    border-color: #a5d6a7;
   }
-  .found-btn:hover {
+  .button.found-btn:hover {
     background: #c8e6c9;
-    color: #0f4d13;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(27, 94, 32, 0.18);
+    color: #2e7d32;
+    border-color: #81c784;
   }
-
-  html[data-theme="dark"] .lost-btn {
+  html[data-theme="dark"] .button.lost-btn {
     background: #5d3a14;
-    color: #ffd699;
+    color: #ffcc80;
     border-color: #8d551a;
   }
-  html[data-theme="dark"] .lost-btn:hover {
+  html[data-theme="dark"] .button.lost-btn:hover {
     background: #7a4a1a;
     color: #ffe0b2;
   }
-  html[data-theme="dark"] .found-btn {
+  html[data-theme="dark"] .button.found-btn {
     background: #1e4620;
-    color: #b2e2b4;
+    color: #a5d6a7;
     border-color: #2e7d32;
   }
-  html[data-theme="dark"] .found-btn:hover {
+  html[data-theme="dark"] .button.found-btn:hover {
     background: #265c28;
     color: #c8e6c9;
   }
 
-  /* ---------- STATS SECTION ---------- */
+  /* ==============================================
+     STATISTICS — ENHANCED WITH COUNTER ANIMATION
+  ============================================== */
   .home-stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 32px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin: 28px 0;
   }
-
-  .stat {
-    padding: 28px 20px;
+  .home-stats .stat {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 26px 20px;
     border: 1px solid var(--border);
     border-radius: 16px;
     background: var(--surface);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow);
     text-align: center;
-    transition: all 0.3s ease;
+    transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
     opacity: 0;
     transform: translateY(20px);
   }
-  .stat.visible {
+  .home-stats .stat.visible {
     opacity: 1;
     transform: translateY(0);
+    transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1);
   }
-  .stat:hover {
-    transform: translateY(-4px);
-    border-color: var(--primary);
-    box-shadow: var(--shadow-hover);
+  .home-stats .stat:nth-child(1).visible { transition-delay: .05s; }
+  .home-stats .stat:nth-child(2).visible { transition-delay: .15s; }
+  .home-stats .stat:nth-child(3).visible { transition-delay: .25s; }
+  .home-stats .stat:nth-child(4).visible { transition-delay: .35s; }
+  .home-stats .stat:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.1);
   }
-
-  .stat-label {
+  .home-stats .stat::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: var(--primary);
+    opacity: .72;
+    border-radius: 0 0 4px 4px;
+    transition: width .3s ease, opacity .3s ease;
+  }
+  .home-stats .stat:hover::before {
+    width: 100%;
+    opacity: 1;
+  }
+  .home-stats .stat-label {
     color: var(--muted);
     font-size: 13px;
     font-weight: 600;
+    letter-spacing: .3px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
   }
-
-  .stat strong {
+  .home-stats .stat strong {
     color: var(--primary);
-    font-size: clamp(28px, 4vw, 38px);
-    font-weight: 800;
+    font-size: clamp(28px, 3vw, 38px);
     line-height: 1.2;
+    overflow-wrap: anywhere;
+    font-weight: 800;
     font-variant-numeric: tabular-nums;
   }
 
-  /* ---------- SEARCH PANEL ---------- */
+  /* ==============================================
+     SEARCH PANEL — ENHANCED
+  ============================================== */
   .search-panel {
-    padding: 36px 32px;
+    scroll-margin-top: 95px;
+    margin-bottom: 30px;
+    text-align: center;
+    padding: 32px 28px;
     border: 1px solid var(--border);
     border-radius: 20px;
     background: var(--surface);
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    margin-bottom: 36px;
+    box-shadow: var(--shadow);
     opacity: 0;
     transform: translateY(20px);
-    transition: all 0.6s ease;
+    transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1);
   }
   .search-panel.visible {
     opacity: 1;
     transform: translateY(0);
   }
-  .search-panel:hover {
-    border-color: var(--primary);
-  }
-
   .search-heading {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
-    margin: 0 0 12px;
-    font-size: clamp(20px, 3vw, 26px);
-    font-weight: 700;
+    gap: 10px;
+    margin: 0 0 14px;
+    font-size: clamp(20px, 3vw, 25px);
   }
-
-  .heading-icon {
+  .search-heading .heading-icon {
+    display: inline-flex;
     width: 44px;
     height: 44px;
-    display: flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
     border-radius: 12px;
     background: var(--primary-soft);
     font-size: 20px;
-    flex-shrink: 0;
+    transition: transform .3s ease;
   }
-
+  .search-panel:hover .heading-icon {
+    transform: rotate(-8deg) scale(1.05);
+  }
   .search-description {
+    margin: 0 auto 22px;
+    max-width: 600px;
     color: var(--muted);
-    font-size: 15px;
-    margin: 0 0 24px;
-    max-width: 640px;
+    font-size: 14px;
   }
-
   .filter-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
   }
-
+  .filter-grid > div {
+    min-width: 0;
+  }
   .filter-grid label {
-    display: block;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    display: block;
   }
-
   .filter-grid input,
   .filter-grid select {
     width: 100%;
-    padding: 12px 16px;
+    min-width: 0;
+    padding: 10px 14px;
     border: 1.5px solid var(--border);
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--surface);
     color: var(--text);
-    font-size: 15px;
-    transition: all 0.25s ease;
+    font-size: 14px;
+    transition: border-color .25s ease, box-shadow .25s ease;
   }
   .filter-grid input:focus,
   .filter-grid select:focus {
     outline: none;
     border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.12);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
   }
-
   .search-actions {
     display: flex;
-    gap: 12px;
+    gap: 9px;
+    align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
+    margin-top: 22px;
   }
 
-  /* ---------- REPORTS SECTION ---------- */
+  /* ==============================================
+     BUTTONS — ENHANCED
+  ============================================== */
+  .home-page .button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 10px 20px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .25s cubic-bezier(.22,1,.36,1), background .25s ease, box-shadow .25s ease;
+  }
+  .home-page .button:hover {
+    background: var(--primary-dark);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(7,92,59,.25);
+  }
+  .home-page .button:active {
+    transform: translateY(0);
+  }
+  .home-page .button.secondary {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .home-page .button.secondary:hover {
+    background: var(--surface-alt);
+    color: var(--text);
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  }
+  .home-page .button.small {
+    min-height: 36px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  /* ==============================================
+     REPORTS SECTION — ENHANCED
+  ============================================== */
   .reports-section {
-    margin-top: 8px;
+    margin-top: 36px;
   }
-
   .reports-heading {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
     flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 24px;
+    margin: 8px 0 20px;
   }
-
   .reports-heading h2 {
     margin: 0;
-    font-size: clamp(20px, 3vw, 26px);
+    font-size: clamp(19px, 3vw, 24px);
     font-weight: 700;
   }
-
   .reports-count {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 36px;
-    height: 32px;
-    padding: 0 12px;
-    margin-left: 10px;
+    min-width: 32px;
+    min-height: 28px;
+    padding: 4px 10px;
+    margin-left: 8px;
     border-radius: 999px;
     background: var(--primary-soft);
     color: var(--primary);
-    font-size: 13px;
-    font-weight: 800;
     border: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 700;
+    vertical-align: middle;
   }
-
   .back-to-home-row {
     margin-bottom: 20px;
   }
-
-  .report-grid {
+  .home-page .report-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
   }
-
   .home-report-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
     border: 1px solid var(--border);
     border-radius: 18px;
     background: var(--surface);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    overflow: hidden;
-    transition: all 0.35s ease;
+    box-shadow: var(--shadow);
     opacity: 0;
     transform: translateY(24px);
+    transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
   }
   .home-report-card.visible {
     opacity: 1;
@@ -346,151 +416,181 @@
   }
   .home-report-card:hover {
     transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(0, 50, 30, 0.12);
     border-color: var(--primary);
-    box-shadow: var(--shadow-hover);
   }
-
-  .report-image-wrap {
+  .home-report-card .report-image-wrap {
     position: relative;
-    height: 200px;
     overflow: hidden;
     background: var(--surface-alt);
   }
-
-  .report-photo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-  .home-report-card:hover .report-photo {
-    transform: scale(1.06);
-  }
-
-  .placeholder-photo {
-    width: 100%;
-    height: 100%;
+  .home-report-card .report-photo,
+  .home-report-card .placeholder-photo {
     display: flex;
+    width: 100%;
+    height: 190px;
+    margin: 0;
     align-items: center;
     justify-content: center;
-    font-size: 48px;
-    background: linear-gradient(135deg, var(--primary-soft), var(--surface-alt));
   }
-
-  .report-content {
+  .home-report-card .report-photo {
+    display: block;
+    object-fit: cover;
+    cursor: zoom-in;
+    transition: transform .5s cubic-bezier(.22,1,.36,1);
+  }
+  .home-report-card:hover .report-photo {
+    transform: scale(1.08);
+  }
+  .home-report-card .placeholder-photo {
+    background: linear-gradient(135deg, var(--primary-soft), var(--surface-alt));
+    font-size: 48px;
+    transition: transform .5s ease;
+  }
+  .home-report-card:hover .placeholder-photo span {
+    transform: scale(1.15);
+    display: inline-block;
+  }
+  .home-report-card .report-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
     padding: 20px;
   }
-
-  .report-content .tag {
-    margin-bottom: 12px;
-  }
-
-  .report-content h3 {
-    margin: 0 0 12px;
+  .home-report-card .report-content h3 {
+    margin: 10px 0 10px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
     font-size: 17px;
     font-weight: 700;
-    line-height: 1.4;
-    transition: color 0.25s ease;
+    transition: color .25s ease;
   }
-  .home-report-card:hover h3 {
+  .home-report-card:hover .report-content h3 {
     color: var(--primary);
   }
-
   .report-meta {
     display: grid;
     gap: 6px;
-    margin-bottom: 14px;
+    margin-top: 5px;
   }
-
   .report-meta p {
-    margin: 0;
-    font-size: 13px;
+    margin: 2px 0;
     color: var(--muted);
+    font-size: 13px;
+    overflow-wrap: anywhere;
     display: flex;
     gap: 6px;
+    align-items: flex-start;
   }
-
-  .report-meta strong {
+  .report-meta strong,
+  .report-status-row > strong {
     color: var(--text);
-    font-weight: 600;
+    flex-shrink: 0;
   }
-
+  .home-page .tag {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+  }
+  .home-page .tag.found {
+    background: #dff4e7;
+    color: #176b45;
+  }
+  .home-page .tag.pending {
+    background: #fff1cc;
+    color: #805700;
+  }
+  .home-page .tag.returned {
+    background: #e6e9ee;
+    color: #465468;
+  }
+  html[data-theme="dark"] .home-page .tag.found {
+    background: #203a2d;
+    color: #9be0b6;
+  }
+  html[data-theme="dark"] .home-page .tag.pending {
+    background: #45381c;
+    color: #f2d18a;
+  }
+  html[data-theme="dark"] .home-page .tag.returned {
+    background: #303944;
+    color: #d2dae5;
+  }
   .report-status-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding-top: 4px;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 14px;
+    font-size: 12px;
   }
-
-  .tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .tag.found { background: #dff4e7; color: #176b45; }
-  .tag.pending { background: #fff1cc; color: #805700; }
-  .tag.returned { background: #e6e9ee; color: #465468; }
-
-  html[data-theme="dark"] .tag.found { background: #203a2d; color: #9be0b6; }
-  html[data-theme="dark"] .tag.pending { background: #45381c; color: #f2d18a; }
-  html[data-theme="dark"] .tag.returned { background: #303944; color: #d2dae5; }
-
-  .card-actions {
+  .home-report-card .card-actions {
     margin-top: auto;
+    padding-top: 18px;
   }
-  .card-actions .button {
+  .home-report-card .card-actions .button {
     width: 100%;
   }
 
-  /* ---------- EMPTY STATE ---------- */
-  .home-empty-state {
-    padding: 56px 32px;
+  /* ==============================================
+     EMPTY STATE — ENHANCED
+  ============================================== */
+  .home-page .home-empty-state {
+    padding: 48px 28px;
     border: 1px dashed var(--border);
     border-radius: 20px;
     background: var(--surface);
     text-align: center;
   }
-
-  .empty-icon {
+  .home-empty-state .empty-icon {
+    display: flex;
     width: 80px;
     height: 80px;
-    display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
     border-radius: 50%;
     background: var(--primary-soft);
     font-size: 40px;
+    animation: emptyPulse 2.5s ease-in-out infinite;
   }
-
+  @keyframes emptyPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(7,92,59,.15); }
+    50% { box-shadow: 0 0 0 16px rgba(7,92,59,0); }
+  }
   .home-empty-state h3 {
-    margin: 0 0 10px;
+    margin: 8px 0 10px;
     font-size: 22px;
     font-weight: 700;
   }
-
   .home-empty-state p {
-    max-width: 540px;
-    margin: 0 auto 28px;
+    max-width: 520px;
+    margin: 0 auto 24px;
     color: var(--muted);
     font-size: 15px;
     line-height: 1.7;
   }
-
-  .empty-actions {
+  .home-empty-state .empty-actions {
     display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
-  /* ---------- REPORTS-ONLY VIEW ---------- */
+  /* ==============================================
+     REPORTS-ONLY VIEW
+  ============================================== */
   body.reports-only .home-hero,
   body.reports-only .home-stats,
   body.reports-only .search-panel {
@@ -498,70 +598,113 @@
   }
   body.reports-only .reports-section {
     margin-top: 0;
-    animation: fadeInUp 0.5s ease both;
+    animation: reportsFadeIn .5s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes reportsFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes homeStickerEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ---------- ANIMATIONS ---------- */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(16px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* ---------- RESPONSIVE ---------- */
-  @media (max-width: 900px) {
+  /* ==============================================
+     RESPONSIVE
+  ============================================== */
+  @media (max-width: 950px) {
     .home-stats {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .filter-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .report-grid {
-      grid-template-columns: repeat(2, 1fr);
+    .home-page .report-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-
   @media (max-width: 600px) {
     .home-hero {
-      padding: 36px 20px;
+      padding: 28px 20px;
+      border-radius: 20px;
+    }
+    .home-hero .sticker-row {
+      gap: 7px;
+      margin-bottom: 24px;
+    }
+    .home-hero .sticker {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .home-hero h1 {
+      font-size: clamp(26px, 5vw, 36px);
     }
     .home-stats {
-      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
+    }
+    .home-stats .stat {
+      padding: 20px 14px;
     }
     .filter-grid {
       grid-template-columns: 1fr;
     }
-    .report-grid {
-      grid-template-columns: 1fr;
-    }
-    .button-group,
-    .search-actions,
-    .empty-actions {
+    .search-actions {
+      align-items: stretch;
       flex-direction: column;
     }
-    .button-group .button,
-    .search-actions .button,
-    .empty-actions .button {
+    .search-actions > * {
       width: 100%;
+      text-align: center;
+    }
+    .reports-heading {
+      align-items: flex-start;
+    }
+    .home-page .report-grid {
+      grid-template-columns: 1fr;
+    }
+    .home-report-card .report-photo,
+    .home-report-card .placeholder-photo {
+      height: 210px;
+    }
+    .home-page .home-empty-state {
+      padding: 36px 18px;
+    }
+    .home-hero .button-group,
+    .home-empty-state .empty-actions {
+      flex-direction: column;
+    }
+    .home-hero .button,
+    .home-empty-state .button {
+      width: 100%;
+      text-align: center;
     }
   }
-
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+    .home-hero .sticker,
+    .home-report-card,
+    .home-stats .stat,
+    .search-panel,
+    body.reports-only .reports-section {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .home-report-card:hover .report-photo {
+      transform: none;
+    }
+    .home-report-card:hover {
+      transform: none;
+    }
+    .home-empty-state .empty-icon {
+      animation: none;
     }
   }
 </style>
 {% endblock %}
-
 {% block hero %}
 <section class="hero home-hero">
   <div class="sticker-row" aria-label="Common lost and found categories">
@@ -587,7 +730,6 @@
   </div>
 </section>
 {% endblock %}
-
 {% block content %}
 <div class="home-page">
   <section class="stats home-stats" aria-label="Lost and found statistics">
@@ -609,15 +751,17 @@
     </div>
   </section>
 
-  <section class="panel search-panel" id="find-item" aria-labelledby="find-item-heading">
+  <section class="panel search-panel" id="find-item"
+           aria-labelledby="find-item-heading">
     <h2 class="search-heading" id="find-item-heading">
       <span class="heading-icon" aria-hidden="true">🔎</span>
-      Find an Item
+      <span>Find an Item</span>
     </h2>
     <p class="search-description">
       Search by keyword, filter by type or status, and quickly locate what you're looking for.
     </p>
-    <form method="GET" action="{{ url_for('home') }}" role="search" aria-label="Search lost and found reports">
+    <form method="GET" action="{{ url_for('home') }}"
+          role="search" aria-label="Search lost and found reports">
       <div class="filter-grid">
         <div>
           <label for="search-query">Search Keywords</label>
@@ -629,4 +773,286 @@
         <div>
           <label for="report-type">Report Type</label>
           <select id="report-type" name="type">
-            <option value="">All Types</option
+            <option value="">All Types</option>
+            <option value="Lost"
+              {% if request.args.get('type', '') == 'Lost' %}selected{% endif %}>
+              Lost
+            </option>
+            <option value="Found"
+              {% if request.args.get('type', '') == 'Found' %}selected{% endif %}>
+              Found
+            </option>
+          </select>
+        </div>
+        <div>
+          <label for="report-status">Status</label>
+          <select id="report-status" name="status">
+            <option value="">All Statuses</option>
+            {% for status_option in ['Open', 'Pending Claim', 'Returned', 'Archived'] %}
+              <option value="{{ status_option }}"
+                {% if request.args.get('status', '') == status_option %}selected{% endif %}>
+                {{ status_option }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="search-actions">
+        <button type="submit">🔎 Search Reports</button>
+        <a class="button secondary" href="{{ url_for('home') }}">
+          Clear Filters
+        </a>
+      </div>
+    </form>
+  </section>
+
+  <section class="reports-section" id="reports-section"
+           aria-labelledby="recent-reports-heading">
+    <div class="back-to-home-row">
+      <a class="button secondary small" href="{{ url_for('home') }}" id="back-to-home-btn" style="display:none;">
+        ← Back to Home
+      </a>
+    </div>
+    <div class="reports-heading">
+      <h2 id="recent-reports-heading">
+        {% if search_performed %}
+          🔍 Search Results
+        {% else %}
+          📌 Recent Reports
+        {% endif %}
+        {% if reports %}
+          <span class="reports-count">{{ reports|length }}</span>
+        {% endif %}
+      </h2>
+      <div style="display: flex; gap: 10px;">
+        <a class="button small lost-btn" href="{{ url_for('new_report') }}?type=Lost">
+          + Report Lost
+        </a>
+        <a class="button small found-btn" href="{{ url_for('new_report') }}?type=Found">
+          + Report Found
+        </a>
+      </div>
+    </div>
+
+    {% if reports %}
+      <div class="report-grid">
+        {% for report in reports %}
+          <article class="home-report-card">
+            <div class="report-image-wrap">
+              {% if report.photo %}
+                <img class="report-photo"
+                     src="{{ photo_src(report.photo) }}"
+                     alt="Photo of {{ report.item_name }}"
+                     loading="lazy"
+                     decoding="async">
+              {% else %}
+                <div class="placeholder-photo"
+                     aria-label="No item photo available">
+                  <span aria-hidden="true">
+                    {% if report.report_type|lower == 'lost' %}
+                      ⚠️
+                    {% else %}
+                      🔎
+                    {% endif %}
+                  </span>
+                </div>
+              {% endif %}
+            </div>
+            <div class="report-content">
+              <span class="tag {% if report.report_type|lower == 'found' %}found{% endif %}">
+                {{ report.report_type }}
+              </span>
+              <h3>{{ report.item_name }}</h3>
+              <div class="report-meta">
+                <p>
+                  <strong>📍 Location:</strong>
+                  {{ report.location or 'Not specified' }}
+                </p>
+                {% if report.incident_date %}
+                  <p>
+                    <strong>📅 Date:</strong>
+                    {{ report.incident_date }}
+                  </p>
+                {% endif %}
+              </div>
+              <div class="report-status-row">
+                <strong>Status:</strong>
+                <span class="tag
+                  {% if report.status == 'Pending Claim' %}pending
+                  {% elif report.status in ['Returned', 'Archived'] %}returned
+                  {% endif %}">
+                  {{ report.status or 'Open' }}
+                </span>
+              </div>
+              <div class="card-actions">
+                <a class="button small"
+                   href="{{ url_for('report_detail', report_id=report.id) }}">
+                  View Details →
+                </a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="home-empty-state">
+        <div class="empty-icon" aria-hidden="true">🕵️</div>
+        <h3>
+          {% if search_performed %}
+            No Matching Reports Found
+          {% else %}
+            No Reports Yet — Be the First
+          {% endif %}
+        </h3>
+        <p>
+          {% if search_performed %}
+            We couldn't find any items matching your search. Try different keywords or clear your filters to see all reports.
+          {% else %}
+            Help build our community — report an item today and help reunite it with its rightful owner.
+          {% endif %}
+        </p>
+        <div class="empty-actions">
+          <a class="button lost-btn" href="{{ url_for('new_report') }}?type=Lost">
+            ⚠️ Report Lost Item
+          </a>
+          <a class="button found-btn" href="{{ url_for('new_report') }}?type=Found">
+           🔍 Report Found Item
+          </a>
+          {% if search_performed %}
+            <a class="button secondary" href="{{ url_for('home') }}">
+              Clear Filters
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const hasSearch = params.has('q') || params.has('type') || params.has('status');
+    const isReportsView = params.get("view") === "reports";
+    const backBtn = document.getElementById("back-to-home-btn");
+    const reportsSection = document.getElementById("reports-section");
+
+    if (hasSearch || isReportsView) {
+      if (reportsSection) reportsSection.style.display = "";
+    } else {
+      if (reportsSection) reportsSection.style.display = "none";
+    }
+
+    if (isReportsView) {
+      document.body.classList.add("reports-only");
+      if (backBtn) backBtn.style.display = "inline-flex";
+      document.title = "All Reports | SLSU JGE FindHub";
+    }
+
+    const navLink = document.getElementById("nav-view-reports");
+    if (navLink) {
+      navLink.addEventListener("click", function (e) {
+        if (isReportsView) return;
+        e.preventDefault();
+        document.body.classList.add("reports-only");
+        if (reportsSection) reportsSection.style.display = "";
+        if (backBtn) backBtn.style.display = "inline-flex";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.pushState({}, "", "{{ url_for('home') }}?view=reports");
+        document.title = "All Reports | SLSU JGE FindHub";
+      });
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener("click", function (e) {
+        if (isReportsView && !hasSearch) return;
+        e.preventDefault();
+        document.body.classList.remove("reports-only");
+        if (!hasSearch && reportsSection) reportsSection.style.display = "none";
+        backBtn.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        history.pushState({}, "", "{{ url_for('home') }}");
+        document.title = "Home | SLSU JGE FindHub";
+      });
+    }
+
+    /* ==============================================
+       SCROLL-TRIGGERED ANIMATIONS (IntersectionObserver)
+    ============================================== */
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: "0px 0px -40px 0px"
+    };
+
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe stat cards
+    document.querySelectorAll(".home-stats .stat").forEach(function (el) {
+      observer.observe(el);
+    });
+
+    // Observe search panel
+    const searchPanel = document.querySelector(".search-panel");
+    if (searchPanel) observer.observe(searchPanel);
+
+    // Observe report cards with staggered delay
+    document.querySelectorAll(".home-report-card").forEach(function (el, index) {
+      el.style.transitionDelay = (index % 3) * 0.1 + "s";
+      observer.observe(el);
+    });
+
+    /* ==============================================
+       ANIMATED COUNTERS FOR STATISTICS
+    ============================================== */
+    function animateCounter(element) {
+      const target = parseInt(element.getAttribute("data-counter"), 10);
+      if (isNaN(target) || target === 0) {
+        element.textContent = target || 0;
+        return;
+      }
+      const duration = 1200;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(eased * target);
+        element.textContent = current;
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          element.textContent = target;
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Trigger counters when stats become visible
+    const statObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          const counter = entry.target.querySelector("[data-counter]");
+          if (counter && !counter.dataset.counted) {
+            counter.dataset.counted = "true";
+            animateCounter(counter);
+          }
+          statObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+
+    document.querySelectorAll(".home-stats .stat").forEach(function (el) {
+      statObserver.observe(el);
+    });
+  })();
+</script>
+{% endblock %}
