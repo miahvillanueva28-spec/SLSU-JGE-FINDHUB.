@@ -5,7 +5,8 @@
 {% block head %}
 <style>
   /* ==============================================
-     HOME — CLEAN & ORGANIZED DESIGN
+     HOME — CLEAN & PROFESSIONAL DESIGN
+     Stickers removed, streamlined layout
   ============================================== */
   .home-page {
     padding: 0 0 48px;
@@ -497,7 +498,7 @@
 {% endblock %}
 {% block content %}
 <div class="home-page">
-  <!-- ===== HERO ===== -->
+  <!-- ===== HERO — Stickers Removed ===== -->
   <section class="home-hero">
     <h1>SLSU JGE FindHub</h1>
     <p class="tagline">Your trusted campus space for lost and found</p>
@@ -506,10 +507,10 @@
     </p>
     <div class="button-group">
       <a class="button lost-btn" href="{{ url_for('new_report') }}?type=Lost">
-         Report Lost Item
+        ⚠️ Report Lost Item
       </a>
       <a class="button found-btn" href="{{ url_for('new_report') }}?type=Found">
-         Report Found Item
+        🔍 Report Found Item
       </a>
     </div>
   </section>
@@ -537,7 +538,7 @@
   <!-- ===== SEARCH ===== -->
   <section class="search-section">
     <div class="search-header">
-      <h2> Find an Item</h2>
+      <h2>🔎 Find an Item</h2>
       <p>Search by name, type, or status to locate what you're looking for</p>
     </div>
     <form method="GET" action="{{ url_for('home') }}">
@@ -565,7 +566,7 @@
         </div>
       </div>
       <div class="search-actions">
-        <button type="submit" class="button btn-search"> Search Reports</button>
+        <button type="submit" class="button btn-search">🔎 Search Reports</button>
         <a href="{{ url_for('home') }}" class="button btn-clear">Clear</a>
       </div>
     </form>
@@ -580,11 +581,11 @@
     <div class="reports-header">
       <h2>
         {% if request.args.q %}
-           Search Results
+          🔍 Search Results
         {% elif request.args.view == 'reports' %}
-           All Reports
+          📋 All Reports
         {% else %}
-           Recent Reports
+          📌 Recent Reports
         {% endif %}
         {% if reports %}<span class="reports-count">{{ reports|length }}</span>{% endif %}
       </h2>
@@ -602,15 +603,15 @@
               {% if report.photo %}
                 <img src="{{ photo_src(report.photo) }}" alt="{{ report.item_name }}" loading="lazy">
               {% else %}
-                {{ '' if report.report_type == 'Lost' else '' }}
+                {{ '⚠️' if report.report_type == 'Lost' else '🔍' }}
               {% endif %}
             </div>
             <div class="card-body">
               <span class="type-tag {{ report.report_type|lower }}">{{ report.report_type }}</span>
               <h3>{{ report.item_name }}</h3>
               <div class="card-meta">
-                <p><strong></strong> {{ report.location or 'Not specified' }}</p>
-                {% if report.incident_date %}<p><strong></strong> {{ report.incident_date }}</p>{% endif %}
+                <p><strong>📍</strong> {{ report.location or 'Not specified' }}</p>
+                {% if report.incident_date %}<p><strong>📅</strong> {{ report.incident_date }}</p>{% endif %}
               </div>
               <span class="status-tag {{ report.status|lower|replace(' ', '-') }}">
                 {{ report.status or 'Open' }}
@@ -622,8 +623,6 @@
       </div>
     {% else %}
       <div class="empty-state">
-        <div class="empty-icon"></div>
+        <div class="empty-icon">🕵️</div>
         <h3>
-          {% if request.args.q %}No matching items found{% else %}No reports yet{% endif %}
-        </h3>
-       
+          {% if request.args.q %}No matching items found{% else %}No
