@@ -40,81 +40,91 @@
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    padding: 18px;
+    padding: 20px;
     border: 1px solid var(--border, #d4ded7);
-    border-radius: 14px;
+    border-radius: 16px;
     background: var(--surface, #ffffff);
-    box-shadow: var(--shadow, 0 2px 10px rgba(0,0,0,0.08));
+    box-shadow: 0 2px 12px rgba(7, 92, 59, 0.06);
     overflow-wrap: anywhere;
+    transition: all 0.25s ease;
+  }
+  .notification-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(7, 92, 59, 0.1);
   }
   .notification-item.unread {
     border-left: 5px solid var(--primary, #075c3b);
+    background: linear-gradient(to right, var(--primary-soft, rgba(7,92,59,0.06)), transparent);
   }
   .notification-icon {
-    flex: 0 0 44px;
-    width: 44px;
-    height: 44px;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
     display: grid;
     place-items: center;
     border-radius: 50%;
     background: var(--primary-soft, rgba(7,92,59,0.12));
-    font-size: 1.3rem;
+    font-size: 1.4rem;
   }
   .notification-body {
     flex: 1;
     min-width: 0;
   }
   .notification-title {
-    margin: 0 0 5px;
-    font-size: 1.05rem;
+    margin: 0 0 6px;
+    font-size: 1.08rem;
+    font-weight: 700;
     color: var(--text, #1a2e22);
   }
   .notification-message {
-    margin: 0 0 8px;
+    margin: 0 0 10px;
     color: var(--text, #1a2e22);
     white-space: pre-wrap;
     line-height: 1.6;
   }
   .notification-date {
     display: block;
-    font-size: .85rem;
+    font-size: 0.85rem;
     color: var(--muted, #6b7f72);
   }
-  .unread-label {
+  .unread-dot {
     display: inline-block;
-    margin-left: 6px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    background: var(--primary-soft, rgba(7,92,59,0.12));
-    color: var(--primary-dark, #075c3b);
-    font-size: .75rem;
-    font-weight: 700;
+    width: 10px;
+    height: 10px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: var(--primary, #075c3b);
+    vertical-align: middle;
   }
   .notification-empty {
-    padding: 45px 20px;
+    padding: 60px 24px;
     text-align: center;
-    border-radius: 14px;
+    border-radius: 16px;
     background: var(--surface, #ffffff);
     border: 1px solid var(--border, #d4ded7);
   }
   .notification-empty .empty-icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
+    font-size: 3.2rem;
+    margin-bottom: 16px;
+    opacity: 0.6;
   }
   .notification-empty h2 {
-    margin: 0 0 8px;
+    margin: 0 0 10px;
     color: var(--text, #1a2e22);
+    font-size: 1.25rem;
   }
   .notification-empty p {
     margin: 0;
     color: var(--muted, #6b7f72);
-    line-height: 1.6;
+    line-height: 1.7;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
-  /* Action buttons row — Open, Mark as read, Delete */
   .notification-actions-row {
     display: flex;
     flex-shrink: 0;
-    gap: 6px;
+    gap: 8px;
     align-items: flex-start;
     flex-wrap: wrap;
     justify-content: flex-end;
@@ -126,10 +136,10 @@
   .btn-base {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 7px 12px;
-    border-radius: 8px;
-    font-size: 12.5px;
+    gap: 5px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 13px;
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
@@ -138,19 +148,18 @@
     border: 1px solid transparent;
     white-space: nowrap;
   }
-  /* Open — green */
   .btn-open {
-    background: var(--primary, #075c3b);
+    background: linear-gradient(135deg, var(--primary, #075c3b) 0%, var(--primary-dark, #05432a) 100%);
     border-color: var(--primary, #075c3b);
     color: #fff !important;
+    box-shadow: 0 2px 8px rgba(7, 92, 59, 0.2);
   }
   .btn-open:hover {
     background: var(--primary-dark, #05432a);
-    border-color: var(--primary-dark, #05432a);
-    color: #fff !important;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(7, 92, 59, 0.25);
+    color: #fff !important;
   }
-  /* Mark as read — outline */
   .btn-mark-read {
     background: var(--surface, #fff);
     border-color: var(--border, #d4ded7);
@@ -161,10 +170,9 @@
     border-color: var(--primary, #075c3b);
     color: var(--primary, #075c3b);
   }
-  /* Delete — red */
   .btn-delete {
     background: #fff;
-    border-color: #f0c0c0;
+    border-color: #f1c0c0;
     color: #c0392b;
   }
   .btn-delete:hover {
@@ -175,27 +183,30 @@
   }
   @media (max-width: 520px) {
     .notification-item {
-      padding: 14px;
-      gap: 10px;
+      padding: 16px;
+      gap: 12px;
       flex-wrap: wrap;
     }
     .notification-icon {
-      flex-basis: 36px;
-      width: 36px;
-      height: 36px;
-      font-size: 1.1rem;
+      flex-basis: 40px;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
     }
     .notification-body {
-      flex-basis: calc(100% - 50px);
+      flex-basis: calc(100% - 56px);
     }
     .notification-actions-row {
-      margin-left: 46px;
+      margin-left: 0;
       width: 100%;
       justify-content: stretch;
+      margin-top: 8px;
     }
     .notification-actions-row .btn-base {
       flex: 1;
       justify-content: center;
+      font-size: 12px;
+      padding: 9px 8px;
     }
   }
 </style>
@@ -207,16 +218,19 @@
     <div>
       <h1>🔔 Notifications</h1>
       <p class="notifications-subtitle">
-        {% if unread_count|default(0) > 0 %}
-          <strong>({{ unread_count }} unread)</strong>
+        {% set unread_count = notifications|selectattr('is_read', 'equalto', false)|list|length %}
+        {% if unread_count > 0 %}
+          You have <strong>{{ unread_count }} unread</strong> notification{% if unread_count > 1 %}s{% endif %}
+        {% else %}
+          All caught up!
         {% endif %}
       </p>
     </div>
-    {% if unread_count|default(0) > 0 %}
+    {% if unread_count > 0 %}
       <div class="notification-actions">
         <form method="POST" action="{{ url_for('mark_all_notifications_read') }}">
           <button type="submit" class="btn-base btn-open">
-            ✓ Mark all as read
+            ✓ Mark All as Read
           </button>
         </form>
       </div>
@@ -244,6 +258,9 @@
           <div class="notification-body">
             <h2 class="notification-title">
               {{ notification.title }}
+              {% if not notification.is_read %}
+                <span class="unread-dot" title="Unread"></span>
+              {% endif %}
             </h2>
             <p class="notification-message">{{ notification.message }}</p>
             <time class="notification-date">
@@ -253,13 +270,12 @@
             </time>
           </div>
 
-          <!-- ✅ ACTION BUTTONS: Open | Mark as read | Delete -->
           <div class="notification-actions-row">
             {% if notification.report_id %}
-              <a href="{{ url_for('report_detail', report_id=notification.report_id) }}?notification_id={{ notification.id }}"
+              <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}?next={{ url_for('report_detail', report_id=notification.report_id) }}"
                  class="btn-base btn-open"
-                 aria-label="Open the related report">
-                👁 Open
+                 aria-label="Open related report and mark as read">
+                👁 Open Report
               </a>
             {% endif %}
 
@@ -268,15 +284,14 @@
                     action="{{ url_for('mark_notification_read', notification_id=notification.id) }}">
                 <button type="submit" class="btn-base btn-mark-read"
                         aria-label="Mark notification as read">
-                  ✓ Mark as read
+                  ✓ Mark Read
                 </button>
               </form>
             {% endif %}
 
-            <!-- 🗑 DELETE BUTTON with confirmation -->
             <form method="POST"
                   action="{{ url_for('delete_notification', notification_id=notification.id) }}"
-                  onsubmit="return confirm('Delete this notification? This cannot be undone.');">
+                  onsubmit="return confirm('Delete this notification? Cannot undo.');">
               <button type="submit" class="btn-base btn-delete"
                       aria-label="Delete notification">
                 🗑 Delete
@@ -289,10 +304,10 @@
   {% else %}
     <div class="notification-empty">
       <div class="empty-icon" aria-hidden="true">🔔</div>
-      <h2>No notifications yet</h2>
+      <h2>No Notifications Yet</h2>
       <p>
-        Wala pang mga notification. Lalabas dito ang mga update tungkol sa
-        mga bagong report at claim requests.
+        You'll see updates here when new reports are submitted, 
+        claim requests are made, or statuses change.
       </p>
     </div>
   {% endif %}
