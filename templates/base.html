@@ -156,7 +156,8 @@
             closeModal?.addEventListener("click", hideModal);
             imageModal?.addEventListener("click", e => e.target === imageModal && hideModal());
             document.addEventListener("keydown", e => e.key === "Escape" && hideModal());
-        });
+        }); 
+        
     </script>
     {% block scripts %}{% endblock %}
 </body>
