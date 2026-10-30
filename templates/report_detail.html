@@ -1,242 +1,569 @@
 {% extends "base.html" %}
-{% block title %}{{ report.item_name }} — Report Details{% endblock %}
+{% block title %}{{ report.item_name }} — Report Details | SLSU JGE FindHub{% endblock %}
 {% block content %}
-<div class="container py-4">
-  <div class="row g-4">
-    <!-- Photo Column -->
-    <div class="col-lg-5">
-      <div class="card shadow-sm border-0">
-        {% set photo_url = photo_src(report.photo) %}
-        {% if photo_url %}
-          <img 
-            src="{{ photo_url }}" 
-            alt="{{ report.item_name }}" 
-            class="card-img-top" 
-            style="object-fit: cover; max-height: 420px; cursor: zoom-in;"
-          >
-        {% else %}
-          <div class="card-img-top d-flex align-items-center justify-content-center" 
-               style="height: 300px; background: var(--surface-alt);">
-            <span style="font-size: 48px; opacity: 0.4;">
-              {% if report.report_type == 'Lost' %}🔍{% else %}📦{% endif %}
-            </span>
-          </div>
-        {% endif %}
-        <div class="card-body">
-          <div class="d-flex flex-wrap gap-2 mb-3">
-            <span class="badge {% if report.report_type == 'Lost' %}bg-warning text-dark{% else %}bg-success{% endif %} fs-6">
-              {{ report.report_type }}
-            </span>
-            <span class="badge bg-secondary fs-6">{{ report.status }}</span>
-          </div>
-          <h3 class="card-title mb-1">{{ report.item_name }}</h3>
-          <p class="text-muted small mb-0">
-            Reported on {{ report.created_at.strftime('%B %d, %Y') if report.created_at else 'N/A' }}
-          </p>
-        </div>
-      </div>
+<div class="report-detail-page">
+  <div class="page-container">
+    <!-- Back Navigation -->
+    <div class="back-nav">
+      <a href="{{ url_for('home') }}" class="back-link">
+        <span>←</span> Back to Home
+      </a>
     </div>
 
-    <!-- Details Column -->
-    <div class="col-lg-7">
-      <!-- Report Details -->
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white">
-          <h5 class="mb-0">📋 Report Details</h5>
+    <div class="detail-grid">
+      <!-- Photo Column -->
+      <div class="photo-section">
+        <div class="photo-card">
+          {% set photo_url = photo_src(report.photo) %}
+          {% if photo_url %}
+            <img 
+              src="{{ photo_url }}" 
+              alt="Photo of {{ report.item_name }}" 
+              class="item-photo"
+            >
+          {% else %}
+            <div class="photo-placeholder">
+              <span class="placeholder-icon">
+                {% if report.report_type == 'Lost' %}🔍{% else %}📦{% endif %}
+              </span>
+              <p class="placeholder-text">No image provided</p>
+            </div>
+          {% endif %}
         </div>
-        <div class="card-body">
-          <dl class="row mb-0">
-            <dt class="col-sm-4 text-muted">Type</dt>
-            <dd class="col-sm-8">{{ report.report_type }}</dd>
+
+        <!-- Status Badges -->
+        <div class="status-badges">
+          <span class="type-badge {% if report.report_type == 'Lost' %}lost{% else %}found{% endif %}">
+            {{ report.report_type }}
+          </span>
+          <span class="status-badge {{ report.status|lower|replace(' ', '-') }}">
+            {{ report.status }}
+          </span>
+        </div>
+
+        <p class="reported-date">
+          Reported on {{ report.created_at.strftime('%B %d, %Y') if report.created_at else 'Date not available' }}
+        </p>
+      </div>
+
+      <!-- Details Column -->
+      <div class="info-section">
+        <h1 class="item-title">{{ report.item_name }}</h1>
+
+        <!-- Report Details Card -->
+        <div class="detail-card">
+          <h2 class="card-heading">📋 Report Information</h2>
+          
+          <dl class="detail-list">
+            <div class="detail-row">
+              <dt>Report Type</dt>
+              <dd>{{ report.report_type }} Item</dd>
+            </div>
             
-            <dt class="col-sm-4 text-muted">
-              {{ 'Date Lost' if report.report_type == 'Lost' else 'Date Found' }}
-            </dt>
-            <dd class="col-sm-8">
-              {{ report.incident_date.strftime('%B %d, %Y') if report.incident_date else 'Not specified' }}
-            </dd>
-            
-            <dt class="col-sm-4 text-muted">Location</dt>
-            <dd class="col-sm-8">{{ report.location or 'Not specified' }}</dd>
-            
-            <dt class="col-sm-4 text-muted">Description</dt>
-            <dd class="col-sm-8">{{ report.description or 'No description provided' }}</dd>
-            
-            {% if report.contact_public or admin_logged_in %}
-              <dt class="col-sm-4 text-muted">Reported by</dt>
-              <dd class="col-sm-8">{{ report.contact_name or 'Anonymous' }}</dd>
-              <dt class="col-sm-4 text-muted">Contact</dt>
-              <dd class="col-sm-8">{{ report.contact }}</dd>
-            {% else %}
-              <dt class="col-sm-4 text-muted">Contact</dt>
-              <dd class="col-sm-8">
-                <em class="text-muted">
-                  Details kept private. Submit a claim request to connect.
-                </em>
+            <div class="detail-row">
+              <dt>
+                {{ 'Date Lost' if report.report_type == 'Lost' else 'Date Found' }}
+              </dt>
+              <dd>
+                {{ report.incident_date.strftime('%B %d, %Y') if report.incident_date else 'Not specified' }}
               </dd>
+            </div>
+            
+            <div class="detail-row">
+              <dt>Campus Location</dt>
+              <dd>{{ report.location or 'Location not specified' }}</dd>
+            </div>
+            
+            <div class="detail-row full-width">
+              <dt>Description</dt>
+              <dd>{{ report.description or 'No additional description provided' }}</dd>
+            </div>
+
+            {% if report.contact_public or admin_logged_in %}
+              <div class="detail-row">
+                <dt>Reported By</dt>
+                <dd>{{ report.contact_name or 'Submitted anonymously' }}</dd>
+              </div>
+              <div class="detail-row">
+                <dt>Contact Information</dt>
+                <dd class="contact-value">{{ report.contact }}</dd>
+              </div>
+            {% else %}
+              <div class="detail-row full-width">
+                <dt>Contact</dt>
+                <dd class="private-note">
+                  <em>Details kept private. Submit a claim request to establish contact.</em>
+                </dd>
+              </div>
             {% endif %}
           </dl>
         </div>
-      </div>
 
-      <!-- Claim Form — WITH FILE UPLOAD -->
-      {% if report.status not in ['Returned', 'Archived'] %}
-        <div class="card shadow-sm border-0 mb-4" id="claim-form">
-          <div class="card-header bg-white">
-            <h5 class="mb-0">
+        <!-- Claim / Information Form -->
+        {% if report.status not in ['Returned', 'Archived'] %}
+          <div class="detail-card claim-card" id="claim-form">
+            <h2 class="card-heading">
               {% if report.report_type == 'Found' %}
-                ✋ Claim This Item
+                ✋ Claim Ownership of This Item
               {% else %}
-                💡 I Have Information
+                💡 Provide Information
               {% endif %}
-            </h5>
-          </div>
-          <div class="card-body">
-            <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}" enctype="multipart/form-data">
-              <div class="mb-3">
-                <label for="claimant_name" class="form-label">Your Name <span class="required">*</span></label>
+            </h2>
+            
+            <p class="form-intro">
+              {% if report.report_type == 'Found' %}
+                Are you the owner? Please provide verifying details below. Your information will be reviewed privately.
+              {% else %}
+                Did you see or find this item? Share what you know to help reunite it with its owner.
+              {% endif %}
+            </p>
+
+            <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}" enctype="multipart/form-data" class="claim-form">
+              <div class="form-group">
+                <label for="claimant_name">Your Full Name <span class="required">*</span></label>
                 <input 
-                  type="text" class="form-control" id="claimant_name" 
-                  name="claimant_name" maxlength="120" required
-                  placeholder="Your full name"
+                  type="text" id="claimant_name" name="claimant_name" 
+                  maxlength="120" required
+                  placeholder="Enter your full name"
+                  class="form-input"
                 >
               </div>
               
-              <div class="mb-3">
-                <label for="claimant_contact" class="form-label">Contact Details <span class="required">*</span></label>
+              <div class="form-group">
+                <label for="claimant_contact">Preferred Contact Method <span class="required">*</span></label>
                 <input 
-                  type="text" class="form-control" id="claimant_contact" 
-                  name="claimant_contact" maxlength="150" required
-                  placeholder="Email, Messenger, or phone number"
+                  type="text" id="claimant_contact" name="claimant_contact" 
+                  maxlength="150" required
+                  placeholder="Email address, Messenger, or phone number"
+                  class="form-input"
                 >
               </div>
               
-              <div class="mb-3">
-                <label for="proof" class="form-label">Verification Details <span class="required">*</span></label>
+              <div class="form-group">
+                <label for="proof">Verification Details <span class="required">*</span></label>
                 <textarea 
-                  class="form-control" id="proof" name="proof" rows="4" required
-                  placeholder="Describe unique details: color, marks, serial number, what was inside, or where exactly you lost it..."
+                  id="proof" name="proof" rows="4" required
+                  placeholder="Describe unique details only the rightful owner would know — specific marks, contents, purchase details, or exact location..."
+                  class="form-textarea"
                 ></textarea>
-                <div class="form-text">
-                  Share details only the real owner would know.
-                </div>
+                <p class="input-hint">
+                  Include distinctive features that confirm ownership or knowledge of the item.
+                </p>
               </div>
               
-              <!-- ✅ NEW: Photo Upload for Proof -->
-              <div class="mb-3">
-                <label for="proof_photo" class="form-label">
-                  Upload Proof Photo 
-                  <span class="text-muted">(optional, max 5 MB)</span>
+              <!-- Proof Photo Upload -->
+              <div class="form-group">
+                <label for="proof_photo">
+                  Supporting Documentation 
+                  <span class="optional">(Optional — Max 5 MB)</span>
                 </label>
                 <input 
-                  type="file" class="form-control" id="proof_photo" 
-                  name="proof_photo" accept=".jpg,.jpeg,.png,.webp,image/*"
+                  type="file" id="proof_photo" name="proof_photo" 
+                  accept=".jpg,.jpeg,.png,.webp,image/*"
+                  class="file-input"
                 >
-                <div class="form-text">
-                  📸 Upload a photo showing you own the item — receipt, serial number, or matching marks.
-                </div>
+                <p class="input-hint">
+                  📸 Upload a photo for verification — such as a receipt, serial number, or matching identifying marks.
+                </p>
               </div>
               
-              <button type="submit" class="btn btn-primary">✅ Submit Claim Request</button>
+              <button type="submit" class="submit-btn">
+                <span class="btn-icon">✅</span>
+                Submit Request
+              </button>
             </form>
           </div>
-        </div>
-      {% else %}
-        <div class="alert {% if report.status == 'Returned' %}alert-success{% else %}alert-secondary{% endif %}">
-          {% if report.status == 'Returned' %}
-            ✅ This item has been returned to its owner. No longer accepting claims.
-          {% else %}
-            📁 This report has been archived.
-          {% endif %}
-        </div>
-      {% endif %}
-
-      <!-- Admin: Claims List -->
-      {% if admin_logged_in and report.claims %}
-        <div class="card shadow-sm border-0">
-          <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">📋 Claims Received ({{ report.claims|length }})</h5>
-            <a href="{{ url_for('admin_claims') }}" class="btn btn-sm btn-outline-primary">Manage All →</a>
+        {% else %}
+          <div class="status-alert {% if report.status == 'Returned' %}success{% else %}archived{% endif %}">
+            {% if report.status == 'Returned' %}
+              <strong>✅ Item Returned</strong>
+              <p>This item has been successfully reunited with its owner. Claim submissions are no longer being accepted.</p>
+            {% else %}
+              <strong>📁 Report Archived</strong>
+              <p>This report has been archived and is no longer active.</p>
+            {% endif %}
           </div>
-          <div class="card-body p-0">
-            <div class="list-group list-group-flush">
+        {% endif %}
+
+        <!-- Admin: Claims Management -->
+        {% if admin_logged_in and report.claims %}
+          <div class="detail-card admin-section">
+            <div class="admin-header">
+              <h2 class="card-heading">📋 Submitted Claims ({{ report.claims|length }})</h2>
+              <a href="{{ url_for('admin_claims') }}" class="manage-link">Manage All →</a>
+            </div>
+            
+            <div class="claims-list">
               {% for claim in report.claims|sort(attribute='created_at', reverse=True) %}
-                <div class="list-group-item">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h6 class="mb-1">{{ claim.claimant_name }}</h6>
-                      <p class="mb-1 text-muted small">{{ claim.claimant_contact }}</p>
-                      <p class="mb-2">{{ claim.proof }}</p>
-                      {% if claim.proof_photo %}
-                        <a href="{{ photo_src(claim.proof_photo) }}" target="_blank" class="btn btn-sm btn-outline-secondary mb-2">
-                          📷 View Proof Photo
-                        </a>
-                      {% endif %}
-                      <small class="text-muted">
-                        Submitted {{ claim.created_at.strftime('%b %d, %Y %H:%M') if claim.created_at else '' }}
-                      </small>
-                    </div>
-                    <span class="badge {% if claim.status == 'Approved' %}bg-success{% elif claim.status == 'Rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
-                      {{ claim.status }}
-                    </span>
+                <div class="claim-item">
+                  <div class="claim-primary">
+                    <h3 class="claim-name">{{ claim.claimant_name }}</h3>
+                    <span class="claim-status {{ claim.status|lower }}">{{ claim.status }}</span>
                   </div>
+                  <p class="claim-contact">{{ claim.claimant_contact }}</p>
+                  <p class="claim-proof">{{ claim.proof }}</p>
+                  {% if claim.proof_file %}
+                    <a href="{{ photo_src(claim.proof_file) }}" target="_blank" class="proof-link">
+                      📷 View Attached Proof
+                    </a>
+                  {% endif %}
+                  <p class="claim-date">
+                    Submitted {{ claim.created_at.strftime('%B %d, %Y at %H:%M') if claim.created_at else 'Date unavailable' }}
+                  </p>
                 </div>
               {% endfor %}
             </div>
           </div>
-        </div>
-      {% endif %}
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>
 
 <style>
-  .card {
-    border-radius: 16px !important;
-    overflow: hidden;
-    border: 1px solid var(--border, #e5e7eb) !important;
+/* Page Animation */
+.report-detail-page {
+  animation: fadeSlideUp 0.5s ease-out;
+  padding: 2rem 1rem 3rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
   }
-  .card-header {
-    border-bottom: 1px solid var(--border, #e5e7eb);
-    background: var(--surface) !important;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  .badge {
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-weight: 700;
+}
+
+/* Back Navigation */
+.back-nav {
+  margin-bottom: 1.5rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary, #087443);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.back-link:hover {
+  gap: 0.75rem;
+  color: var(--primary-dark, #055c34);
+}
+
+/* Layout Grid */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 420px 1fr;
+    align-items: start;
   }
-  .required {
-    color: var(--primary, #087443);
-    font-weight: 700;
-  }
-  .form-control {
-    border-radius: 10px;
-    border: 1.5px solid var(--border, #ddd);
-    padding: 10px 14px;
-  }
-  .form-control:focus {
-    border-color: var(--primary, #087443);
-    box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.15);
-    outline: none;
-  }
-  .btn-primary {
-    background: var(--primary, #087443);
-    border: none;
-    border-radius: 10px;
-    padding: 10px 24px;
-    font-weight: 700;
-  }
-  .btn-primary:hover {
-    background: var(--primary-dark, #055c34);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(8, 116, 67, 0.25);
-  }
-  .dl dt {
-    font-weight: 600;
-  }
-  .list-group-item {
-    border-left: none;
-    border-right: none;
-  }
-</style>
-{% endblock %}
+}
+
+/* Photo Section */
+.photo-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 10px 25px rgba(8, 116, 67, 0.08);
+  background: var(--surface);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 15px 35px rgba(8, 116, 67, 0.12);
+}
+
+.item-photo {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-placeholder {
+  height: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-alt, #edf4ef);
+  color: var(--muted, #6b7280);
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  opacity: 0.5;
+  margin-bottom: 0.5rem;
+}
+
+.placeholder-text {
+  font-size: 0.9375rem;
+  opacity: 0.7;
+}
+
+.status-badges {
+  display: flex;
+  gap: 0.75rem;
+  margin: 1rem 0 0.5rem;
+  flex-wrap: wrap;
+}
+
+.type-badge, .status-badge {
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.type-badge.lost {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.type-badge.found {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.status-badge.open {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.pending-claim {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.returned {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.archived {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.reported-date {
+  color: var(--muted, #6b7280);
+  font-size: 0.9rem;
+}
+
+/* Info Section */
+.item-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 1.5rem;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.detail-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 8px 20px rgba(8, 116, 67, 0.06);
+  border: 1px solid var(--border, #e5e7eb);
+  transition: box-shadow 0.3s ease;
+}
+
+.detail-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 12px 28px rgba(8, 116, 67, 0.1);
+}
+
+.card-heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  color: var(--text);
+}
+
+.detail-list {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.detail-row.full-width {
+  grid-template-columns: 1fr;
+}
+
+.detail-row.full-width dt {
+  margin-bottom: 0.25rem;
+}
+
+.detail-list dt {
+  font-weight: 600;
+  color: var(--muted, #6b7280);
+  font-size: 0.9375rem;
+}
+
+.detail-list dd {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.contact-value {
+  font-weight: 500;
+}
+
+.private-note {
+  color: var(--muted, #6b7280);
+  font-style: italic;
+}
+
+/* Form Styling */
+.form-intro {
+  color: var(--muted, #6b7280);
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.claim-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.required {
+  color: #dc2626;
+}
+
+.optional {
+  color: var(--muted, #6b7280);
+  font-weight: normal;
+  font-size: 0.875rem;
+}
+
+.form-input, .form-textarea, .file-input {
+  padding: 0.875rem 1rem;
+  border: 1.5px solid var(--border, #ddd);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: var(--page, #fff);
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--primary, #087443);
+  box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.15);
+  transform: translateY(-1px);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.input-hint {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted, #6b7280);
+  line-height: 1.5;
+}
+
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, var(--primary, #087443) 0%, var(--primary-dark, #055c34) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(8, 116, 67, 0.3);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+/* Status Alerts */
+.status-alert {
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 4px solid;
+}
+
+.status-alert.success {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #065f46;
+}
+
+.status-alert.archived {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #4b5563;
+}
+
+.status-alert strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1rem;
+}
+
+/* Admin Section */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.manage-link {
+  color: var(--primary, #087443);
+  text-decoration: none;
+  font-weight: 600
