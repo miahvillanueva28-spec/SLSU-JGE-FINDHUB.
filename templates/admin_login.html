@@ -33,29 +33,6 @@
     transform: translateY(-2px);
   }
 
-  /* Stickers / Badges */
-  .admin-login-panel .sticker-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 28px;
-  }
-
-  .admin-login-panel .sticker {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--primary-soft);
-    color: var(--primary);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-  }
-
   /* Headings */
   .admin-login-panel h2 {
     margin: 0 0 10px;
@@ -244,12 +221,6 @@
 {% block content %}
 <div class="admin-login-wrapper">
   <section class="admin-login-panel" aria-labelledby="login-heading">
-
-    <!-- Badges -->
-    <div class="sticker-row">
-      <span class="sticker">🔐 Administrator Access</span>
-      <span class="sticker">SLSU JGE FindHub</span>
-    </div>
 
     <!-- Heading -->
     <h2 id="login-heading">Sign In</h2>
