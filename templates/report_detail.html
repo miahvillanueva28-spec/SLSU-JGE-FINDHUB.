@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ report.item_name }}{% endblock %}
+{% block title %}{{ report.item_name }} — Report Details{% endblock %}
 {% block content %}
 <div class="container py-4">
   <div class="row g-4">
@@ -17,14 +17,14 @@
         {% else %}
           <div class="card-img-top d-flex align-items-center justify-content-center" 
                style="height: 300px; background: var(--surface-alt);">
-            <span style="font-size: 40px; opacity: 0.5;">
-              {% if report.report_type == 'Lost' %}🎒{% else %}🔍{% endif %}
+            <span style="font-size: 48px; opacity: 0.4;">
+              {% if report.report_type == 'Lost' %}🔍{% else %}📦{% endif %}
             </span>
           </div>
         {% endif %}
         <div class="card-body">
-          <div class="d-flex flex-wrap gap-2 mb-2">
-            <span class="badge {% if report.report_type == 'Lost' %}bg-danger{% else %}bg-success{% endif %} fs-6">
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="badge {% if report.report_type == 'Lost' %}bg-warning text-dark{% else %}bg-success{% endif %} fs-6">
               {{ report.report_type }}
             </span>
             <span class="badge bg-secondary fs-6">{{ report.status }}</span>
@@ -46,28 +46,32 @@
         </div>
         <div class="card-body">
           <dl class="row mb-0">
-            <dt class="col-sm-4 text-muted">Category</dt>
-            <dd class="col-sm-8">{{ report.category or 'Not specified' }}</dd>
+            <dt class="col-sm-4 text-muted">Type</dt>
+            <dd class="col-sm-8">{{ report.report_type }}</dd>
+            
             <dt class="col-sm-4 text-muted">
               {{ 'Date Lost' if report.report_type == 'Lost' else 'Date Found' }}
             </dt>
             <dd class="col-sm-8">
               {{ report.incident_date.strftime('%B %d, %Y') if report.incident_date else 'Not specified' }}
             </dd>
+            
             <dt class="col-sm-4 text-muted">Location</dt>
             <dd class="col-sm-8">{{ report.location or 'Not specified' }}</dd>
+            
             <dt class="col-sm-4 text-muted">Description</dt>
             <dd class="col-sm-8">{{ report.description or 'No description provided' }}</dd>
+            
             {% if report.contact_public or admin_logged_in %}
               <dt class="col-sm-4 text-muted">Reported by</dt>
-              <dd class="col-sm-8">{{ report.contact_name }}</dd>
+              <dd class="col-sm-8">{{ report.contact_name or 'Anonymous' }}</dd>
               <dt class="col-sm-4 text-muted">Contact</dt>
               <dd class="col-sm-8">{{ report.contact }}</dd>
             {% else %}
               <dt class="col-sm-4 text-muted">Contact</dt>
               <dd class="col-sm-8">
                 <em class="text-muted">
-                  Contact details are private. Submit a claim request to connect with the owner.
+                  Details kept private. Submit a claim request to connect.
                 </em>
               </dd>
             {% endif %}
@@ -75,7 +79,7 @@
         </div>
       </div>
 
-      <!-- Claim Form — UPDATED LABEL -->
+      <!-- Claim Form — WITH FILE UPLOAD -->
       {% if report.status not in ['Returned', 'Archived'] %}
         <div class="card shadow-sm border-0 mb-4" id="claim-form">
           <div class="card-header bg-white">
@@ -88,37 +92,51 @@
             </h5>
           </div>
           <div class="card-body">
-            <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}">
+            <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}" enctype="multipart/form-data">
               <div class="mb-3">
-                <label for="claimant_name" class="form-label">Your Name <span class="text-danger">*</span></label>
+                <label for="claimant_name" class="form-label">Your Name <span class="required">*</span></label>
                 <input 
                   type="text" class="form-control" id="claimant_name" 
                   name="claimant_name" maxlength="120" required
-                  placeholder="Enter your full name"
+                  placeholder="Your full name"
                 >
               </div>
+              
               <div class="mb-3">
-                <label for="claimant_contact" class="form-label">Contact Details <span class="text-danger">*</span></label>
+                <label for="claimant_contact" class="form-label">Contact Details <span class="required">*</span></label>
                 <input 
                   type="text" class="form-control" id="claimant_contact" 
                   name="claimant_contact" maxlength="150" required
-                  placeholder="Email or phone number"
+                  placeholder="Email, Messenger, or phone number"
                 >
               </div>
-
-              <!-- ✅ UPDATED: From "Proof of Ownership" to "Information About the Item" -->
+              
               <div class="mb-3">
-                <label for="proof" class="form-label">Information About the Item <span class="text-danger">*</span></label>
+                <label for="proof" class="form-label">Verification Details <span class="required">*</span></label>
                 <textarea 
                   class="form-control" id="proof" name="proof" rows="4" required
-                  placeholder="Describe the item — color, unique marks, contents, serial number, or any details that show you know this item..."
+                  placeholder="Describe unique details: color, marks, serial number, what was inside, or where exactly you lost it..."
                 ></textarea>
                 <div class="form-text">
-                  Be specific — the administrator will compare your information with the reported item details.
+                  Share details only the real owner would know.
                 </div>
               </div>
-              <!-- ✅ END OF UPDATE -->
-
+              
+              <!-- ✅ NEW: Photo Upload for Proof -->
+              <div class="mb-3">
+                <label for="proof_photo" class="form-label">
+                  Upload Proof Photo 
+                  <span class="text-muted">(optional, max 5 MB)</span>
+                </label>
+                <input 
+                  type="file" class="form-control" id="proof_photo" 
+                  name="proof_photo" accept=".jpg,.jpeg,.png,.webp,image/*"
+                >
+                <div class="form-text">
+                  📸 Upload a photo showing you own the item — receipt, serial number, or matching marks.
+                </div>
+              </div>
+              
               <button type="submit" class="btn btn-primary">✅ Submit Claim Request</button>
             </form>
           </div>
@@ -126,9 +144,9 @@
       {% else %}
         <div class="alert {% if report.status == 'Returned' %}alert-success{% else %}alert-secondary{% endif %}">
           {% if report.status == 'Returned' %}
-            ✅ This item has been returned to its owner and is no longer available for claims.
+            ✅ This item has been returned to its owner. No longer accepting claims.
           {% else %}
-            📁 This report has been archived and is no longer accepting claims.
+            📁 This report has been archived.
           {% endif %}
         </div>
       {% endif %}
@@ -137,8 +155,8 @@
       {% if admin_logged_in and report.claims %}
         <div class="card shadow-sm border-0">
           <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">📋 Claims ({{ report.claims|length }})</h5>
-            <a href="{{ url_for('admin_claims') }}" class="btn btn-sm btn-outline-primary">Manage All Claims</a>
+            <h5 class="mb-0">📋 Claims Received ({{ report.claims|length }})</h5>
+            <a href="{{ url_for('admin_claims') }}" class="btn btn-sm btn-outline-primary">Manage All →</a>
           </div>
           <div class="card-body p-0">
             <div class="list-group list-group-flush">
@@ -148,7 +166,12 @@
                     <div>
                       <h6 class="mb-1">{{ claim.claimant_name }}</h6>
                       <p class="mb-1 text-muted small">{{ claim.claimant_contact }}</p>
-                      <p class="mb-1">{{ claim.proof }}</p>
+                      <p class="mb-2">{{ claim.proof }}</p>
+                      {% if claim.proof_photo %}
+                        <a href="{{ photo_src(claim.proof_photo) }}" target="_blank" class="btn btn-sm btn-outline-secondary mb-2">
+                          📷 View Proof Photo
+                        </a>
+                      {% endif %}
                       <small class="text-muted">
                         Submitted {{ claim.created_at.strftime('%b %d, %Y %H:%M') if claim.created_at else '' }}
                       </small>
@@ -169,14 +192,51 @@
 
 <style>
   .card {
-    border-radius: 14px !important;
+    border-radius: 16px !important;
     overflow: hidden;
+    border: 1px solid var(--border, #e5e7eb) !important;
   }
   .card-header {
-    border-bottom: 1px solid var(--border, #eee);
+    border-bottom: 1px solid var(--border, #e5e7eb);
+    background: var(--surface) !important;
   }
-  .text-danger {
-    color: #dc3545 !important;
+  .badge {
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-weight: 700;
+  }
+  .required {
+    color: var(--primary, #087443);
+    font-weight: 700;
+  }
+  .form-control {
+    border-radius: 10px;
+    border: 1.5px solid var(--border, #ddd);
+    padding: 10px 14px;
+  }
+  .form-control:focus {
+    border-color: var(--primary, #087443);
+    box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.15);
+    outline: none;
+  }
+  .btn-primary {
+    background: var(--primary, #087443);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 24px;
+    font-weight: 700;
+  }
+  .btn-primary:hover {
+    background: var(--primary-dark, #055c34);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(8, 116, 67, 0.25);
+  }
+  .dl dt {
+    font-weight: 600;
+  }
+  .list-group-item {
+    border-left: none;
+    border-right: none;
   }
 </style>
 {% endblock %}
