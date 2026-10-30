@@ -3,35 +3,37 @@
 {% block content %}
 <section class="panel">
   <div class="sticker-row">
-    <span class="sticker"><span>📝</span>New report</span>
-    <span class="sticker"><span>🤝</span>Help a classmate</span>
+    <span class="sticker"><span id="type-icon">📝</span> <span id="type-label">New Report</span></span>
+    <span class="sticker"><span>🤝</span>Help a Classmate</span>
   </div>
+
   <h2 id="form-heading">📝 Submit a Lost or Found Item</h2>
   <p class="help">
-    After submitting, your report will be saved and its details page
-    will open. Your contact details stay private unless you choose
-    to display them.
+    After submitting, your report will be saved and its details page will open.
+    Your contact details stay private unless you choose to display them publicly.
   </p>
-  <form method="POST" enctype="multipart/form-data">
+
+  <form method="POST" enctype="multipart/form-data" id="report-form">
     <!-- Hidden Report Type Field - auto-set from URL -->
     <input type="hidden" id="report_type" name="report_type" value="{{ request.args.get('type', '') }}">
 
     <div class="form-grid">
       <!-- Item Name -->
       <div>
-        <label for="item_name">Item name *</label>
+        <label for="item_name">Item Name <span style="color:var(--muted);font-weight:normal">*</span></label>
         <input
           id="item_name"
           name="item_name"
           maxlength="120"
           required
-          placeholder="e.g. Black wallet"
+          placeholder="e.g. Black leather wallet, ID lace, Samsung phone"
         >
       </div>
+
       <!-- Date -->
       <div>
         <label for="incident_date" id="incident-date-label">
-          Date Lost or Found *
+          Date Lost or Found <span style="color:var(--muted);font-weight:normal">*</span>
         </label>
         <input
           id="incident_date"
@@ -41,62 +43,76 @@
           required
         >
       </div>
+
       <!-- Contact -->
       <div>
-        <label for="contact">Private contact method *</label>
+        <label for="contact">Your Contact <span style="color:var(--muted);font-weight:normal">*</span></label>
         <input
           id="contact"
           name="contact"
           maxlength="180"
           required
-          placeholder="Email, phone, or Messenger name"
+          placeholder="Email, Messenger name, or phone number"
         >
       </div>
+
       <!-- Your Name (optional) -->
       <div>
-        <label for="contact_name">Your name <span style="font-weight:normal;color:var(--muted);">(optional)</span></label>
+        <label for="contact_name">Your Name <span style="color:var(--muted);font-weight:normal">(optional)</span></label>
         <input
           id="contact_name"
           name="contact_name"
           maxlength="120"
-          placeholder="Your name"
+          placeholder="Your full name or nickname"
         >
       </div>
+
       <!-- Location (full width) -->
       <div class="full">
-        <label for="location">Location on campus *</label>
+        <label for="location">Location on Campus <span style="color:var(--muted);font-weight:normal">*</span></label>
         <input
           id="location"
           name="location"
           maxlength="180"
           required
-          placeholder="e.g. Library, Room 203, canteen"
+          placeholder="e.g. Library reading area, Room 203, Canteen, Main Gate"
         >
       </div>
+
       <!-- Description (full width) -->
       <div class="full">
-        <label for="description">Description and identifying details *</label>
+        <label for="description">Description & Details <span style="color:var(--muted);font-weight:normal">*</span></label>
         <textarea
           id="description"
           name="description"
           maxlength="3000"
           required
-          placeholder="Describe the item, color, brand, or where it was found."
+          rows="5"
+          placeholder="
+For LOST: Describe what it looks like, any marks, brand, color, or contents inside.
+For FOUND: Describe the item and where exactly you found it.
+Be specific — this helps the right owner claim it!
+          "
         ></textarea>
       </div>
+
       <!-- Photo Upload -->
       <div>
-        <label for="photo">Item photo <span style="font-weight:normal;color:var(--muted);">(optional, max 5 MB)</span></label>
+        <label for="photo">Upload Photo <span style="color:var(--muted);font-weight:normal">(optional, max 5 MB)</span></label>
         <input
           id="photo"
           type="file"
           name="photo"
           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
         >
+        <small style="color:var(--muted);display:block;margin-top:4px">
+          Clear photos help identify items faster.
+        </small>
       </div>
+
       <!-- Public Contact Checkbox (full width) -->
       <div class="full">
-        <label style="display:flex;gap:10px;align-items:flex-start;font-weight:normal">
+        <label style="display:flex;gap:10px;align-items:flex-start;font-weight:normal;cursor:pointer">
           <input
             type="checkbox"
             name="contact_public"
@@ -104,45 +120,59 @@
             style="width:auto;margin-top:3px"
           >
           <span>
-            Display my name and contact method publicly. Leave unchecked
-            to keep them private.
+            Show my name & contact publicly on this report.
+            <strong>Leave unchecked to keep them private</strong> — only admins will see your contact info.
           </span>
         </label>
       </div>
     </div>
-    <p class="help">
-      Fields marked * are required. Avoid sharing highly sensitive information.
+
+    <p class="help" style="background:var(--primary-soft);padding:12px 16px;border-radius:10px;margin-top:8px">
+      ⚠️ <strong>Tip:</strong> Avoid sharing passwords, student ID numbers, or other sensitive info in the description.
     </p>
+
     <div class="card-actions">
-      <button type="submit" id="submit-btn">🚀 Submit Report</button>
+      <button type="submit" id="submit-btn" style="min-width:200px">🚀 Submit Report</button>
       <a class="button secondary" href="{{ url_for('home') }}">Cancel</a>
     </div>
   </form>
 </section>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const reportType = document.getElementById("report_type").value;
   const dateLabel = document.getElementById("incident-date-label");
   const formHeading = document.getElementById("form-heading");
   const submitBtn = document.getElementById("submit-btn");
+  const typeIcon = document.getElementById("type-icon");
+  const typeLabel = document.getElementById("type-label");
+  const descPlaceholder = document.getElementById("description");
 
-  // Update labels based on auto-detected type
+  // Update ALL labels based on report type
   if (reportType === "Lost") {
-    dateLabel.textContent = "Date Lost *";
+    dateLabel.innerHTML = "Date Item Lost <span style='color:var(--muted);font-weight:normal'>*</span>";
     formHeading.innerHTML = "🔎 Report a Lost Item";
     submitBtn.innerHTML = "🔎 Submit Lost Report";
+    typeIcon.textContent = "🔍";
+    typeLabel.textContent = "Lost Item";
+    descPlaceholder.placeholder = `Describe the item you lost — include color, brand, unique marks, serial numbers, or what was inside. The more details, the easier it is to identify!`;
+
   } else if (reportType === "Found") {
-    dateLabel.textContent = "Date Found *";
+    dateLabel.innerHTML = "Date Item Found <span style='color:var(--muted);font-weight:normal'>*</span>";
     formHeading.innerHTML = "✨ Report a Found Item";
     submitBtn.innerHTML = "✨ Submit Found Report";
+    typeIcon.textContent = "✨";
+    typeLabel.textContent = "Found Item";
+    descPlaceholder.placeholder = `Describe the item you found — include where exactly you found it, color, brand, and any visible details. This helps the owner match it!`;
   }
 
-  // Fallback: if someone accesses without type, show a gentle reminder
+  // Fallback: if accessed without type parameter
   if (!reportType) {
-    const form = document.querySelector("form");
+    const form = document.getElementById("report-form");
     form.addEventListener("submit", function (e) {
-      alert("Please go back and choose either 'Report Lost Item' or 'Report Found Item' from the homepage.");
       e.preventDefault();
+      alert("⚠️ Please go back and choose either:\n• 'Report Lost Item' or\n• 'Report Found Item'\n\nfrom the homepage first.");
+      window.location.href = "{{ url_for('home') }}";
     });
   }
 });
