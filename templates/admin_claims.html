@@ -1,11 +1,396 @@
 {% extends "base.html" %}
 {% block title %}Claim Requests — SLSU JGE FindHub{% endblock %}
+
+{% block head %}
+<style>
+/* ==========================================
+   PAGE BACKGROUND & WRAPPER
+   ========================================== */
+.claims-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* ==========================================
+   HEADER
+   ========================================== */
+.claims-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  border: 1px solid rgba(7, 92, 59, 0.12);
+}
+
+.claims-header h1 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  color: #055c34;
+  font-weight: 700;
+}
+
+.claims-header p {
+  margin: 0;
+  color: #557563;
+  font-size: 0.95rem;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(7, 92, 59, 0.08);
+  color: #075c3b;
+  padding: 0.7rem 1.3rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid rgba(7, 92, 59, 0.15);
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: rgba(7, 92, 59, 0.15);
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   STATS GRID
+   ========================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 14px;
+  padding: 1.25rem;
+  border: 1px solid rgba(7, 92, 59, 0.12);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(7, 92, 59, 0.06);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #668072;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1a3024;
+}
+
+.stat-value.pending { color: #f39c12; }
+.stat-value.approved { color: #27ae60; }
+.stat-value.rejected { color: #c0392b; }
+
+/* ==========================================
+   FILTERS BAR
+   ========================================== */
+.filters-bar {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 12px;
+  border: 1px solid rgba(7, 92, 59, 0.12);
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 220px;
+}
+
+.filter-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #557563;
+  margin-bottom: 0.4rem;
+}
+
+.filter-group input,
+.filter-group select {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid rgba(7, 92, 59, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #075c3b;
+  box-shadow: 0 0 0 3px rgba(7, 92, 59, 0.1);
+}
+
+/* ==========================================
+   CLAIMS TABLE
+   ========================================== */
+.claims-table-wrapper {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  border: 1px solid rgba(7, 92, 59, 0.12);
+  overflow: hidden;
+}
+
+.table-header-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(7, 92, 59, 0.04);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #557563;
+  border-bottom: 1px solid rgba(7, 92, 59, 0.08);
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(7, 92, 59, 0.06);
+  align-items: flex-start;
+  transition: background 0.25s ease;
+}
+
+.table-row:hover {
+  background: rgba(7, 92, 59, 0.02);
+}
+
+.claim-id {
+  font-size: 0.95rem;
+  color: #1a3024;
+  font-weight: 700;
+}
+
+.item-name {
+  margin: 0.4rem 0 0.2rem;
+  font-weight: 600;
+  color: #075c3b;
+  font-size: 1rem;
+}
+
+.meta {
+  display: block;
+  font-size: 0.85rem;
+  color: #668072;
+  margin: 0.25rem 0;
+}
+
+.meta.muted {
+  color: #99a89f;
+}
+
+.link-view {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: #075c3b;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.link-view:hover {
+  text-decoration: underline;
+  color: #055c34;
+}
+
+.proof-col {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #2d4a3b;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+/* ==========================================
+   STATUS & FORM
+   ========================================== */
+.status-tag {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+}
+
+.status-tag.pending { 
+  background: #fef3e0; 
+  color: #b77900; 
+}
+.status-tag.approved { 
+  background: #e6f9e9; 
+  color: #219646; 
+}
+.status-tag.rejected { 
+  background: #fde8e8; 
+  color: #b02020; 
+}
+
+.status-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.status-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #557563;
+}
+
+.status-form select {
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid rgba(7, 92, 59, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.status-form select:focus {
+  outline: none;
+  border-color: #075c3b;
+  box-shadow: 0 0 0 3px rgba(7, 92, 59, 0.1);
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #075c3b, #087443);
+  color: #ffffff;
+  border: none;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+  background: #064d32;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(7, 92, 59, 0.2);
+}
+
+.no-results {
+  padding: 3rem;
+  text-align: center;
+  color: #668072;
+  font-weight: 500;
+  display: none;
+  margin: 0;
+}
+
+/* ==========================================
+   EMPTY STATE
+   ========================================== */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  border: 1px solid rgba(7, 92, 59, 0.12);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem;
+  color: #1a3024;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.empty-state p {
+  margin: 0 0 1.5rem;
+  color: #668072;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: linear-gradient(135deg, #075c3b, #087443);
+  color: #ffffff;
+  padding: 0.8rem 1.6rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #064d32;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(7, 92, 59, 0.2);
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 1024px) {
+  .table-header-row { display: none; }
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .claims-header { flex-direction: column; align-items: flex-start; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .filters-bar { flex-direction: column; }
+  .filter-group { width: 100%; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="claims-wrapper">
+
   <!-- HEADER -->
   <div class="claims-header">
     <div>
-      <h1>🤝 Claim Requests</h1>
+      <h1>Claim Requests</h1>
       <p>Review ownership proof and update claim decisions. Approved claims mark the item as Returned.</p>
     </div>
     <a href="{{ url_for('admin_dashboard') }}" class="btn-back">← Back to Dashboard</a>
@@ -18,15 +403,15 @@
       <div class="stat-value">{{ claims|length }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">⏳ Pending</div>
+      <div class="stat-label">Pending</div>
       <div class="stat-value pending">{{ claims|selectattr('status', 'equalto', 'Pending')|list|length }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">✅ Approved</div>
+      <div class="stat-label">Approved</div>
       <div class="stat-value approved">{{ claims|selectattr('status', 'equalto', 'Approved')|list|length }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">❌ Rejected</div>
+      <div class="stat-label">Rejected</div>
       <div class="stat-value rejected">{{ claims|selectattr('status', 'equalto', 'Rejected')|list|length }}</div>
     </div>
   </div>
@@ -97,11 +482,11 @@
 
           <div class="status-col">
             {% if c.status|lower == 'pending' %}
-              <span class="status-tag pending">⏳ Pending</span>
+              <span class="status-tag pending">Pending</span>
             {% elif c.status|lower == 'approved' %}
-              <span class="status-tag approved">✅ Approved</span>
+              <span class="status-tag approved">Approved</span>
             {% elif c.status|lower == 'rejected' %}
-              <span class="status-tag rejected">❌ Rejected</span>
+              <span class="status-tag rejected">Rejected</span>
             {% else %}
               <span class="status-tag">{{ c.status }}</span>
             {% endif %}
@@ -141,305 +526,6 @@
   </div>
   {% endif %}
 </div>
-
-<style>
-  .claims-wrapper {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
-    background: #ffffff;
-  }
-
-  .claims-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #e0e0e0;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .claims-header h1 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1.5rem;
-    color: #1a1a1a;
-    font-weight: 700;
-  }
-
-  .claims-header p {
-    margin: 0;
-    color: #555;
-    font-size: 0.95rem;
-  }
-
-  .btn-back {
-    background: #f0f0f0;
-    color: #333;
-    padding: 0.6rem 1.25rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    border: 1px solid #ddd;
-  }
-
-  .btn-back:hover {
-    background: #e0e0e0;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background: #ffffff;
-    border: 2px solid #e8e8e8;
-    border-radius: 8px;
-    padding: 1.25rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-  }
-
-  .stat-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1a1a1a;
-  }
-
-  .stat-value.pending { color: #f39c12; }
-  .stat-value.approved { color: #27ae60; }
-  .stat-value.rejected { color: #c0392b; }
-
-  .filters-bar {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #f8f8f8;
-    border-radius: 8px;
-    border: 1px solid #e8e8e8;
-  }
-
-  .filter-group {
-    flex: 1;
-    min-width: 200px;
-  }
-
-  .filter-group label {
-    display: block;
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: #555;
-    margin-bottom: 0.4rem;
-  }
-
-  .filter-group input,
-  .filter-group select {
-    width: 100%;
-    padding: 0.6rem 0.8rem;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    background: white;
-    font-size: 0.95rem;
-  }
-
-  .filter-group input:focus,
-  .filter-group select:focus {
-    outline: none;
-    border-color: #075c3b;
-  }
-
-  .claims-table-wrapper {
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
-  }
-
-  .table-header-row {
-    display: grid;
-    grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
-    gap: 1rem;
-    padding: 0.9rem 1.25rem;
-    background: #f5f5f5;
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: #333;
-    border-bottom: 2px solid #e0e0e0;
-  }
-
-  .table-row {
-    display: grid;
-    grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
-    gap: 1rem;
-    padding: 1.25rem;
-    border-top: 1px solid #e8e8e8;
-    align-items: flex-start;
-    background: #ffffff;
-  }
-
-  .table-row:hover {
-    background: #f9f9f9;
-  }
-
-  .claim-id {
-    font-size: 1rem;
-    color: #333;
-  }
-
-  .item-name {
-    margin: 0.4rem 0 0.2rem;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-
-  .meta {
-    display: block;
-    font-size: 0.85rem;
-    color: #666;
-    margin: 0.2rem 0;
-  }
-
-  .meta.muted {
-    color: #999;
-  }
-
-  .link-view {
-    display: inline-block;
-    margin-top: 0.4rem;
-    color: #075c3b;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-  }
-
-  .link-view:hover {
-    text-decoration: underline;
-  }
-
-  .proof-col {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    color: #333;
-    line-height: 1.5;
-  }
-
-  .status-tag {
-    display: inline-block;
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .status-tag.pending { background: #fef3e0; color: #b77900; }
-  .status-tag.approved { background: #e6f9e9; color: #219646; }
-  .status-tag.rejected { background: #fde8e8; color: #b02020; }
-
-  .status-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .status-form label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #555;
-  }
-
-  .status-form select {
-    padding: 0.5rem 0.7rem;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    background: white;
-    font-weight: 500;
-  }
-
-  .status-form select:focus {
-    outline: none;
-    border-color: #075c3b;
-  }
-
-  .btn-save {
-    background: #075c3b;
-    color: white;
-    border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 0.25rem;
-  }
-
-  .btn-save:hover {
-    background: #064d32;
-  }
-
-  .no-results {
-    padding: 2rem;
-    text-align: center;
-    color: #777;
-    font-weight: 500;
-    display: none;
-    margin: 0;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-  }
-
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 1rem;
-  }
-
-  .empty-state h3 {
-    margin: 0 0 0.5rem;
-    color: #333;
-    font-size: 1.25rem;
-  }
-
-  .empty-state p {
-    margin: 0 0 1.5rem;
-    color: #666;
-  }
-
-  .btn-primary {
-    background: #075c3b;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    display: inline-block;
-  }
-
-  .btn-primary:hover {
-    background: #064d32;
-  }
-
-  @media (max-width: 1024px) {
-    .table-header-row { display: none; }
-    .table-row {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-  }
-</style>
 
 {% if claims %}
 <script>
