@@ -342,7 +342,7 @@ def report_detail(report_id):
     return render_template("report_detail.html", report=report)
 
 # ==================================================
-# SUBMIT CLAIM — WITH PROOF PHOTO
+# SUBMIT CLAIM
 # ==================================================
 @app.route("/report/<int:report_id>/claim", methods=["POST"])
 def submit_claim(report_id):
@@ -372,10 +372,3 @@ def submit_claim(report_id):
         proof=proof,
         proof_file=saved_proof,
         status="Pending"
-    )
-    try:
-        db.session.add(claim)
-        report.status = "Pending Claim"
-        db.session.flush()
-        create_notification(
-            "
