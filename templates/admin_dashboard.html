@@ -3,126 +3,161 @@
 {% block content %}
 <div class="dashboard-wrapper">
 
-  <!-- === PAGE HEADER === -->
-  <div class="section-header">
-    <div class="header-left">
+  <!-- TOP HEADER AREA -->
+  <div class="top-bar">
+    <div class="page-title">
       <h1>Admin Dashboard</h1>
-      <p class="subtext">Manage reports, review claims, and update item statuses.</p>
+      <p>Manage reports, review claims, and update item statuses</p>
     </div>
-    <a href="{{ url_for('export_reports') }}" class="btn-export">📊 Export CSV</a>
+    <a href="{{ url_for('export_reports') }}" class="export-btn">
+      <span>📊</span> Export CSV
+    </a>
   </div>
 
-  <!-- === STATISTICS OVERVIEW === -->
-  <div class="stats-section">
-    <h2 class="section-title">📈 Overview</h2>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total Reports</div>
-        <div class="stat-value">{{ stats.total }}</div>
+  <!-- STATS CARDS -- NICE GRID LAYOUT -->
+  <div class="stats-container">
+    <div class="stat-card total">
+      <div class="stat-icon">📋</div>
+      <div class="stat-content">
+        <p class="stat-label">Total Reports</p>
+        <h3 class="stat-number">{{ stats.total }}</h3>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Lost Reports</div>
-        <div class="stat-value lost">{{ stats.lost }}</div>
+    </div>
+
+    <div class="stat-card lost">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-content">
+        <p class="stat-label">Lost Items</p>
+        <h3 class="stat-number">{{ stats.lost }}</h3>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Found Reports</div>
-        <div class="stat-value found">{{ stats.found }}</div>
+    </div>
+
+    <div class="stat-card found">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <p class="stat-label">Found Items</p>
+        <h3 class="stat-number">{{ stats.found }}</h3>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Open Reports</div>
-        <div class="stat-value open">{{ stats.open }}</div>
+    </div>
+
+    <div class="stat-card open">
+      <div class="stat-icon">🟢</div>
+      <div class="stat-content">
+        <p class="stat-label">Open</p>
+        <h3 class="stat-number">{{ stats.open }}</h3>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Pending Claims</div>
-        <div class="stat-value pending">{{ stats.pending_claims }}</div>
+    </div>
+
+    <div class="stat-card pending">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-content">
+        <p class="stat-label">Pending Claims</p>
+        <h3 class="stat-number">{{ stats.pending_claims }}</h3>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Returned Items</div>
-        <div class="stat-value returned">{{ stats.returned }}</div>
+    </div>
+
+    <div class="stat-card returned">
+      <div class="stat-icon">🎁</div>
+      <div class="stat-content">
+        <p class="stat-label">Returned</p>
+        <h3 class="stat-number">{{ stats.returned }}</h3>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Archived</div>
-        <div class="stat-value archived">{{ stats.archived }}</div>
+    </div>
+
+    <div class="stat-card archived">
+      <div class="stat-icon">📁</div>
+      <div class="stat-content">
+        <p class="stat-label">Archived</p>
+        <h3 class="stat-number">{{ stats.archived }}</h3>
       </div>
     </div>
   </div>
 
-  <!-- === ACTIONS & FILTERS === -->
-  <div class="actions-section">
-    <h2 class="section-title">⚡ Quick Actions</h2>
-    <div class="actions-bar">
-      <a href="{{ url_for('admin_claims') }}" class="btn-primary">
-        📋 Review All Claims
-        {% if stats.pending_claims > 0 %}
-          <span class="badge">{{ stats.pending_claims }}</span>
-        {% endif %}
-      </a>
-      <a href="{{ url_for('admin_dashboard') }}?filter=Lost" class="btn-filter {% if request.args.get('filter') == 'Lost' %}active{% endif %}">
+  <!-- ACTION BUTTONS -->
+  <div class="actions-wrapper">
+    <a href="{{ url_for('admin_claims') }}" class="main-action-btn">
+      📋 Review Claims
+      {% if stats.pending_claims > 0 %}
+        <span class="badge-dot">{{ stats.pending_claims }}</span>
+      {% endif %}
+    </a>
+
+    <div class="filter-group">
+      <a href="{{ url_for('admin_dashboard') }}?filter=Lost" 
+         class="filter-btn {% if request.args.get('filter') == 'Lost' %}active{% endif %}">
         ⚠️ Lost Only
       </a>
-      <a href="{{ url_for('admin_dashboard') }}?filter=Found" class="btn-filter {% if request.args.get('filter') == 'Found' %}active{% endif %}">
-        🔎 Found Only
+      <a href="{{ url_for('admin_dashboard') }}?filter=Found" 
+         class="filter-btn {% if request.args.get('filter') == 'Found' %}active{% endif %}">
+        ✅ Found Only
       </a>
-      <a href="{{ url_for('admin_history') }}" class="btn-history">
-        🕓 Deleted History
+      <a href="{{ url_for('admin_history') }}" class="history-btn">
+        🕓 Deleted
       </a>
       {% if request.args.get('filter') %}
-        <a href="{{ url_for('admin_dashboard') }}" class="btn-clear">
-          ✅ Show All
+        <a href="{{ url_for('admin_dashboard') }}" class="clear-btn">
+          ← Show All
         </a>
       {% endif %}
     </div>
   </div>
 
-  <!-- === REPORTS TABLE === -->
-  <div class="table-section">
-    <h2 class="section-title">
-      📋 Reports
-      {% if request.args.get('filter') == 'Lost' %} — Lost Items
-      {% elif request.args.get('filter') == 'Found' %} — Found Items
-      {% endif %}
-    </h2>
+  <!-- REPORTS TABLE -->
+  <div class="table-wrapper">
+    <div class="table-heading">
+      <h2>
+        {% if request.args.get('filter') == 'Lost' %}
+          ⚠️ Lost Reports
+        {% elif request.args.get('filter') == 'Found' %}
+          ✅ Found Reports
+        {% else %}
+          📋 All Reports
+        {% endif %}
+      </h2>
+    </div>
 
     {% if reports %}
-      <div class="table-container">
-        <div class="table-header-row">
+      <div class="table-box">
+        <!-- TABLE HEADER -->
+        <div class="table-head-row">
           <span class="col-id">ID</span>
-          <span class="col-name">Item Name</span>
+          <span class="col-item">Item Name</span>
           <span class="col-type">Type</span>
           <span class="col-status">Status</span>
           <span class="col-update">Update Status</span>
           <span class="col-date">Date</span>
-          <span class="col-actions">Actions</span>
+          <span class="col-act">Actions</span>
         </div>
 
+        <!-- TABLE ROWS -->
         {% for report in reports %}
           {% set current_filter = request.args.get('filter') %}
           {% if not current_filter or current_filter == report.report_type %}
           <div class="table-data-row">
             <span class="col-id">#{{ report.id }}</span>
-            <a href="{{ url_for('report_detail', report_id=report.id) }}" class="col-name report-link">
+            <a href="{{ url_for('report_detail', report_id=report.id) }}" class="col-item item-link">
               {{ report.item_name }}
             </a>
             <span class="col-type type-{{ report.report_type|lower }}">
               {{ report.report_type }}
             </span>
-            <span class="col-status status-{{ report.status|replace(' ', '-')|lower }}">
+            <span class="col-status stat-{{ report.status|replace(' ', '-')|lower }}">
               {{ report.status }}
             </span>
-            <form action="{{ url_for('admin_update_report_status', report_id=report.id) }}" method="POST" class="col-update status-form">
+            <form action="{{ url_for('admin_update_report_status', report_id=report.id) }}" method="POST" class="col-update sel-form">
               <select name="status" onchange="this.form.submit()">
                 <option value="Open" {% if report.status == 'Open' %}selected{% endif %}>🟢 Open</option>
-                <option value="Pending Claim" {% if report.status == 'Pending Claim' %}selected{% endif %}>⏳ Pending Claim</option>
+                <option value="Pending Claim" {% if report.status == 'Pending Claim' %}selected{% endif %}>⏳ Pending</option>
                 <option value="Returned" {% if report.status == 'Returned' %}selected{% endif %}>✅ Returned</option>
                 <option value="Archived" {% if report.status == 'Archived' %}selected{% endif %}>📁 Archived</option>
               </select>
             </form>
             <span class="col-date">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
-            <div class="col-actions action-buttons">
-              <a href="{{ url_for('report_detail', report_id=report.id) }}" class="btn-view">View</a>
-              <form action="{{ url_for('admin_delete_report', report_id=report.id) }}" method="POST" class="delete-form"
-                    onsubmit="return confirm('Delete this report? It will be moved to Deleted History.');">
-                <button type="submit" class="btn-delete">Delete</button>
+            <div class="col-act action-set">
+              <a href="{{ url_for('report_detail', report_id=report.id) }}" class="view-btn">View</a>
+              <form action="{{ url_for('admin_delete_report', report_id=report.id) }}" method="POST" class="del-form"
+                    onsubmit="return confirm('Delete this report?');">
+                <button type="submit" class="del-btn">Delete</button>
               </form>
             </div>
           </div>
@@ -130,8 +165,8 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-container">
-        <p class="empty-text">No reports available.</p>
+      <div class="empty-box">
+        <p>No reports found.</p>
       </div>
     {% endif %}
   </div>
@@ -139,229 +174,255 @@
 </div>
 
 <style>
-/* === BASE LAYOUT === */
+/* ==========================================
+   GENERAL LAYOUT
+   ========================================== */
 .dashboard-wrapper {
-  max-width: 1450px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem;
 }
 
-/* === SECTION SPACING === */
-.section-header,
-.stats-section,
-.actions-section,
-.table-section {
-  margin-bottom: 2.5rem;
-}
-
-.section-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid rgba(7, 92, 59, 0.1);
-}
-
-/* === PAGE HEADER === */
-.section-header {
+/* ==========================================
+   TOP HEADER
+   ========================================== */
+.top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(7, 92, 59, 0.15);
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(7, 92, 59, 0.1);
 }
 
-.header-left h1 {
+.page-title h1 {
   margin: 0 0 0.25rem 0;
-  font-size: 1.6rem;
-  color: var(--text);
+  font-size: 1.75rem;
+  color: var(--primary);
   font-weight: 800;
 }
 
-.subtext {
+.page-title p {
   margin: 0;
   color: var(--muted);
   font-size: 0.95rem;
 }
 
-.btn-export {
-  background: var(--primary);
-  color: #fff;
-  padding: 0.7rem 1.4rem;
-  border-radius: 10px;
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #075c3b, #087443);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(7, 92, 59, 0.15);
 }
 
-.btn-export:hover {
-  background: var(--primary-dark);
+.export-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(7, 92, 59, 0.2);
+  box-shadow: 0 6px 15px rgba(7, 92, 59, 0.25);
 }
 
-/* === STATS GRID === */
-.stats-grid {
+/* ==========================================
+   STATS CARDS
+   ========================================== */
+.stats-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(7, 92, 59, 0.12);
-  border-radius: 14px;
-  padding: 1.25rem;
+  border-radius: 16px;
+  padding: 1.2rem;
+  border: 1px solid rgba(7, 92, 59, 0.1);
   transition: all 0.3s ease;
 }
 
 .stat-card:hover {
-  background: rgba(255, 255, 255, 0.85);
-  transform: translateY(-3px);
-  border-color: rgba(7, 92, 59, 0.25);
-  box-shadow: 0 6px 16px rgba(7, 92, 59, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(7, 92, 59, 0.08);
+  border-color: rgba(7, 92, 59, 0.2);
+}
+
+.stat-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.stat-content {
+  flex: 1;
 }
 
 .stat-label {
-  font-size: 0.85rem;
+  margin: 0 0 0.25rem 0;
+  font-size: 0.8rem;
   color: var(--muted);
-  margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
-.stat-value {
-  font-size: 1.8rem;
+.stat-number {
+  margin: 0;
+  font-size: 1.5rem;
   font-weight: 800;
-  color: var(--text);
 }
 
-.stat-value.lost { color: #c0392b; }
-.stat-value.found { color: #27ae60; }
-.stat-value.open { color: #2980b9; }
-.stat-value.pending { color: #f39c12; }
-.stat-value.returned { color: #27ae60; }
-.stat-value.archived { color: #7f8c8d; }
+.stat-card.total .stat-number { color: #333; }
+.stat-card.lost .stat-number { color: #c0392b; }
+.stat-card.found .stat-number { color: #27ae60; }
+.stat-card.open .stat-number { color: #2980b9; }
+.stat-card.pending .stat-number { color: #f39c12; }
+.stat-card.returned .stat-number { color: #27ae60; }
+.stat-card.archived .stat-number { color: #7f8c8d; }
 
-/* === ACTIONS BAR === */
-.actions-bar {
+/* ==========================================
+   ACTION BUTTONS AREA
+   ========================================== */
+.actions-wrapper {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
-.btn-primary {
-  background: var(--primary);
-  color: #fff;
-  padding: 0.8rem 1.5rem;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 600;
+.main-action-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(7, 92, 59, 0.2);
-}
-
-.badge {
-  background: rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg, #075c3b, #087443);
   color: #fff;
-  padding: 0.2rem 0.55rem;
+  padding: 0.8rem 1.6rem;
   border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(7, 92, 59, 0.15);
+}
+
+.main-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(7, 92, 59, 0.25);
+}
+
+.badge-dot {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 700;
 }
 
-.btn-filter {
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--text);
-  padding: 0.8rem 1.4rem;
+.filter-group {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn, .history-btn, .clear-btn {
+  padding: 0.7rem 1.2rem;
   border-radius: 10px;
   text-decoration: none;
   font-weight: 600;
-  border: 1px solid rgba(7, 92, 59, 0.15);
+  font-size: 0.9rem;
   transition: all 0.3s ease;
+  border: 1px solid transparent;
 }
 
-.btn-filter:hover {
-  background: rgba(7, 92, 59, 0.08);
-  border-color: rgba(7, 92, 59, 0.25);
+.filter-btn {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(7, 92, 59, 0.12);
+  color: var(--text);
 }
 
-.btn-filter.active {
+.filter-btn:hover {
+  background: rgba(7, 92, 59, 0.06);
+  border-color: rgba(7, 92, 59, 0.2);
+}
+
+.filter-btn.active {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
 }
 
-.btn-history {
+.history-btn {
   background: rgba(254, 243, 199, 0.7);
+  border-color: rgba(252, 211, 77, 0.4);
   color: #92400e;
-  padding: 0.8rem 1.4rem;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 600;
-  border: 1px solid rgba(252, 211, 77, 0.5);
-  transition: all 0.3s ease;
 }
 
-.btn-history:hover {
+.history-btn:hover {
   background: rgba(253, 230, 138, 0.85);
-  transform: translateY(-2px);
 }
 
-.btn-clear {
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--primary);
-  padding: 0.8rem 1.4rem;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 600;
-  border: 1px solid rgba(7, 92, 59, 0.2);
-  transition: all 0.3s ease;
-}
-
-.btn-clear:hover {
+.clear-btn {
   background: rgba(7, 92, 59, 0.08);
+  color: var(--primary);
+  border-color: rgba(7, 92, 59, 0.15);
 }
 
-/* === TABLE STYLING === */
-.table-container {
-  border: 1px solid rgba(7, 92, 59, 0.12);
-  border-radius: 16px;
-  overflow: hidden;
+.clear-btn:hover {
+  background: rgba(7, 92, 59, 0.12);
+}
+
+/* ==========================================
+   TABLE
+   ========================================== */
+.table-wrapper {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(12px);
+  border-radius: 18px;
+  border: 1px solid rgba(7, 92, 59, 0.1);
+  overflow: hidden;
 }
 
-.table-header-row {
+.table-heading {
+  padding: 1.2rem 1.5rem 0.5rem;
+}
+
+.table-heading h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.table-box {
+  width: 100%;
+}
+
+.table-head-row {
   display: grid;
-  grid-template-columns: 60px 2fr 100px 150px 170px 120px 140px;
+  grid-template-columns: 65px 2fr 100px 140px 160px 110px 130px;
   gap: 0.5rem;
-  padding: 1rem 1.25rem;
-  background: rgba(7, 92, 59, 0.05);
+  padding: 1rem 1.5rem;
+  background: rgba(7, 92, 59, 0.04);
   font-weight: 700;
   font-size: 0.85rem;
-  color: var(--text);
-  border-bottom: 1px solid rgba(7, 92, 59, 0.1);
+  color: var(--muted);
+  border-bottom: 1px solid rgba(7, 92, 59, 0.08);
 }
 
 .table-data-row {
   display: grid;
-  grid-template-columns: 60px 2fr 100px 150px 170px 120px 140px;
+  grid-template-columns: 65px 2fr 100px 140px 160px 110px 130px;
   gap: 0.5rem;
-  padding: 1rem 1.25rem;
-  border-top: 1px solid rgba(7, 92, 59, 0.08);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(7, 92, 59, 0.05);
   align-items: center;
   transition: background 0.25s ease;
 }
@@ -370,23 +431,36 @@
   background: rgba(7, 92, 59, 0.03);
 }
 
-.col-id { color: var(--muted); font-family: monospace; font-weight: 600; }
-.col-name { color: var(--primary); font-weight: 600; }
-.report-link { text-decoration: none; transition: color 0.2s ease; }
-.report-link:hover { text-decoration: underline; color: var(--primary-dark); }
+.col-id {
+  color: var(--muted);
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.item-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.item-link:hover {
+  text-decoration: underline;
+  color: var(--primary-dark);
+}
 
 .type-lost { color: #c0392b; font-weight: 600; }
 .type-found { color: #27ae60; font-weight: 600; }
 
-.status-open { color: #2980b9; font-weight: 600; }
-.status-pending-claim { color: #f39c12; font-weight: 600; }
-.status-returned { color: #27ae60; font-weight: 600; }
-.status-archived { color: #7f8c8d; font-weight: 600; }
+.stat-open { color: #2980b9; font-weight: 600; }
+.stat-pending-claim { color: #f39c12; font-weight: 600; }
+.stat-returned { color: #27ae60; font-weight: 600; }
+.stat-archived { color: #7f8c8d; font-weight: 600; }
 
-.status-form select {
+.sel-form select {
   width: 100%;
   padding: 0.5rem 0.6rem;
-  border: 1.5px solid rgba(7, 92, 59, 0.2);
+  border: 1.5px solid rgba(7, 92, 59, 0.18);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.8);
   cursor: pointer;
@@ -394,80 +468,96 @@
   transition: all 0.25s ease;
 }
 
-.status-form select:focus {
+.sel-form select:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(7, 92, 59, 0.1);
 }
 
-.col-date { color: var(--muted); font-size: 0.9rem; font-weight: 500; }
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
+.col-date {
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
-.btn-view {
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--text);
-  padding: 0.5rem 0.9rem;
-  border-radius: 6px;
+.action-set {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.view-btn {
+  background: rgba(7, 92, 59, 0.06);
+  color: var(--primary);
+  padding: 0.5rem 0.8rem;
+  border-radius: 7px;
   text-decoration: none;
   font-size: 0.85rem;
   font-weight: 600;
-  border: 1px solid rgba(7, 92, 59, 0.15);
   transition: all 0.25s ease;
 }
 
-.btn-view:hover {
-  background: rgba(7, 92, 59, 0.08);
-  color: var(--primary);
+.view-btn:hover {
+  background: rgba(7, 92, 59, 0.12);
 }
 
-.delete-form { margin: 0; }
+.del-form {
+  margin: 0;
+}
 
-.btn-delete {
-  background: rgba(255, 238, 238, 0.7);
-  color: #c62828;
-  padding: 0.5rem 0.9rem;
-  border-radius: 6px;
-  border: 1px solid rgba(198, 40, 40, 0.25);
+.del-btn {
+  background: rgba(220, 53, 69, 0.08);
+  color: #c0392b;
+  padding: 0.5rem 0.8rem;
+  border-radius: 7px;
+  border: none;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
-.btn-delete:hover {
-  background: rgba(255, 205, 210, 0.85);
+.del-btn:hover {
+  background: rgba(220, 53, 69, 0.15);
 }
 
-.empty-container {
+.empty-box {
   padding: 3rem;
   text-align: center;
-}
-
-.empty-text {
   color: var(--muted);
-  font-weight: 500;
-  margin: 0;
 }
 
-/* === RESPONSIVE === */
-@media (max-width: 968px) {
-  .table-header-row,
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 900px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .table-head-row,
   .table-data-row {
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem 1rem;
+    gap: 0.8rem 1rem;
   }
-  .col-id, .col-date { display: none; }
+
+  .col-id, .col-date {
+    display: none;
+  }
+
+  .actions-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    justify-content: center;
+  }
 }
 
-@media (max-width: 600px) {
-  .section-header { flex-direction: column; align-items: flex-start; }
-  .actions-bar { flex-direction: column; width: 100%; }
-  .actions-bar > * { width: 100%; text-align: center; justify-content: center; }
-  .action-buttons { flex-direction: column; }
+@media (max-width: 550px) {
+  .stats-container {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>
 {% endblock %}
