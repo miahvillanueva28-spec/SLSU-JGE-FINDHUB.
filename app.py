@@ -42,9 +42,7 @@ if not IS_VERCEL:
 app = Flask(__name__)
 secret_key = os.environ.get("SECRET_KEY", "").strip()
 if IS_VERCEL and not secret_key:
-    raise RuntimeError(
-        "SECRET_KEY must be configured in Vercel Environment Variables."
-    )
+    raise RuntimeError("SECRET_KEY must be configured.")
 app.config["SECRET_KEY"] = secret_key or secrets.token_hex(32)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -59,73 +57,44 @@ app.config["SESSION_COOKIE_SECURE"] = (
 # ==================================================
 database_url = os.environ.get("DATABASE_URL", "").strip()
 if database_url.startswith("postgres://"):
-    database_url = database_url.replace(
-        "postgres://", "postgresql+psycopg2://", 1
-    )
+    database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
 elif database_url.startswith("postgresql://"):
-    database_url = database_url.replace(
-        "postgresql://", "postgresql+psycopg2://", 1
-    )
+    database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 elif database_url.startswith("postgresql+psycopg://"):
-    database_url = database_url.replace(
-        "postgresql+psycopg://", "postgresql+psycopg2://", 1
-    )
+    database_url = database_url.replace("postgresql+psycopg://", "postgresql+psycopg2://", 1)
 
 if not database_url:
     if IS_VERCEL:
-        raise RuntimeError(
-            "DATABASE_URL is missing. Configure PostgreSQL and add "
-            "DATABASE_URL in Vercel Environment Variables."
-        )
+        raise RuntimeError("DATABASE_URL is missing.")
     database_url = f"sqlite:///{DATA_DIR / 'findhub.db'}"
-    app.logger.warning(
-        "DATABASE_URL is missing. Using local SQLite for development only."
-    )
+    app.logger.warning("Using local SQLite for development only.")
 
 if not database_url.startswith(("postgresql+psycopg2://", "sqlite:///")):
-    raise RuntimeError(
-        "Unsupported DATABASE_URL. Use PostgreSQL or SQLite locally."
-    )
+    raise RuntimeError("Unsupported DATABASE_URL.")
 
 if IS_VERCEL and database_url.startswith("sqlite:///"):
-    raise RuntimeError(
-        "SQLite is not suitable for persistent Vercel production data. "
-        "Configure PostgreSQL using DATABASE_URL."
-    )
+    raise RuntimeError("SQLite not supported on Vercel. Use PostgreSQL.")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_pre_ping": True,
-    "pool_recycle": 300,
-}
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True, "pool_recycle": 300}
 db = SQLAlchemy(app)
 
 # ==================================================
-# CLOUDINARY PHOTO STORAGE
+# CLOUDINARY
 # ==================================================
 CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "").strip()
 USE_CLOUDINARY = bool(CLOUDINARY_URL)
 if USE_CLOUDINARY:
     cloudinary.config(cloudinary_url=CLOUDINARY_URL)
-if IS_VERCEL and not USE_CLOUDINARY:
-    app.logger.warning(
-        "CLOUDINARY_URL is missing. Photo uploads will not work on Vercel."
-    )
 
 # ==================================================
-# WEBSITE BRANDING
+# BRANDING
 # ==================================================
-CAMPUS_LOGO = (
-    "https://www.slsu.edu.ph/wp-content/uploads/2023/05/"
-    "Campuses/Campus-Logo/SLSU-JGE-Logo.png"
-)
-CAMPUS_PHOTO = (
-    "https://www.slsu.edu.ph/wp-content/uploads/"
-    "elementor/thumbs/JGE%20bldg-q6759ky68kjrv7f9iklhioqfdjrgb6067ofnjh7qns.jpg"
-)
+CAMPUS_LOGO = "https://www.slsu.edu.ph/wp-content/uploads/2023/05/Campuses/Campus-Logo/SLSU-JGE-Logo.png"
+CAMPUS_PHOTO = "https://www.slsu.edu.ph/wp-content/uploads/elementor/thumbs/JGE%20bldg-q6759ky68kjrv7f9iklhioqfdjrgb6067ofnjh7qns.jpg"
 
 # ==================================================
-# DATABASE MODELS
+# MODELS
 # ==================================================
 def utcnow():
     return datetime.now(timezone.utc)
@@ -144,15 +113,11 @@ class Report(db.Model):
     photo = db.Column(db.String(1000), nullable=True)
     status = db.Column(db.String(30), default="Open", nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
-    claims = db.relationship(
-        "Claim", backref="report", cascade="all, delete-orphan", lazy=True
-    )
+    claims = db.relationship("Claim", backref="report", cascade="all, delete-orphan", lazy=True)
 
 class Claim(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    report_id = db.Column(
-        db.Integer, db.ForeignKey("report.id"), nullable=False
-    )
+    report_id = db.Column(db.Integer, db.ForeignKey("report.id"), nullable=False)
     claimant_name = db.Column(db.String(120), nullable=False)
     claimant_contact = db.Column(db.String(150), nullable=False)
     proof = db.Column(db.Text, nullable=False)
@@ -164,9 +129,7 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    notification_type = db.Column(
-        db.String(30), nullable=False, default="info"
-    )
+    notification_type = db.Column(db.String(30), nullable=False, default="info")
     report_id = db.Column(db.Integer, nullable=True)
     is_read = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
@@ -192,10 +155,10 @@ with app.app_context():
     db.create_all()
 
 # ==================================================
-# TEMPLATE CONTEXT
+# CONTEXT PROCESSORS
 # ==================================================
 @app.context_processor
-def inject_global_template_values():
+def inject_global():
     return {
         "today": date.today(),
         "campus_logo": CAMPUS_LOGO,
@@ -204,45 +167,34 @@ def inject_global_template_values():
     }
 
 @app.context_processor
-def inject_notification_count():
-    count = 0
-    if session.get("admin_logged_in"):
-        count = Notification.query.filter_by(is_read=False).count()
+def inject_notif_count():
+    count = Notification.query.filter_by(is_read=False).count() if session.get("admin_logged_in") else 0
     return {"unread_notification_count": count}
 
 # ==================================================
-# CONSTANTS AND HELPERS
+# HELPERS
 # ==================================================
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 REPORT_STATUSES = {"Open", "Pending Claim", "Returned", "Archived"}
 CLAIM_STATUSES = {"Pending", "Approved", "Rejected"}
 
 def create_notification(title, message, notification_type="info", report_id=None):
-    notification = Notification(
-        title=title,
-        message=message,
-        notification_type=notification_type,
-        report_id=report_id,
-        is_read=False,
-    )
-    db.session.add(notification)
-    return notification
+    notif = Notification(title=title, message=message, notification_type=notification_type,
+                         report_id=report_id, is_read=False)
+    db.session.add(notif)
+    return notif
 
-def admin_required(view_function):
-    @wraps(view_function)
-    def wrapped_view(*args, **kwargs):
+def admin_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
         if not session.get("admin_logged_in"):
-            flash("Please log in as an administrator first.", "warning")
+            flash("Please log in as administrator first.", "warning")
             return redirect(url_for("admin_login"))
-        return view_function(*args, **kwargs)
-    return wrapped_view
+        return f(*args, **kwargs)
+    return wrap
 
 def allowed_file(filename):
-    return (
-        bool(filename)
-        and "." in filename
-        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-    )
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def photo_src(photo):
     if not photo:
@@ -258,157 +210,160 @@ def inject_photo_helper():
 def save_photo(file_storage):
     if not file_storage or not file_storage.filename:
         return None
-    original_name = secure_filename(file_storage.filename)
-    if not original_name or not allowed_file(original_name):
-        raise ValueError("Use a PNG, JPG, JPEG, GIF, or WEBP image.")
-    if not USE_CLOUDINARY:
-        if IS_VERCEL:
-            raise RuntimeError(
-                "Photo storage is not configured. Set CLOUDINARY_URL "
-                "in Vercel Environment Variables."
-            )
-        filename = f"{secrets.token_hex(12)}_{original_name}"
-        file_storage.save(UPLOAD_FOLDER / filename)
-        return filename
-    result = cloudinary.uploader.upload(
-        file_storage,
-        folder="slsu-jge-findhub",
-        resource_type="image",
-    )
-    photo_url = result.get("secure_url")
-    if not photo_url:
-        raise RuntimeError("Cloudinary did not return a secure photo URL.")
-    return photo_url
+    if not allowed_file(file_storage.filename):
+        raise ValueError("Use PNG, JPG, JPEG, GIF, or WEBP.")
+    if USE_CLOUDINARY:
+        result = cloudinary.uploader.upload(file_storage, folder="slsu-jge-findhub", resource_type="image")
+        url = result.get("secure_url")
+        if not url:
+            raise RuntimeError("Cloudinary upload failed.")
+        return url
+    if IS_VERCEL:
+        raise RuntimeError("CLOUDINARY_URL not configured.")
+    fn = f"{secrets.token_hex(12)}_{secure_filename(file_storage.filename)}"
+    file_storage.save(UPLOAD_FOLDER / fn)
+    return fn
 
 def delete_photo(photo):
-    if not photo or photo.startswith(("https://", "http://")):
+    if not photo or photo.startswith(("https://", "http://")) or IS_VERCEL:
         return
-    if IS_VERCEL:
-        return
-    filename = Path(photo).name
-    path = UPLOAD_FOLDER / filename
-    try:
-        if path.is_file():
-            path.unlink()
-    except OSError:
-        app.logger.exception("Unable to delete local photo")
+    path = UPLOAD_FOLDER / Path(photo).name
+    if path.is_file():
+        path.unlink()
 
-def parse_incident_date(value):
+def parse_date(val):
     try:
-        return datetime.strptime(value, "%Y-%m-%d").date()
+        return datetime.strptime(val, "%Y-%m-%d").date()
     except (TypeError, ValueError):
         return None
 
-def get_report_form_value(name, default=""):
+def form_val(name, default=""):
     return (request.form.get(name, default) or "").strip()
 
 # ==================================================
-# HOME AND SEARCH
+# HOME
 # ==================================================
 @app.route("/")
 def home():
-    query = request.args.get("q", "").strip()[:100]
-    report_type = request.args.get("type", "").strip()
-    status = request.args.get("status", "").strip()
+    q = request.args.get("q", "").strip()[:100]
+    t = request.args.get("type", "").strip()
+    s = request.args.get("status", "").strip()
     sort = request.args.get("sort", "newest").strip()
-
-    search_performed = bool(query or report_type or status)
-    reports_query = Report.query
-
-    if report_type in {"Lost", "Found"}:
-        reports_query = reports_query.filter(Report.report_type == report_type)
-    if status in REPORT_STATUSES:
-        reports_query = reports_query.filter(Report.status == status)
-    if query:
-        search_term = f"%{query}%"
-        reports_query = reports_query.filter(
-            or_(
-                Report.item_name.ilike(search_term),
-                Report.description.ilike(search_term),
-                Report.location.ilike(search_term),
-            )
-        )
-
+    query = Report.query
+    if t in {"Lost", "Found"}:
+        query = query.filter(Report.report_type == t)
+    if s in REPORT_STATUSES:
+        query = query.filter(Report.status == s)
+    if q:
+        qs = f"%{q}%"
+        query = query.filter(or_(Report.item_name.ilike(qs), Report.description.ilike(qs), Report.location.ilike(qs)))
     if sort == "oldest":
-        reports_query = reports_query.order_by(
-            Report.created_at.asc(), Report.id.asc()
-        )
+        query = query.order_by(Report.created_at.asc(), Report.id.asc())
     elif sort == "name":
-        reports_query = reports_query.order_by(
-            Report.item_name.asc(), Report.id.asc()
-        )
+        query = query.order_by(Report.item_name.asc(), Report.id.asc())
     else:
-        sort = "newest"
-        reports_query = reports_query.order_by(
-            Report.created_at.desc(), Report.id.desc()
-        )
-
-    reports = reports_query.all()
-
-    total_reports = Report.query.count()
-    total_lost = Report.query.filter_by(report_type="Lost").count()
-    total_found = Report.query.filter_by(report_type="Found").count()
-    total_open = Report.query.filter_by(status="Open").count()
-
+        query = query.order_by(Report.created_at.desc(), Report.id.desc())
+    reports = query.all()
     stats = {
-        "total": total_reports,
-        "lost": total_lost,
-        "found": total_found,
-        "open": total_open,
+        "total": Report.query.count(),
+        "lost": Report.query.filter_by(report_type="Lost").count(),
+        "found": Report.query.filter_by(report_type="Found").count(),
+        "open": Report.query.filter_by(status="Open").count(),
     }
-
-    return render_template(
-        "home.html",
-        reports=reports,
-        stats=stats,
-        total_reports=total_reports,
-        total_lost=total_lost,
-        total_found=total_found,
-        total_open=total_open,
-        search_performed=search_performed,
-        query=query,
-        selected_type=report_type,
-        selected_status=status,
-        selected_sort=sort,
-    )
+    return render_template("home.html", reports=reports, stats=stats,
+                           search_performed=bool(q or t or s), query=q,
+                           selected_type=t, selected_status=s, selected_sort=sort)
 
 # ==================================================
-# CREATE A REPORT
+# NEW REPORT
 # ==================================================
 @app.route("/report/new", methods=["GET", "POST"])
 def new_report():
-    if request.method == "POST":
-        report_type = get_report_form_value("report_type")
-        item_name = get_report_form_value("item_name")
-        category = get_report_form_value("category")
-        description = get_report_form_value("description")
-        location = get_report_form_value("location")
-        incident_date = parse_incident_date(
-            get_report_form_value("incident_date")
-        )
-        contact_name = get_report_form_value("contact_name")
-        contact = get_report_form_value("contact")
-        contact_public = request.form.get("contact_public") in {
-            "1", "true", "on", "yes"
-        }
+    if request.method != "POST":
+        return render_template("report_form.html")
+    rt = form_val("report_type")
+    name = form_val("item_name")
+    cat = form_val("category")
+    desc = form_val("description")
+    loc = form_val("location")
+    dt = parse_date(form_val("incident_date"))
+    cname = form_val("contact_name")
+    contact = form_val("contact")
+    pub = request.form.get("contact_public") in {"1", "true", "on", "yes"}
+    if rt not in {"Lost", "Found"}:
+        flash("Select Lost or Found.", "danger")
+        return redirect(url_for("new_report"))
+    if not all([name, desc, loc, dt, contact]):
+        flash("Complete all required fields.", "danger")
+        return redirect(url_for("new_report"))
+    if dt > date.today():
+        flash("Date cannot be in the future.", "danger")
+        return redirect(url_for("new_report"))
+    photo = None
+    try:
+        photo = save_photo(request.files.get("photo"))
+    except ValueError as e:
+        flash(str(e), "danger")
+        return redirect(url_for("new_report"))
+    rep = Report(
+        report_type=rt, item_name=name, category=cat or "General",
+        description=desc, location=loc, incident_date=dt,
+        contact_name=cname or "Not provided", contact=contact,
+        contact_public=pub, photo=photo, status="Open"
+    )
+    try:
+        db.session.add(rep)
+        db.session.flush()
+        create_notification(f"New {rt} Report", f"{name} was submitted.", "report", rep.id)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        delete_photo(photo)
+        flash("Failed to save report.", "danger")
+        return redirect(url_for("new_report"))
+    flash("Report submitted successfully!", "success")
+    return redirect(url_for("report_detail", report_id=rep.id))
 
-        if report_type not in {"Lost", "Found"}:
-            flash("Please select Lost or Found.", "danger")
-            return redirect(url_for("new_report"))
-        if not all([item_name, description, location, incident_date, contact]):
-            flash("Please complete all required fields.", "danger")
-            return redirect(url_for("new_report"))
-        if incident_date > date.today():
-            flash("The lost or found date cannot be in the future.", "danger")
-            return redirect(url_for("new_report"))
-        if len(item_name) > 150:
-            flash("Item name is too long.", "danger")
-            return redirect(url_for("new_report"))
-        if len(location) > 200:
-            flash("Location is too long.", "danger")
-            return redirect(url_for("new_report"))
-        if len(contact) > 150:
-            flash("Contact details are too long.", "danger")
-            return redirect(url_for("new_report"))
-        if len(contact_name) > 120:
-            flash("Your name
+# ==================================================
+# REPORT DETAIL
+# ==================================================
+@app.route("/report/<int:report_id>")
+def report_detail(report_id):
+    report = db.get_or_404(Report, report_id)
+    nid = request.args.get("notification_id", type=int)
+    if nid and session.get("admin_logged_in"):
+        notif = Notification.query.get(nid)
+        if notif and not notif.is_read:
+            try:
+                notif.is_read = True
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+    return render_template("report_detail.html", report=report)
+
+# ==================================================
+# SUBMIT CLAIM — WITH PROOF PHOTO
+# ==================================================
+@app.route("/report/<int:report_id>/claim", methods=["POST"])
+def submit_claim(report_id):
+    report = db.get_or_404(Report, report_id)
+    if report.status in {"Returned", "Archived"}:
+        flash("No longer accepting claims.", "warning")
+        return redirect(url_for("report_detail", report_id=report.id))
+    cname = form_val("claimant_name")
+    ccontact = form_val("claimant_contact")
+    proof = form_val("proof")
+    if not all([cname, ccontact, proof]):
+        flash("Complete all required fields.", "danger")
+        return redirect(url_for("report_detail", report_id=report.id))
+    saved_proof = None
+    try:
+        saved_proof = save_photo(request.files.get("proof_photo"))
+    except ValueError as e:
+        flash(str(e), "danger")
+        return redirect(url_for("report_detail", report_id=report.id))
+    except Exception:
+        app.logger.exception("Proof photo upload failed")
+        flash("Photo upload failed, but claim was submitted.", "warning")
+    claim = Claim(
+        report_id=report.id, claimant_name=cname
