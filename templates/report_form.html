@@ -1,148 +1,445 @@
 {% extends "base.html" %}
-{% block title %}Submit a Report | FindHub{% endblock %}
+{% block title %}Submit a Report | SLSU JGE FindHub{% endblock %}
 {% block content %}
-<section class="panel">
-  <div class="sticker-row">
-    <span class="sticker"><span>📝</span>New report</span>
-    <span class="sticker"><span>🤝</span>Help a classmate</span>
+<section class="panel form-panel">
+  <div class="form-header">
+    <div class="form-badges">
+      <span class="badge primary">📝 New Report</span>
+      <span class="badge secondary">🤝 Reunite Belongings</span>
+    </div>
+    <h2 id="form-heading" class="form-title">Submit an Item Report</h2>
+    <p class="form-subtitle">
+      Your submission will be reviewed and published. Your contact details remain 
+      confidential unless you choose to share them publicly.
+    </p>
   </div>
-  <h2 id="form-heading">📝 Submit a Lost or Found Item</h2>
-  <p class="help">
-    After submitting, your report will be saved and its details page
-    will open. Your contact details stay private unless you choose
-    to display them.
-  </p>
-  <form method="POST" enctype="multipart/form-data">
-    <!-- Hidden Report Type Field - auto-set from URL -->
+
+  <form method="POST" enctype="multipart/form-data" class="form-container">
+    <!-- Hidden Report Type Field -->
     <input type="hidden" id="report_type" name="report_type" value="{{ request.args.get('type', '') }}">
 
     <div class="form-grid">
       <!-- Item Name -->
-      <div>
-        <label for="item_name">Item name *</label>
+      <div class="form-group">
+        <label for="item_name">Item Name <span class="required">*</span></label>
         <input
           id="item_name"
           name="item_name"
+          type="text"
           maxlength="120"
           required
-          placeholder="e.g. Black wallet"
+          placeholder="e.g., Black Leather Wallet, ID Card, Blue Backpack"
+          class="form-input"
         >
       </div>
-      <!-- Date -->
-      <div>
+
+      <!-- Incident Date -->
+      <div class="form-group">
         <label for="incident_date" id="incident-date-label">
-          Date Lost or Found *
+          Date of Occurrence <span class="required">*</span>
         </label>
         <input
           id="incident_date"
-          type="date"
           name="incident_date"
+          type="date"
           max="{{ today.isoformat() }}"
           required
+          class="form-input"
         >
       </div>
-      <!-- Contact -->
-      <div>
-        <label for="contact">Private contact method *</label>
+
+      <!-- Your Contact Details -->
+      <div class="form-group">
+        <label for="contact">Preferred Contact Method <span class="required">*</span></label>
         <input
           id="contact"
           name="contact"
+          type="text"
           maxlength="180"
           required
-          placeholder="Email, phone, or Messenger name"
+          placeholder="Email address, phone number, or social media handle"
+          class="form-input"
         >
       </div>
-      <!-- Your Name (optional) -->
-      <div>
-        <label for="contact_name">Your name <span style="font-weight:normal;color:var(--muted);">(optional)</span></label>
+
+      <!-- Your Full Name -->
+      <div class="form-group">
+        <label for="contact_name">Your Full Name <span class="optional">(Recommended)</span></label>
         <input
           id="contact_name"
           name="contact_name"
+          type="text"
           maxlength="120"
-          placeholder="Your name"
+          placeholder="Enter your name to help the owner identify you"
+          class="form-input"
         >
       </div>
-      <!-- Location (full width) -->
-      <div class="full">
-        <label for="location">Location on campus *</label>
+
+      <!-- Location -->
+      <div class="form-group full-width">
+        <label for="location">Location on Campus <span class="required">*</span></label>
         <input
           id="location"
           name="location"
+          type="text"
           maxlength="180"
           required
-          placeholder="e.g. Library, Room 203, canteen"
+          placeholder="e.g., Main Library, JGE Building — Room 102, Student Canteen"
+          class="form-input"
         >
       </div>
-      <!-- Description (full width) -->
-      <div class="full">
-        <label for="description">Description and identifying details *</label>
+
+      <!-- Description -->
+      <div class="form-group full-width">
+        <label for="description">Detailed Description <span class="required">*</span></label>
         <textarea
           id="description"
           name="description"
           maxlength="3000"
           required
-          placeholder="Describe the item, color, brand, or where it was found."
+          rows="5"
+          placeholder="Include distinctive features: color, brand, markings, contents, or any unique identifiers..."
+          class="form-textarea"
         ></textarea>
       </div>
+
       <!-- Photo Upload -->
-      <div>
-        <label for="photo">Item photo <span style="font-weight:normal;color:var(--muted);">(optional, max 5 MB)</span></label>
+      <div class="form-group">
+        <label for="photo">Reference Image <span class="optional">(Optional)</span></label>
         <input
           id="photo"
-          type="file"
           name="photo"
+          type="file"
           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          class="form-input file-input"
         >
+        <p class="input-hint">Supports JPG, PNG, WebP • Maximum file size: 5 MB</p>
       </div>
-      <!-- Public Contact Checkbox (full width) -->
-      <div class="full">
-        <label style="display:flex;gap:10px;align-items:flex-start;font-weight:normal">
+
+      <!-- Public Contact Toggle -->
+      <div class="form-group full-width">
+        <label class="checkbox-label">
           <input
             type="checkbox"
             name="contact_public"
             value="yes"
-            style="width:auto;margin-top:3px"
+            class="checkbox-input"
           >
-          <span>
-            Display my name and contact method publicly. Leave unchecked
-            to keep them private.
+          <span class="checkbox-text">
+            <strong>Display my contact details publicly</strong> — select this if you want 
+            your name and contact information visible to all visitors. When unchecked, 
+            only administrators can view your details.
           </span>
         </label>
       </div>
     </div>
-    <p class="help">
-      Fields marked * are required. Avoid sharing highly sensitive information.
+
+    <p class="form-note">
+      <span class="required">*</span> Indicates required field. Please avoid sharing sensitive 
+      personal information such as passwords or financial details.
     </p>
-    <div class="card-actions">
-      <button type="submit" id="submit-btn">🚀 Submit Report</button>
-      <a class="button secondary" href="{{ url_for('home') }}">Cancel</a>
+
+    <div class="form-actions">
+      <button type="submit" id="submit-btn" class="btn primary btn-lg">
+        <span class="btn-icon">🚀</span>
+        <span id="btn-text">Submit Report</span>
+      </button>
+      <a href="{{ url_for('home') }}" class="btn secondary btn-lg">Cancel</a>
     </div>
   </form>
 </section>
+
+<style>
+/* Professional Form Styling & Transitions */
+.form-panel {
+  max-width: 720px;
+  margin: 0 auto;
+  animation: fadeSlideIn 0.4s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-badges {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.badge.primary {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.badge.secondary {
+  background: #f0f4f8;
+  color: #475467;
+}
+
+.form-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+  transition: all 0.3s ease;
+}
+
+.form-subtitle {
+  color: var(--muted, #6b7280);
+  max-width: 540px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.form-container {
+  background: var(--surface);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 25px -5px rgba(7, 92, 59, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.form-container:hover {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 15px 30px -5px rgba(7, 92, 59, 0.12);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+
+.required {
+  color: #dc2626;
+}
+
+.optional {
+  color: var(--muted, #6b7280);
+  font-weight: normal;
+  font-size: 0.875rem;
+}
+
+.form-input,
+.form-textarea {
+  padding: 0.875rem 1rem;
+  border: 1.5px solid var(--border, #e5e7eb);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: var(--page, #ffffff);
+  color: var(--text);
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.15);
+  transform: translateY(-1px);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--muted, #9ca3af);
+}
+
+.file-input {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+
+.input-hint {
+  margin: 0.3rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted, #6b7280);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.checkbox-label {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  cursor: pointer;
+  font-weight: normal;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(8, 116, 67, 0.03);
+  transition: background 0.3s ease;
+}
+
+.checkbox-label:hover {
+  background: rgba(8, 116, 67, 0.06);
+}
+
+.checkbox-input {
+  margin-top: 0.25rem;
+  width: auto;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.checkbox-text {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.form-note {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-left: 3px solid var(--primary);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.875rem 2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(8, 116, 67, 0.25);
+}
+
+.btn.primary:hover {
+  box-shadow: 0 6px 20px rgba(8, 116, 67, 0.35);
+}
+
+.btn.secondary {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text);
+}
+
+.btn.secondary:hover {
+  border-color: var(--muted);
+  background: rgba(0,0,0,0.02);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-container {
+    padding: 1.5rem 1rem;
+  }
+  .form-actions {
+    flex-direction: column;
+  }
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const reportType = document.getElementById("report_type").value;
   const dateLabel = document.getElementById("incident-date-label");
-  const formHeading = document.getElementById("form-heading");
+  const formTitle = document.querySelector(".form-title");
+  const btnText = document.getElementById("btn-text");
   const submitBtn = document.getElementById("submit-btn");
 
-  // Update labels based on auto-detected type
+  // Smooth transition for dynamic text
+  const fadeUpdate = (element, newText) => {
+    element.style.opacity = "0";
+    setTimeout(() => {
+      element.innerHTML = newText;
+      element.style.opacity = "1";
+    }, 150);
+  };
+
   if (reportType === "Lost") {
-    dateLabel.textContent = "Date Lost *";
-    formHeading.innerHTML = "🔎 Report a Lost Item";
-    submitBtn.innerHTML = "🔎 Submit Lost Report";
+    fadeUpdate(dateLabel, "Date Item Was Lost <span class='required'>*</span>");
+    fadeUpdate(formTitle, "🔎 Report a Lost Item");
+    fadeUpdate(btnText, "Submit Lost Report");
   } else if (reportType === "Found") {
-    dateLabel.textContent = "Date Found *";
-    formHeading.innerHTML = "✨ Report a Found Item";
-    submitBtn.innerHTML = "✨ Submit Found Report";
+    fadeUpdate(dateLabel, "Date Item Was Found <span class='required'>*</span>");
+    fadeUpdate(formTitle, "✨ Report a Found Item");
+    fadeUpdate(btnText, "Submit Found Report");
   }
 
-  // Fallback: if someone accesses without type, show a gentle reminder
   if (!reportType) {
-    const form = document.querySelector("form");
+    const form = document.querySelector(".form-container");
     form.addEventListener("submit", function (e) {
-      alert("Please go back and choose either 'Report Lost Item' or 'Report Found Item' from the homepage.");
       e.preventDefault();
+      alert("Please start from the homepage and select either 'Report Lost Item' or 'Report Found Item' to proceed.");
+      window.location.href = "{{ url_for('home') }}";
     });
   }
 });
