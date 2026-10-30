@@ -314,7 +314,7 @@ def new_report():
     try:
         db.session.add(rep)
         db.session.flush()
-        create_notification(f"New {rt} Report", f"{name} was submitted.", "report", rep.id)
+        create_notification(f"New {rt} Report", f"{name} was submitted.", "info", rep.id)
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -366,5 +366,16 @@ def submit_claim(report_id):
         app.logger.exception("Proof photo upload failed")
         flash("Photo upload failed, but claim was submitted.", "warning")
     claim = Claim(
-        report_id=report.id, claimant_name=cname, claimant_contact=ccontact,
+        report_id=report.id,
+        claimant_name=cname,
+        claimant_contact=ccontact,
         proof=proof,
+        proof_file=saved_proof,
+        status="Pending"
+    )
+    try:
+        db.session.add(claim)
+        report.status = "Pending Claim"
+        db.session.flush()
+        create_notification(
+            "
