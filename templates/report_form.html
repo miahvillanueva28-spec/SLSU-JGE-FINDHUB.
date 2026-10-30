@@ -3,7 +3,6 @@
 {% block content %}
 <section class="panel form-panel">
   <div class="form-header">
-    <h2 id="form-heading" class="form-title">Submit an Item Report</h2>
     <p class="form-subtitle">
       Your submission will be reviewed and published. Your contact details remain 
       confidential unless you choose to share them publicly.
@@ -416,11 +415,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (reportType === "Lost") {
     fadeUpdate(dateLabel, "Date Item Was Lost <span class='required'>*</span>");
-    fadeUpdate(formTitle, "🔎 Report a Lost Item");
+    fadeUpdate(formTitle, " Report a Lost Item");
     fadeUpdate(btnText, "Submit Lost Report");
   } else if (reportType === "Found") {
     fadeUpdate(dateLabel, "Date Item Was Found <span class='required'>*</span>");
-    fadeUpdate(formTitle, "✨ Report a Found Item");
+    fadeUpdate(formTitle, " Report a Found Item");
     fadeUpdate(btnText, "Submit Found Report");
   }
 
