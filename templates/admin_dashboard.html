@@ -2,109 +2,114 @@
 {% block title %}Admin Dashboard — SLSU JGE FindHub{% endblock %}
 {% block content %}
 <div class="dashboard-wrapper">
-  <!-- HEADER -->
-  <div class="dashboard-header">
-    <div>
+
+  <!-- === PAGE HEADER === -->
+  <div class="section-header">
+    <div class="header-left">
       <h1>Admin Dashboard</h1>
-      <p>Manage reports, review claims, and update item statuses.</p>
+      <p class="subtext">Manage reports, review claims, and update item statuses.</p>
     </div>
     <a href="{{ url_for('export_reports') }}" class="btn-export">📊 Export CSV</a>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Total Reports</div>
-      <div class="stat-value">{{ stats.total }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Lost Reports</div>
-      <div class="stat-value lost">{{ stats.lost }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Found Reports</div>
-      <div class="stat-value found">{{ stats.found }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Open Reports</div>
-      <div class="stat-value open">{{ stats.open }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Pending Claims</div>
-      <div class="stat-value pending">{{ stats.pending_claims }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Returned Items</div>
-      <div class="stat-value returned">{{ stats.returned }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Archived</div>
-      <div class="stat-value archived">{{ stats.archived }}</div>
+  <!-- === STATISTICS OVERVIEW === -->
+  <div class="stats-section">
+    <h2 class="section-title">📈 Overview</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Reports</div>
+        <div class="stat-value">{{ stats.total }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Lost Reports</div>
+        <div class="stat-value lost">{{ stats.lost }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Found Reports</div>
+        <div class="stat-value found">{{ stats.found }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Open Reports</div>
+        <div class="stat-value open">{{ stats.open }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pending Claims</div>
+        <div class="stat-value pending">{{ stats.pending_claims }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Returned Items</div>
+        <div class="stat-value returned">{{ stats.returned }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Archived</div>
+        <div class="stat-value archived">{{ stats.archived }}</div>
+      </div>
     </div>
   </div>
 
-  <!-- ACTION BUTTONS -->
-  <div class="actions-bar">
-    <a href="{{ url_for('admin_claims') }}" class="btn-primary">
-      📋 Review All Claims
-      {% if stats.pending_claims > 0 %}
-        <span class="badge">{{ stats.pending_claims }}</span>
-      {% endif %}
-    </a>
-    <a href="{{ url_for('admin_dashboard') }}?filter=Lost" class="btn-filter {% if request.args.get('filter') == 'Lost' %}active{% endif %}">
-      ⚠️ Lost Reports
-    </a>
-    <a href="{{ url_for('admin_dashboard') }}?filter=Found" class="btn-filter {% if request.args.get('filter') == 'Found' %}active{% endif %}">
-      🔎 Found Reports
-    </a>
-    <a href="{{ url_for('admin_history') }}" class="btn-history">
-      🕓 Deleted History
-    </a>
-    {% if request.args.get('filter') %}
-      <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">
-        ← Show All
+  <!-- === ACTIONS & FILTERS === -->
+  <div class="actions-section">
+    <h2 class="section-title">⚡ Quick Actions</h2>
+    <div class="actions-bar">
+      <a href="{{ url_for('admin_claims') }}" class="btn-primary">
+        📋 Review All Claims
+        {% if stats.pending_claims > 0 %}
+          <span class="badge">{{ stats.pending_claims }}</span>
+        {% endif %}
       </a>
-    {% endif %}
+      <a href="{{ url_for('admin_dashboard') }}?filter=Lost" class="btn-filter {% if request.args.get('filter') == 'Lost' %}active{% endif %}">
+        ⚠️ Lost Only
+      </a>
+      <a href="{{ url_for('admin_dashboard') }}?filter=Found" class="btn-filter {% if request.args.get('filter') == 'Found' %}active{% endif %}">
+        🔎 Found Only
+      </a>
+      <a href="{{ url_for('admin_history') }}" class="btn-history">
+        🕓 Deleted History
+      </a>
+      {% if request.args.get('filter') %}
+        <a href="{{ url_for('admin_dashboard') }}" class="btn-clear">
+          ✅ Show All
+        </a>
+      {% endif %}
+    </div>
   </div>
 
-  <!-- REPORTS LIST -->
-  <div class="reports-section">
-    <h2>
-      {% if request.args.get('filter') == 'Lost' %}
-        ⚠️ Lost Reports
-      {% elif request.args.get('filter') == 'Found' %}
-        🔎 Found Reports
-      {% else %}
-        All Reports
+  <!-- === REPORTS TABLE === -->
+  <div class="table-section">
+    <h2 class="section-title">
+      📋 Reports
+      {% if request.args.get('filter') == 'Lost' %} — Lost Items
+      {% elif request.args.get('filter') == 'Found' %} — Found Items
       {% endif %}
     </h2>
 
     {% if reports %}
-      <div class="reports-table">
-        <div class="table-header">
-          <span>ID</span>
-          <span>Item Name</span>
-          <span>Type</span>
-          <span>Current Status</span>
-          <span>Update Status</span>
-          <span>Date</span>
-          <span>Actions</span>
+      <div class="table-container">
+        <div class="table-header-row">
+          <span class="col-id">ID</span>
+          <span class="col-name">Item Name</span>
+          <span class="col-type">Type</span>
+          <span class="col-status">Status</span>
+          <span class="col-update">Update Status</span>
+          <span class="col-date">Date</span>
+          <span class="col-actions">Actions</span>
         </div>
 
         {% for report in reports %}
           {% set current_filter = request.args.get('filter') %}
           {% if not current_filter or current_filter == report.report_type %}
-          <div class="table-row">
-            <span class="report-id">#{{ report.id }}</span>
-            <a href="{{ url_for('report_detail', report_id=report.id) }}" class="report-name">
+          <div class="table-data-row">
+            <span class="col-id">#{{ report.id }}</span>
+            <a href="{{ url_for('report_detail', report_id=report.id) }}" class="col-name report-link">
               {{ report.item_name }}
             </a>
-            <span class="type-{{ report.report_type|lower }}">{{ report.report_type }}</span>
-            <span class="status-{{ report.status|replace(' ', '-')|lower }}">
+            <span class="col-type type-{{ report.report_type|lower }}">
+              {{ report.report_type }}
+            </span>
+            <span class="col-status status-{{ report.status|replace(' ', '-')|lower }}">
               {{ report.status }}
             </span>
-
-            <form action="{{ url_for('admin_update_report_status', report_id=report.id) }}" method="POST" class="status-form">
+            <form action="{{ url_for('admin_update_report_status', report_id=report.id) }}" method="POST" class="col-update status-form">
               <select name="status" onchange="this.form.submit()">
                 <option value="Open" {% if report.status == 'Open' %}selected{% endif %}>🟢 Open</option>
                 <option value="Pending Claim" {% if report.status == 'Pending Claim' %}selected{% endif %}>⏳ Pending Claim</option>
@@ -112,13 +117,11 @@
                 <option value="Archived" {% if report.status == 'Archived' %}selected{% endif %}>📁 Archived</option>
               </select>
             </form>
-
-            <span class="report-date">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
-
-            <div class="action-buttons">
+            <span class="col-date">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
+            <div class="col-actions action-buttons">
               <a href="{{ url_for('report_detail', report_id=report.id) }}" class="btn-view">View</a>
               <form action="{{ url_for('admin_delete_report', report_id=report.id) }}" method="POST" class="delete-form"
-                    onsubmit="return confirm('Delete this report? It will be moved to Deleted History and cannot be restored from here.');">
+                    onsubmit="return confirm('Delete this report? It will be moved to Deleted History.');">
                 <button type="submit" class="btn-delete">Delete</button>
               </form>
             </div>
@@ -127,382 +130,344 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="empty-state">No reports available.</p>
+      <div class="empty-container">
+        <p class="empty-text">No reports available.</p>
+      </div>
     {% endif %}
   </div>
+
 </div>
 
 <style>
-  .dashboard-wrapper {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
+/* === BASE LAYOUT === */
+.dashboard-wrapper {
+  max-width: 1450px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* === SECTION SPACING === */
+.section-header,
+.stats-section,
+.actions-section,
+.table-section {
+  margin-bottom: 2.5rem;
+}
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(7, 92, 59, 0.1);
+}
+
+/* === PAGE HEADER === */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(7, 92, 59, 0.15);
+}
+
+.header-left h1 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.6rem;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.subtext {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.btn-export {
+  background: var(--primary);
+  color: #fff;
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-export:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(7, 92, 59, 0.2);
+}
+
+/* === STATS GRID === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(7, 92, 59, 0.12);
+  border-radius: 14px;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-3px);
+  border-color: rgba(7, 92, 59, 0.25);
+  box-shadow: 0 6px 16px rgba(7, 92, 59, 0.08);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.stat-value.lost { color: #c0392b; }
+.stat-value.found { color: #27ae60; }
+.stat-value.open { color: #2980b9; }
+.stat-value.pending { color: #f39c12; }
+.stat-value.returned { color: #27ae60; }
+.stat-value.archived { color: #7f8c8d; }
+
+/* === ACTIONS BAR === */
+.actions-bar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(7, 92, 59, 0.2);
+}
+
+.badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.btn-filter {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text);
+  padding: 0.8rem 1.4rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid rgba(7, 92, 59, 0.15);
+  transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+  background: rgba(7, 92, 59, 0.08);
+  border-color: rgba(7, 92, 59, 0.25);
+}
+
+.btn-filter.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.btn-history {
+  background: rgba(254, 243, 199, 0.7);
+  color: #92400e;
+  padding: 0.8rem 1.4rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid rgba(252, 211, 77, 0.5);
+  transition: all 0.3s ease;
+}
+
+.btn-history:hover {
+  background: rgba(253, 230, 138, 0.85);
+  transform: translateY(-2px);
+}
+
+.btn-clear {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--primary);
+  padding: 0.8rem 1.4rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid rgba(7, 92, 59, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-clear:hover {
+  background: rgba(7, 92, 59, 0.08);
+}
+
+/* === TABLE STYLING === */
+.table-container {
+  border: 1px solid rgba(7, 92, 59, 0.12);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+.table-header-row {
+  display: grid;
+  grid-template-columns: 60px 2fr 100px 150px 170px 120px 140px;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  background: rgba(7, 92, 59, 0.05);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text);
+  border-bottom: 1px solid rgba(7, 92, 59, 0.1);
+}
+
+.table-data-row {
+  display: grid;
+  grid-template-columns: 60px 2fr 100px 150px 170px 120px 140px;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(7, 92, 59, 0.08);
+  align-items: center;
+  transition: background 0.25s ease;
+}
+
+.table-data-row:hover {
+  background: rgba(7, 92, 59, 0.03);
+}
+
+.col-id { color: var(--muted); font-family: monospace; font-weight: 600; }
+.col-name { color: var(--primary); font-weight: 600; }
+.report-link { text-decoration: none; transition: color 0.2s ease; }
+.report-link:hover { text-decoration: underline; color: var(--primary-dark); }
+
+.type-lost { color: #c0392b; font-weight: 600; }
+.type-found { color: #27ae60; font-weight: 600; }
+
+.status-open { color: #2980b9; font-weight: 600; }
+.status-pending-claim { color: #f39c12; font-weight: 600; }
+.status-returned { color: #27ae60; font-weight: 600; }
+.status-archived { color: #7f8c8d; font-weight: 600; }
+
+.status-form select {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1.5px solid rgba(7, 92, 59, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.status-form select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(7, 92, 59, 0.1);
+}
+
+.col-date { color: var(--muted); font-size: 0.9rem; font-weight: 500; }
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-view {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text);
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(7, 92, 59, 0.15);
+  transition: all 0.25s ease;
+}
+
+.btn-view:hover {
+  background: rgba(7, 92, 59, 0.08);
+  color: var(--primary);
+}
+
+.delete-form { margin: 0; }
+
+.btn-delete {
+  background: rgba(255, 238, 238, 0.7);
+  color: #c62828;
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid rgba(198, 40, 40, 0.25);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-delete:hover {
+  background: rgba(255, 205, 210, 0.85);
+}
+
+.empty-container {
+  padding: 3rem;
+  text-align: center;
+}
+
+.empty-text {
+  color: var(--muted);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 968px) {
+  .table-header-row,
+  .table-data-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1rem;
   }
+  .col-id, .col-date { display: none; }
+}
 
-  .dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(7, 92, 59, 0.15);
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .dashboard-header h1 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1.5rem;
-    color: var(--text);
-    font-weight: 700;
-  }
-
-  .dashboard-header p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.95rem;
-  }
-
-  .btn-export {
-    background: var(--primary);
-    color: #ffffff;
-    padding: 0.6rem 1.25rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    border: none;
-    white-space: nowrap;
-    transition: all 0.3s ease;
-  }
-
-  .btn-export:hover {
-    background: var(--primary-dark);
-    color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(7, 92, 59, 0.2);
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(7, 92, 59, 0.12);
-    border-radius: 16px;
-    padding: 1.25rem;
-    box-shadow: 0 4px 12px rgba(7, 92, 59, 0.06);
-    transition: all 0.3s ease;
-  }
-
-  .stat-card:hover {
-    background: rgba(255, 255, 255, 0.85);
-    transform: translateY(-4px);
-    border-color: rgba(7, 92, 59, 0.25);
-    box-shadow: 0 8px 20px rgba(7, 92, 59, 0.1);
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-    color: var(--muted);
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-  }
-
-  .stat-value {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--text);
-  }
-
-  .stat-value.lost { color: #c0392b; }
-  .stat-value.found { color: #27ae60; }
-  .stat-value.open { color: #2980b9; }
-  .stat-value.pending { color: #f39c12; }
-  .stat-value.returned { color: #27ae60; }
-  .stat-value.archived { color: #7f8c8d; }
-
-  .actions-bar {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    margin-bottom: 2rem;
-    align-items: center;
-  }
-
-  .btn-primary {
-    background: var(--primary);
-    color: #ffffff;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    border: none;
-    transition: all 0.3s ease;
-  }
-
-  .btn-primary:hover {
-    background: var(--primary-dark);
-    color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(7, 92, 59, 0.2);
-  }
-
-  .btn-filter {
-    background: rgba(255, 255, 255, 0.6);
-    color: var(--text);
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    border: 1px solid rgba(7, 92, 59, 0.15);
-    transition: all 0.3s ease;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .btn-filter:hover {
-    background: rgba(7, 92, 59, 0.08);
-    border-color: rgba(7, 92, 59, 0.25);
-    color: var(--primary);
-  }
-
-  .btn-filter.active {
-    background: var(--primary);
-    color: #ffffff;
-    border-color: var(--primary);
-  }
-
-  .btn-history {
-    background: rgba(254, 243, 199, 0.7);
-    color: #92400e;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    border: 1px solid rgba(252, 211, 77, 0.5);
-    transition: all 0.3s ease;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .btn-history:hover {
-    background: rgba(253, 230, 138, 0.85);
-    border-color: #f59e0b;
-    color: #78350f;
-    transform: translateY(-2px);
-  }
-
-  .btn-secondary {
-    background: rgba(255, 255, 255, 0.6);
-    color: var(--text);
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    border: 1px solid rgba(7, 92, 59, 0.15);
-    transition: all 0.3s ease;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .btn-secondary:hover {
-    background: rgba(7, 92, 59, 0.08);
-    color: var(--primary);
-  }
-
-  .badge {
-    background: rgba(0, 0, 0, 0.15);
-    color: #ffffff;
-    padding: 0.15rem 0.5rem;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
-
-  .reports-section h2 {
-    font-size: 1.1rem;
-    color: var(--text);
-    margin-bottom: 1rem;
-    font-weight: 700;
-  }
-
-  .reports-table {
-    border: 1px solid rgba(7, 92, 59, 0.12);
-    border-radius: 16px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 4px 12px rgba(7, 92, 59, 0.05);
-  }
-
-  .table-header {
-    display: grid;
-    grid-template-columns: 60px 2fr 100px 140px 160px 120px 140px;
-    gap: 0.5rem;
-    padding: 0.85rem 1.25rem;
-    background: rgba(7, 92, 59, 0.05);
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--text);
-    border-bottom: 1px solid rgba(7, 92, 59, 0.1);
-  }
-
-  .table-row {
-    display: grid;
-    grid-template-columns: 60px 2fr 100px 140px 160px 120px 140px;
-    gap: 0.5rem;
-    padding: 1rem 1.25rem;
-    border-top: 1px solid rgba(7, 92, 59, 0.08);
-    align-items: center;
-    background: transparent;
-    transition: background 0.25s ease;
-  }
-
-  .table-row:hover {
-    background: rgba(7, 92, 59, 0.04);
-  }
-
-  .report-id {
-    color: var(--muted);
-    font-family: monospace;
-    font-weight: 600;
-  }
-
-  .report-name {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s ease;
-  }
-
-  .report-name:hover {
-    text-decoration: underline;
-    color: var(--primary-dark);
-  }
-
-  .type-lost { color: #c0392b; font-weight: 600; }
-  .type-found { color: #27ae60; font-weight: 600; }
-  .status-open { color: #2980b9; font-weight: 600; }
-  .status-pending-claim { color: #f39c12; font-weight: 600; }
-  .status-returned { color: #27ae60; font-weight: 600; }
-  .status-archived { color: #7f8c8d; font-weight: 600; }
-
-  .status-form select {
-    width: 100%;
-    padding: 0.5rem 0.7rem;
-    border: 1.5px solid rgba(7, 92, 59, 0.2);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.8);
-    cursor: pointer;
-    font-weight: 500;
-    color: var(--text);
-    transition: all 0.25s ease;
-  }
-
-  .status-form select:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 0 0 3px rgba(7, 92, 59, 0.1);
-  }
-
-  .report-date {
-    color: var(--muted);
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .btn-view {
-    background: rgba(255, 255, 255, 0.7);
-    color: var(--text);
-    padding: 0.4rem 0.9rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-align: center;
-    border: 1px solid rgba(7, 92, 59, 0.15);
-    transition: all 0.25s ease;
-  }
-
-  .btn-view:hover {
-    background: rgba(7, 92, 59, 0.08);
-    color: var(--primary);
-    border-color: rgba(7, 92, 59, 0.25);
-  }
-
-  .delete-form {
-    margin: 0;
-  }
-
-  .btn-delete {
-    background: rgba(255, 238, 238, 0.7);
-    color: #c62828;
-    padding: 0.4rem 0.9rem;
-    border-radius: 6px;
-    border: 1px solid rgba(198, 40, 40, 0.25);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-
-  .btn-delete:hover {
-    background: rgba(255, 205, 210, 0.85);
-    border-color: rgba(198, 40, 40, 0.4);
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 3rem;
-    color: var(--muted);
-    font-weight: 500;
-  }
-
-  /* Dark Mode Support */
-  html[data-theme="dark"] .stat-card,
-  html[data-theme="dark"] .reports-table,
-  html[data-theme="dark"] .btn-filter,
-  html[data-theme="dark"] .btn-history,
-  html[data-theme="dark"] .btn-secondary {
-    background: rgba(30, 40, 34, 0.6);
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-
-  html[data-theme="dark"] .table-row:hover {
-    background: rgba(255, 255, 255, 0.03);
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .dashboard-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .table-header { display: none; }
-    .table-row {
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem 1rem;
-    }
-    .report-id { display: none; }
-    .actions-bar { flex-direction: column; width: 100%; }
-    .actions-bar a { width: 100%; text-align: center; }
-    .action-buttons { flex-direction: column; }
-  }
+@media (max-width: 600px) {
+  .section-header { flex-direction: column; align-items: flex-start; }
+  .actions-bar { flex-direction: column; width: 100%; }
+  .actions-bar > * { width: 100%; text-align: center; justify-content: center; }
+  .action-buttons { flex-direction: column; }
+}
 </style>
 {% endblock %}
