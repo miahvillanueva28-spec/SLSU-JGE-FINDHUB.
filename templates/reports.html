@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+{% block title %}All Reports | SLSU JGE FindHub{% endblock %}
+{% block head %}
+<style>
+  .reports-page {
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .back-nav {
+    margin-bottom: 1.5rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary, #087443);
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.25s ease;
+  }
+
+  .back-link:hover {
+    border-color: var(--border, #ddd);
+    background: var(--surface, #fff);
+    gap: 0.75rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    color: var(--primary, #087443);
+    margin: 0;
+  }
+
+  .count-badge {
+    background: var(--primary-soft, #e6f4ea);
+    color: var(--primary, #087443);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 0.7rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-size: 0.95rem;
+  }
+
+  .btn-lost {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .btn-lost:hover { background: #fde68a; }
+
+  .btn-found {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  .btn-found:hover { background: #a7f3d0; }
+
+  .search-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .search-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .search-field label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    color: var(--muted, #6b7280);
+  }
+
+  .search-field input,
+  .search-field select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--border, #ddd);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: var(--page, #fff);
+    color: var(--text, #1f2937);
+    transition: all 0.25s ease;
+  }
+
+  .search-field input:focus,
+  .search-field select:focus {
+    outline: none;
+    border-color: var(--primary, #087443);
+    box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.12);
+  }
+
+  .search-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary, #087443) 0%, var(--primary-dark, #055c34) 100%);
+    color: white;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(8,116,67,0.25); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text, #374151);
+    border: 1.5px solid var(--border, #ddd);
+  }
+  .btn-secondary:hover { background: var(--surface-alt, #f3f4f6); }
+
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .report-card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    transition: all 0.3s ease;
+  }
+
+  .report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(8, 116, 67, 0.08);
+    border-color: var(--primary, #087443);
+  }
+
+  .card-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background: var(--surface-alt, #edf4ef);
+  }
+
+  .card-image-placeholder {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-soft, #e6f4ea), var(--surface-alt, #edf4ef));
+    font-size: 3rem;
+    opacity: 0.5;
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
+
+  .card-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+
+  .type-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .type-badge.lost { background: #fef3c7; color: #92400e; }
+  .type-badge.found { background: #d1fae5; color: #065f46; }
+
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .status-badge.open { background: #dbeafe; color: #1e40af; }
+  .status-badge.pending-claim { background: #fef3c7; color: #92400e; }
+  .status-badge.returned { background: #d1fae5; color: #065f46; }
+  .status-badge.archived { background: #e5e7eb; color: #6b7280; }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: var(--text, #1f2937);
+  }
+
+  .card-meta {
+    font-size: 0.85rem;
+    color: var(--muted, #6b7280);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+
+  .view-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 0.7rem;
+    background: var(--primary, #087443);
+    color: white;
+    border-radius: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+  .view-btn:hover { background: var(--primary-dark, #055c34); }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    border: 1px dashed var(--border, #ddd);
+    border-radius: 16px;
+    background: var(--surface, #fff);
+  }
+
+  .empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .empty-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+  }
+
+  .empty-text {
+    color: var(--muted, #6b7280);
+    margin-bottom: 1.5rem;
+  }
+
+  /* Dark theme support */
+  html[data-theme="dark"] .btn-lost { background: #45381c; color: #f2d18a; }
+  html[data-theme="dark"] .btn-lost:hover { background: #5c4a1f; }
+  html[data-theme="dark"] .btn-found { background: #203a2d; color: #9be0b6; }
+  html[data-theme="dark"] .btn-found:hover { background: #2a4d3a; }
+  html[data-theme="dark"] .type-badge.lost { background: #45381c; color: #f2d18a; }
+  html[data-theme="dark"] .type-badge.found { background: #203a2d; color: #9be0b6; }
+  html[data-theme="dark"] .status-badge.open { background: #1a365d; color: #a4c9ff; }
+  html[data-theme="dark"] .status-badge.pending-claim { background: #45381c; color: #f2d18a; }
+  html[data-theme="dark"] .status-badge.returned { background: #203a2d; color: #9be0b6; }
+  html[data-theme="dark"] .status-badge.archived { background: #2f3744; color: #b0b8c4; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .search-grid { grid-template-columns: 1fr; }
+    .page-header { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="reports-page">
+  <!-- Back to Home -->
+  <div class="back-nav">
+    <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">📋 All Reports</h1>
+    {% if reports %}
+      <span class="count-badge">{{ reports|length }} Report{% if reports|length != 1 %}s{% endif %}</span>
+    {% endif %}
+    <div class="header-actions">
+      <a href="{{ url_for('new_report', report_type='Lost') }}" class="btn btn-lost">🔍 Report Lost</a>
+      <a href="{{ url_for('new_report', report_type='Found') }}" class="btn btn-found">📦 Report Found</a>
+    </div>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="search-card">
+    <form method="GET" action="{{ url_for('view_reports') }}">
+      <div class="search-grid">
+        <div class="search-field">
+          <label for="q">Search</label>
+          <input type="text" id="q" name="q" value="{{ query }}" placeholder="Item, location, description...">
+        </div>
+        <div class="search-field">
+          <label for="type">Type</label>
+          <select id="type" name="type">
+            <option value="">All Types</option>
+            <option value="Lost" {% if selected_type == 'Lost' %}selected{% endif %}>Lost</option>
+            <option value="Found" {% if selected_type == 'Found' %}selected{% endif %}>Found</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            <option value="">All Status</option>
+            <option value="Open" {% if selected_status == 'Open' %}selected{% endif %}>Open</option>
+            <option value="Pending Claim" {% if selected_status == 'Pending Claim' %}selected{% endif %}>Pending Claim</option>
+            <option value="Returned" {% if selected_status == 'Returned' %}selected{% endif %}>Returned</option>
+            <option value="Archived" {% if selected_status == 'Archived' %}selected{% endif %}>Archived</option>
+          </select>
+        </div>
+      </div>
+      <div class="search-actions">
+        <button type="submit" class="btn btn-primary">🔎 Search</button>
+        <a href="{{ url_for('view_reports') }}" class="btn btn-secondary">Clear</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Reports List -->
+  {% if reports %}
+    <div class="reports-grid">
+      {% for report in reports %}
+        <div class="report-card">
+          {% set photo_url = photo_src(report.photo) %}
+          {% if photo_url %}
+            <img src="{{ photo_url }}" alt="{{ report.item_name }}" class="card-image">
+          {% else %}
+            <div class="card-image-placeholder">
+              {% if report.report_type == 'Lost' %}🔍{% else %}📦{% endif %}
+            </div>
+          {% endif %}
+          <div class="card-body">
+            <div class="card-badges">
+              <span class="type-badge {{ report.report_type|lower }}">{{ report.report_type }}</span>
+              {% set status_slug = report.status|lower|replace(' ', '-') %}
+              <span class="status-badge {{ status_slug }}">{{ report.status }}</span>
+            </div>
+            <h3 class="card-title">{{ report.item_name }}</h3>
+            <div class="card-meta">
+              <div>📍 {{ report.location }}</div>
+              <div>📅 {{ report.incident_date.strftime('%B %d, %Y') if report.incident_date else 'Date unknown' }}</div>
+            </div>
+            <a href="{{ url_for('report_detail', report_id=report.id) }}?from=reports" class="view-btn">View Details →</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3 class="empty-title">
+        {% if search_performed %}No matching reports{% else %}No reports yet{% endif %}
+      </h3>
+      <p class="empty-text">
+        {% if search_performed %}
+          Try different keywords or clear the filters.
+        {% else %}
+          Be the first to submit a lost or found item report.
+        {% endif %}
+      </p>
+      <div class="header-actions" style="justify-content: center;">
+        <a href="{{ url_for('new_report', report_type='Lost') }}" class="btn btn-lost">Report Lost</a>
+        <a href="{{ url_for('new_report', report_type='Found') }}" class="btn btn-found">Report Found</a>
+        {% if search_performed %}
+          <a href="{{ url_for('view_reports') }}" class="btn btn-secondary">Clear Filters</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
