@@ -5,6 +5,7 @@
 <style>
   /* ============================================================
      REPORT DETAIL — Professional (no emojis, SVG icons)
+     Smart back button + highly visible action buttons
   ============================================================ */
   .rd-wrap {
     max-width: 1040px;
@@ -29,19 +30,31 @@
   .rd-icon--sm { width: 13px; height: 13px; }
   .rd-icon--lg { width: 20px; height: 20px; }
 
-  /* Back nav */
+  /* ---------- Smart back nav (highly visible pill) ---------- */
   .rd-back { margin-bottom: 18px; }
   .rd-back a {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
     color: var(--primary);
     text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    transition: gap .2s ease, color .2s ease;
+    font-weight: 700;
+    font-size: 13.5px;
+    box-shadow: 0 2px 8px rgba(7,92,59,.08);
+    transition: all .2s ease;
   }
-  .rd-back a:hover { gap: 11px; color: var(--primary-dark); }
+  .rd-back a:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    transform: translateX(-3px);
+    box-shadow: 0 6px 16px rgba(7,92,59,.25);
+  }
+  .rd-back a:hover .rd-icon { stroke: #fff; }
 
   /* Layout */
   .rd-grid {
@@ -50,9 +63,7 @@
     gap: 28px;
     align-items: start;
   }
-  @media (max-width: 860px) {
-    .rd-grid { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 860px) { .rd-grid { grid-template-columns: 1fr; } }
 
   /* Photo column */
   .rd-photo-card {
@@ -62,12 +73,7 @@
     background: var(--surface);
     box-shadow: var(--shadow);
   }
-  .rd-photo {
-    width: 100%;
-    height: 340px;
-    object-fit: cover;
-    display: block;
-  }
+  .rd-photo { width: 100%; height: 340px; object-fit: cover; display: block; }
   .rd-photo-ph {
     height: 340px;
     display: flex;
@@ -98,12 +104,7 @@
     text-transform: uppercase;
     letter-spacing: .04em;
   }
-  .rd-badge::before {
-    content: "";
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-  }
+  .rd-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .rd-badge--lost { background: #fff3e0; color: #c2410c; }
   .rd-badge--found { background: #e8f5e9; color: #15803d; }
   .rd-badge--open { background: #e0f2fe; color: #075985; }
@@ -164,12 +165,7 @@
     justify-content: center;
     flex-shrink: 0;
   }
-  .rd-card__head h2 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text);
-  }
+  .rd-card__head h2 { margin: 0; font-size: 17px; font-weight: 700; color: var(--text); }
   .rd-card__head .rd-manage {
     margin-left: auto;
     font-size: 13px;
@@ -204,35 +200,20 @@
     overflow-wrap: anywhere;
   }
   .rd-row--full dd { margin-top: 4px; }
-  .rd-private {
-    color: var(--muted);
-    font-style: italic;
-    font-size: 13.5px;
-  }
-  @media (max-width: 520px) {
-    .rd-row { grid-template-columns: 1fr; gap: 4px; }
-  }
+  .rd-private { color: var(--muted); font-style: italic; font-size: 13.5px; }
+  @media (max-width: 520px) { .rd-row { grid-template-columns: 1fr; gap: 4px; } }
 
-  /* Claim form */
-  .rd-form-intro {
-    margin: 0 0 18px;
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.7;
-  }
+  /* ---------- Claim form ---------- */
+  .rd-form-intro { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.7; }
   .rd-form { display: grid; gap: 16px; }
   .rd-field { display: flex; flex-direction: column; gap: 6px; }
-  .rd-field label {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--text);
-  }
+  .rd-field label { font-size: 13.5px; font-weight: 600; color: var(--text); }
   .rd-req { color: #dc2626; font-weight: 700; }
   .rd-opt { color: var(--muted); font-weight: 500; font-size: 12px; }
   .rd-input, .rd-textarea, .rd-file {
     width: 100%;
     box-sizing: border-box;
-    padding: 11px 14px;
+    padding: 12px 15px;
     border: 1.5px solid var(--border);
     border-radius: 12px;
     background: var(--surface);
@@ -244,49 +225,80 @@
   .rd-input:focus, .rd-textarea:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
+    box-shadow: 0 0 0 4px rgba(7,92,59,.14);
   }
   .rd-textarea { resize: vertical; min-height: 110px; }
   .rd-hint { margin: 2px 0 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .rd-submit {
+
+  /* ---------- HIGHLY VISIBLE BUTTONS ---------- */
+  .rd-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 46px;
-    padding: 0 24px;
+    gap: 9px;
+    min-height: 50px;
+    padding: 0 28px;
     border: none;
-    border-radius: 12px;
-    background: var(--primary);
-    color: #fff;
+    border-radius: 14px;
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: .01em;
     cursor: pointer;
-    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    text-decoration: none;
+    font-family: inherit;
+    transition: transform .2s ease, box-shadow .25s ease, filter .2s ease;
     justify-self: start;
   }
-  .rd-submit:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(7,92,59,.28);
+  .rd-btn--submit {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(7,92,59,.32), inset 0 1px 0 rgba(255,255,255,.18);
   }
-  @media (max-width: 520px) { .rd-submit { width: 100%; justify-self: stretch; } }
+  .rd-btn--submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(7,92,59,.4), inset 0 1px 0 rgba(255,255,255,.18);
+    filter: brightness(1.06);
+  }
+  .rd-btn--submit:active { transform: translateY(0); }
+  .rd-btn--secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .rd-btn--secondary:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(7,92,59,.15);
+  }
+  .rd-btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  @media (max-width: 520px) {
+    .rd-btn { width: 100%; justify-self: stretch; }
+    .rd-btn-row { flex-direction: column; }
+  }
 
   /* Status alert (returned / archived) */
   .rd-alert {
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    padding: 20px 22px;
+    padding: 22px 24px;
     border-radius: 16px;
-    border-left: 4px solid;
+    border-left: 5px solid;
     margin-bottom: 20px;
+    box-shadow: var(--shadow);
   }
   .rd-alert--success { background: #ecfdf5; border-color: #10b981; color: #065f46; }
   .rd-alert--archived { background: var(--surface-alt); border-color: #94a3b8; color: var(--text); }
   html[data-theme="dark"] .rd-alert--success { background: rgba(16,185,129,.12); }
   .rd-alert__icon {
-    width: 36px; height: 36px;
+    width: 40px; height: 40px;
     border-radius: 50%;
     background: rgba(255,255,255,.6);
     display: inline-flex;
@@ -340,17 +352,38 @@
 
   @media (prefers-reduced-motion: reduce) {
     .rd-wrap { animation: none; }
+    .rd-btn:hover, .rd-back a:hover { transform: none !important; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
+{# ============ SMART BACK BUTTON ============
+   If you came from another page on this site (reports list, admin dashboard,
+   notifications), go back there. Otherwise default to the reports list view
+   (not the home hero). #}
+{% set ref = request.referrer %}
+{% set same_site = ref and request.host in ref %}
+{% if same_site and '/report/' not in ref %}
+  {% set back_url = ref %}
+  {% if '/admin' in ref %}
+    {% set back_label = 'Back to Dashboard' %}
+  {% elif '/notifications' in ref %}
+    {% set back_label = 'Back to Notifications' %}
+  {% else %}
+    {% set back_label = 'Back to Reports' %}
+  {% endif %}
+{% else %}
+  {% set back_url = url_for('home') ~ '?view=reports' %}
+  {% set back_label = 'Back to Reports' %}
+{% endif %}
+
 <div class="rd-wrap">
 
   <div class="rd-back">
-    <a href="{{ url_for('home') }}">
+    <a href="{{ back_url }}">
       <svg class="rd-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-      Back to Reports
+      {{ back_label }}
     </a>
   </div>
 
@@ -493,10 +526,16 @@
               <p class="rd-hint">Upload a photo for verification — receipt, serial number, or matching identifying marks.</p>
             </div>
 
-            <button type="submit" class="rd-submit">
-              <svg class="rd-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
-              Submit Request
-            </button>
+            <div class="rd-btn-row">
+              <button type="submit" class="rd-btn rd-btn--submit">
+                <svg class="rd-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+                {% if report.report_type == 'Found' %}Submit Claim Request{% else %}Submit Information{% endif %}
+              </button>
+              <a href="{{ back_url }}" class="rd-btn rd-btn--secondary">
+                <svg class="rd-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Browse More Reports
+              </a>
+            </div>
           </form>
         </div>
 
@@ -517,6 +556,12 @@
               <strong>Report Archived</strong>
               <p>This report has been archived and is no longer active.</p>
             {% endif %}
+            <div class="rd-btn-row" style="margin-top:14px;">
+              <a href="{{ back_url }}" class="rd-btn rd-btn--secondary">
+                <svg class="rd-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                {{ back_label }}
+              </a>
+            </div>
           </div>
         </div>
       {% endif %}
