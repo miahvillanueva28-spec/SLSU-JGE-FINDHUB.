@@ -489,7 +489,7 @@ def report_detail(report_id):
     return render_template("report_detail.html", report=report)
 
 # ==================================================
-# CLAIM SUBMISSION — UPDATED FLASH MESSAGE
+# CLAIM SUBMISSION
 # ==================================================
 @app.route("/report/<int:report_id>/claim", methods=["POST"])
 def submit_claim(report_id):
@@ -506,7 +506,6 @@ def submit_claim(report_id):
     proof = get_report_form_value("proof")
 
     if not all([claimant_name, claimant_contact, proof]):
-        # ✅ UPDATED: from "ownership proof" to "information about the item"
         flash(
             "Complete your name, contact details, and information about the item.",
             "danger",
@@ -664,7 +663,6 @@ def admin_update_report_status(report_id):
 def admin_delete_report(report_id):
     report = db.get_or_404(Report, report_id)
 
-    # --- Save to DELETED HISTORY before deleting ---
     deleted_record = DeletedReport(
         original_report_id=report.id,
         report_type=report.report_type,
@@ -681,7 +679,6 @@ def admin_delete_report(report_id):
         deleted_by=session.get("admin_username", "Unknown Admin"),
     )
     db.session.add(deleted_record)
-    # ------------------------------------------------
 
     report_id_to_delete = report.id
     photo = report.photo
@@ -839,18 +836,21 @@ def notifications_page():
         unread_count=unread_count,
     )
 
-@app.route("/notifications/<int:notification_id>/read", methods=["POST"])
+# ========== FIXED: accepts GET + POST, redirects to ?next= ==========
+@app.route("/notifications/<int:notification_id>/read", methods=["GET", "POST"])
 @admin_required
 def mark_notification_read(notification_id):
     notification = db.get_or_404(Notification, notification_id)
     try:
         notification.is_read = True
         db.session.commit()
-        flash("Notification marked as read.", "success")
     except Exception:
         db.session.rollback()
         app.logger.exception("Failed to mark notification as read")
-        flash("Unable to update notification.", "danger")
+    # Redirect to the ?next= page (e.g. the report) if provided and safe.
+    next_url = request.values.get("next")
+    if next_url and next_url.startswith("/") and "://" not in next_url:
+        return redirect(next_url)
     return redirect(url_for("notifications_page"))
 
 @app.route("/notifications/read-all", methods=["POST"])
