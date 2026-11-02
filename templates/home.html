@@ -5,8 +5,9 @@
 {% block head %}
 <style>
   /* ============================================================
-     SLSU JGE FindHub — HOME (Professional Redesign)
+     SLSU JGE FindHub — HOME (Full-bleed hero redesign)
      - No emojis (inline SVG icons only)
+     - Hero: campus photo + dark overlay + cream pill buttons
      - When searching: hero hidden, only matching reports show
   ============================================================ */
 
@@ -17,6 +18,9 @@
     --fh-accent-found: #15803d;
     --fh-accent-found-soft: #f0fdf4;
     --fh-accent-found-border: #86efac;
+    --fh-cream: #f0e2b0;
+    --fh-cream-dark: #e3cd84;
+    --fh-cream-text: #4a3810;
     --fh-radius: 16px;
     --fh-radius-lg: 24px;
   }
@@ -25,6 +29,9 @@
     --fh-accent-lost-border: rgba(253,186,116,.4);
     --fh-accent-found-soft: rgba(21,128,61,.2);
     --fh-accent-found-border: rgba(134,239,172,.35);
+    --fh-cream: #e8d490;
+    --fh-cream-dark: #d4ba6a;
+    --fh-cream-text: #3a2c0c;
   }
 
   .fh-home {
@@ -55,149 +62,177 @@
   .fh-icon--lg { width: 22px; height: 22px; }
 
   /* ============================================================
-     HERO — HIDDEN when searching (body.search-active)
+     HERO WRAP — hidden when searching or in reports-only view
+  ============================================================ */
+  body.search-active .fh-hero-wrap,
+  body.reports-only .fh-hero-wrap { display: none !important; }
+
+  /* ============================================================
+     FULL-BLEED HERO — campus photo + dark green overlay
   ============================================================ */
   .fh-hero {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 40px;
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    min-height: 520px;
+    display: flex;
     align-items: center;
-    padding: clamp(36px, 5vw, 56px) clamp(28px, 5vw, 56px);
-    border: 1px solid var(--border);
-    border-radius: var(--fh-radius-lg);
-    background:
-      radial-gradient(600px 300px at 100% 0%, var(--primary-soft), transparent 65%),
-      var(--surface);
-    box-shadow: var(--shadow);
+    padding: clamp(48px, 7vw, 80px) clamp(24px, 6vw, 80px);
+    color: #fff;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     overflow: hidden;
   }
-  body.search-active .fh-hero { display: none !important; }
-
-  .fh-hero__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface-alt);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--primary);
-    margin-bottom: 20px;
+  .fh-hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(115deg, rgba(3, 34, 22, 0.82) 0%, rgba(4, 52, 34, 0.68) 55%, rgba(6, 70, 46, 0.55) 100%);
+    z-index: 0;
   }
-  .fh-hero__eyebrow .fh-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+  .fh-hero__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    width: 100%;
+    animation: fhHeroIn .7s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes fhHeroIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Brand block at top of hero */
+  .fh-hero__brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .fh-hero__logo {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: #fff;
+    padding: 4px;
+    object-fit: contain;
+    box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    flex-shrink: 0;
+  }
+  .fh-hero__brand-text strong {
+    display: block;
+    font-size: clamp(20px, 3vw, 26px);
+    font-weight: 800;
+    letter-spacing: -.01em;
+    line-height: 1.15;
+  }
+  .fh-hero__brand-text span {
+    display: block;
+    margin-top: 3px;
+    font-size: 13.5px;
+    color: rgba(255,255,255,.78);
+    font-weight: 500;
   }
 
   .fh-hero h1 {
-    margin: 0 0 14px;
-    font-size: clamp(30px, 4.5vw, 46px);
-    line-height: 1.12;
+    margin: 0 0 18px;
+    font-size: clamp(34px, 5.5vw, 56px);
+    line-height: 1.08;
     letter-spacing: -.02em;
     font-weight: 800;
-    color: var(--text);
+    color: #fff;
   }
-  .fh-hero h1 span { color: var(--primary); }
+  .fh-hero h1 span { color: var(--fh-cream); }
 
   .fh-hero__sub {
-    margin: 0 0 28px;
-    max-width: 480px;
-    color: var(--muted);
-    font-size: 15.5px;
+    margin: 0 0 32px;
+    max-width: 560px;
+    color: rgba(255,255,255,.85);
+    font-size: clamp(15px, 1.8vw, 17px);
     line-height: 1.75;
+    font-weight: 500;
   }
 
   .fh-hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 22px;
+    gap: 14px;
+    margin-bottom: 28px;
   }
 
+  /* Cream pill buttons (matches reference) */
   .fh-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     min-height: 46px;
-    padding: 0 22px;
-    border-radius: 12px;
+    padding: 0 24px;
+    border-radius: 999px;
     border: 1.5px solid transparent;
     font-size: 14.5px;
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
-    transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    transition: transform .2s ease, box-shadow .25s ease, background .2s ease, filter .2s ease;
   }
   .fh-btn:hover { transform: translateY(-2px); }
   .fh-btn:active { transform: translateY(0); }
+
+  .fh-btn--cream {
+    background: linear-gradient(135deg, var(--fh-cream), var(--fh-cream-dark));
+    color: var(--fh-cream-text);
+    box-shadow: 0 6px 18px rgba(0,0,0,.28);
+  }
+  .fh-btn--cream:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 10px 26px rgba(0,0,0,.36);
+    color: var(--fh-cream-text);
+  }
+  .fh-btn--cream-outline {
+    background: transparent;
+    color: #fff;
+    border-color: rgba(255,255,255,.55);
+  }
+  .fh-btn--cream-outline:hover {
+    background: rgba(255,255,255,.12);
+    border-color: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    color: #fff;
+  }
 
   .fh-btn--lost {
     background: var(--fh-accent-lost-soft);
     color: var(--fh-accent-lost);
     border-color: var(--fh-accent-lost-border);
+    border-radius: 10px;
   }
   .fh-btn--lost:hover { box-shadow: 0 8px 20px rgba(194,65,12,.18); }
   .fh-btn--found {
     background: var(--fh-accent-found-soft);
     color: var(--fh-accent-found);
     border-color: var(--fh-accent-found-border);
+    border-radius: 10px;
   }
   .fh-btn--found:hover { box-shadow: 0 8px 20px rgba(21,128,61,.18); }
-  .fh-btn--primary { background: var(--primary); color: #fff; }
+  .fh-btn--primary { background: var(--primary); color: #fff; border-radius: 12px; }
   .fh-btn--primary:hover {
     background: var(--primary-dark);
     box-shadow: 0 8px 20px rgba(7,92,59,.28);
     color: #fff;
   }
-  .fh-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
+  .fh-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); border-radius: 12px; }
   .fh-btn--ghost:hover { background: var(--surface-alt); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
   .fh-btn--sm { min-height: 36px; padding: 0 14px; font-size: 13px; border-radius: 10px; }
 
   .fh-hero__meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 22px;
     font-size: 13px;
-    color: var(--muted);
+    color: rgba(255,255,255,.75);
   }
   .fh-hero__meta span { display: inline-flex; align-items: center; gap: 6px; }
-
-  .fh-hero__visual { display: flex; flex-direction: column; gap: 14px; }
-  .fh-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 18px 20px;
-    border: 1px solid var(--border);
-    border-radius: var(--fh-radius);
-    background: var(--surface);
-    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
-  }
-  .fh-step:hover {
-    transform: translateX(4px);
-    border-color: var(--primary);
-    box-shadow: 0 8px 20px rgba(0,0,0,.06);
-  }
-  .fh-step__num {
-    flex-shrink: 0;
-    width: 34px; height: 34px;
-    border-radius: 10px;
-    background: var(--primary-soft);
-    color: var(--primary);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 14px;
-  }
-  .fh-step__body h4 { margin: 0 0 3px; font-size: 14.5px; font-weight: 700; color: var(--text); }
-  .fh-step__body p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .fh-hero__meta .fh-icon { stroke: var(--fh-cream); }
 
   /* ============================================================
      SEARCH SECTION — more compact when searching
@@ -511,17 +546,19 @@
      RESPONSIVE
   ============================================================ */
   @media (max-width: 960px) {
-    .fh-hero { grid-template-columns: 1fr; gap: 32px; }
-    .fh-hero__visual { order: 2; }
     .fh-search__form { grid-template-columns: 1fr 1fr; }
     .fh-search__form .fh-field:first-child { grid-column: 1 / -1; }
     .fh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 600px) {
     .fh-home { padding: 4px 14px 56px; gap: 28px; }
-    .fh-hero { padding: 28px 20px; }
+    .fh-hero { min-height: 460px; padding: 40px 20px; }
+    .fh-hero__brand { margin-bottom: 28px; }
+    .fh-hero__logo { width: 48px; height: 48px; }
     .fh-hero__actions { flex-direction: column; }
     .fh-hero__actions .fh-btn { width: 100%; }
+    .fh-stats-strip { padding: 24px 16px; gap: 8px; }
+    .fh-stat__label { font-size: 11px; letter-spacing: .04em; }
     .fh-search { padding: 22px 18px; }
     .fh-search__form { grid-template-columns: 1fr; }
     .fh-search__actions { justify-content: stretch; flex-direction: column; }
@@ -535,12 +572,11 @@
     .fh-empty__actions .fh-btn { width: 100%; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .fh-card, body.reports-only .fh-reports {
+    .fh-card, body.reports-only .fh-reports, .fh-hero__inner {
       animation: none !important; opacity: 1 !important; transform: none !important;
     }
     .fh-card:hover { transform: none; }
     .fh-card:hover .fh-card__media img { transform: none; }
-    .fh-step:hover { transform: none; }
   }
 </style>
 {% endblock %}
@@ -550,70 +586,82 @@
 {% block content %}
 <div class="fh-home">
 
-  <!-- ===================== HERO (hidden when searching) ===================== -->
-  <section class="fh-hero" aria-label="Welcome">
-    <div class="fh-hero__copy">
-      <span class="fh-hero__eyebrow">
-        <span class="fh-dot" aria-hidden="true"></span>
-        SLSU — JGE Campus
-      </span>
-      <h1>Lost something on campus?<br><span>Let's find it together.</span></h1>
-      <p class="fh-hero__sub">
-        The official lost and found hub of SLSU JGE. Report a missing item,
-        browse found items, and claim what's yours — all in one place.
-      </p>
+  <!-- ===================== HERO + STATS (hidden when searching) ===================== -->
+  <div class="fh-hero-wrap">
 
-      <div class="fh-hero__actions">
-        <a class="fh-btn fh-btn--lost" href="{{ url_for('new_report') }}?type=Lost">
-          <svg class="fh-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-          Report a Lost Item
-        </a>
-        <a class="fh-btn fh-btn--found" href="{{ url_for('new_report') }}?type=Found">
-          <svg class="fh-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          Report a Found Item
-        </a>
+    <!-- FULL-BLEED HERO with campus photo -->
+    <section class="fh-hero" aria-label="Welcome"
+      {% if campus_photo %}style="background-image: url('{{ campus_photo }}');"{% endif %}>
+      <div class="fh-hero__inner">
+
+        <div class="fh-hero__brand">
+          {% if campus_logo %}
+            <img class="fh-hero__logo" src="{{ campus_logo }}" alt="SLSU JGE Campus Logo">
+          {% else %}
+            <span class="fh-hero__logo" style="display:inline-flex;align-items:center;justify-content:center;font-weight:800;color:var(--primary);font-size:20px;">FH</span>
+          {% endif %}
+          <div class="fh-hero__brand-text">
+            <strong>SLSU JGE FindHub</strong>
+            <span>Southern Leyte State University — JGE Campus</span>
+          </div>
+        </div>
+
+        <h1>Lost something on campus?<br><span>Let's find it together.</span></h1>
+
+        <p class="fh-hero__sub">
+          The official lost and found hub of SLSU JGE. Report a missing item,
+          browse found items, and claim what's yours — all in one place.
+        </p>
+
+        <div class="fh-hero__actions">
+          <a class="fh-btn fh-btn--cream" href="{{ url_for('new_report') }}?type=Lost">
+            <svg class="fh-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Report a Lost Item
+          </a>
+          <a class="fh-btn fh-btn--cream" href="{{ url_for('new_report') }}?type=Found">
+            <svg class="fh-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Report a Found Item
+          </a>
+          <a class="fh-btn fh-btn--cream-outline" href="{{ url_for('home') }}?view=reports" id="hero-browse">
+            <svg class="fh-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Browse Items
+          </a>
+        </div>
+
+        <div class="fh-hero__meta">
+          <span>
+            <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Free to use
+          </span>
+          <span>
+            <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Open to all students &amp; staff
+          </span>
+          <span>
+            <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Managed by campus administration
+          </span>
+        </div>
       </div>
+    </section>
 
-      <div class="fh-hero__meta">
-        <span>
-          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-          Free to use
-        </span>
-        <span>
-          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-          Open to all students &amp; staff
-        </span>
-        <span>
-          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-          Managed by campus administration
-        </span>
+    <!-- STAT STRIP — 3 big numbers, no boxes -->
+    <div class="fh-stats-strip">
+      <div class="fh-stat">
+        <span class="fh-stat__num">{{ stats.open }}</span>
+        <span class="fh-stat__label">Open Reports</span>
+      </div>
+      <div class="fh-stat">
+        <span class="fh-stat__num">{{ stats.found }}</span>
+        <span class="fh-stat__label">Items Found</span>
+      </div>
+      <div class="fh-stat">
+        <span class="fh-stat__num">{{ stats.lost }}</span>
+        <span class="fh-stat__label">Items Lost</span>
       </div>
     </div>
 
-    <div class="fh-hero__visual" aria-hidden="true">
-      <div class="fh-step">
-        <span class="fh-step__num">1</span>
-        <div class="fh-step__body">
-          <h4>Report</h4>
-          <p>File a lost or found item in under a minute with a photo and details.</p>
-        </div>
-      </div>
-      <div class="fh-step">
-        <span class="fh-step__num">2</span>
-        <div class="fh-step__body">
-          <h4>Search &amp; Match</h4>
-          <p>Browse reports and filter by type, status, or keyword to find a match.</p>
-        </div>
-      </div>
-      <div class="fh-step">
-        <span class="fh-step__num">3</span>
-        <div class="fh-step__body">
-          <h4>Claim &amp; Return</h4>
-          <p>Contact the reporter through the platform and get your item back.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  </div>
 
   <!-- ===================== SEARCH ===================== -->
   <section class="fh-search" id="find-item" aria-labelledby="fh-search-title">
@@ -803,7 +851,7 @@
     var backBtn = document.getElementById('fh-back-btn');
     var reportsSection = document.getElementById('reports-section');
 
-    /* KEY FIX: when searching, add body.search-active → CSS hides the hero */
+    /* when searching, add body.search-active → CSS hides hero+stats */
     if (hasSearch) {
       document.body.classList.add('search-active');
     }
@@ -824,6 +872,20 @@
     if (navLink) {
       navLink.addEventListener('click', function (e) {
         if (isReportsView) return;
+        e.preventDefault();
+        document.body.classList.add('reports-only');
+        if (reportsSection) reportsSection.style.display = '';
+        if (backBtn) backBtn.style.display = 'inline-flex';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        history.pushState({}, '', '{{ url_for('home') }}?view=reports');
+        document.title = 'All Reports | SLSU JGE FindHub';
+      });
+    }
+
+    /* "Browse Items" button in hero → reports view */
+    var browseBtn = document.getElementById('hero-browse');
+    if (browseBtn) {
+      browseBtn.addEventListener('click', function (e) {
         e.preventDefault();
         document.body.classList.add('reports-only');
         if (reportsSection) reportsSection.style.display = '';
