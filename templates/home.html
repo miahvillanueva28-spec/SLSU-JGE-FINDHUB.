@@ -321,6 +321,27 @@
   }
   .fh-back-link:hover { text-decoration: underline; }
 
+  /* Visible "Back to Home" button in reports-only view */
+  #fh-back-btn {
+    display: none;
+    padding: 11px 22px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 4px 14px rgba(7,92,59,.28);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  #fh-back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(7,92,59,.35);
+    filter: brightness(1.06);
+    text-decoration: none !important;
+  }
+  /* Hide +Lost / +Found buttons in reports-only view */
+  body.reports-only .fh-reports__actions { display: none !important; }
+
   .fh-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
