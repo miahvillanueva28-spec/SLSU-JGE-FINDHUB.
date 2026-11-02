@@ -1,174 +1,121 @@
 {% extends "base.html" %}
-{% block title %}Home | SLSU JGE FindHub{% endblock %}
+{% block title %}All Reports | SLSU JGE FindHub{% endblock %}
 {% block head %}
 <style>
   :root {
-    --shadow-soft: 0 4px 20px rgba(0, 75, 43, 0.08);
-    --shadow-strong: 0 8px 30px rgba(0, 75, 43, 0.12);
     --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --shadow-soft: 0 4px 20px rgba(0, 75, 43, 0.08);
   }
 
-  .home-wrapper {
-    max-width: 920px;
+  .reports-page-wrapper {
+    max-width: 1024px;
     margin: 0 auto;
-    padding: clamp(30px, 5vw, 50px) 20px;
+    padding: clamp(24px, 4vw, 40px) 20px;
   }
 
-  /* ========== HERO ========== */
-  .home-hero {
-    text-align: center;
-    margin-bottom: 36px;
-  }
-
-  .hero-badges {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
+  .back-nav {
     margin-bottom: 24px;
   }
 
-  .hero-badge {
-    padding: 6px 14px;
-    border-radius: 50px;
-    background: var(--primary-soft);
-    color: var(--primary);
-    font-size: 13px;
-    font-weight: 600;
+  .back-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: all 0.25s ease;
+  }
+  .back-btn:hover {
+    background: var(--surface-alt);
+    border-color: var(--muted);
   }
 
-  .home-hero h1 {
-    font-size: clamp(32px, 5vw, 48px);
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .section-header h1 {
+    margin: 0;
+    font-size: clamp(22px, 3.5vw, 28px);
     font-weight: 800;
     color: var(--primary);
-    margin: 0 0 10px;
-    line-height: 1.15;
-  }
-
-  .hero-subtitle {
-    font-size: clamp(16px, 2.5vw, 20px);
-    color: var(--text);
-    margin: 0 0 8px;
-    font-weight: 600;
-  }
-
-  .hero-desc {
-    font-size: 15px;
-    color: var(--muted);
-    max-width: 580px;
-    margin: 0 auto 32px;
-    line-height: 1.7;
-  }
-
-  /* ========== MAIN ACTION CARD ========== */
-  .action-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-    box-shadow: var(--shadow-soft);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-    margin-bottom: 40px;
-  }
-
-  .action-card:hover {
-    box-shadow: var(--shadow-strong);
-    transform: translateY(-2px);
-  }
-
-  .action-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-
-  .action-btn {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 18px 16px;
-    border-radius: 14px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 15px;
-    transition: all 0.25s ease;
-    border: 2px solid transparent;
+    gap: 10px;
   }
 
-  .action-btn.lost {
+  .reports-count {
+    background: var(--primary-soft);
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-small {
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-small.lost {
     background: #fff3e0;
     color: #e65100;
-    border-color: #ffcc80;
   }
-  .action-btn.lost:hover {
+  .btn-small.lost:hover {
     background: #ffe0b2;
-    border-color: #ffb74d;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(230, 81, 0, 0.15);
   }
-
-  .action-btn.found {
+  .btn-small.found {
     background: #e8f5e9;
     color: #2e7d32;
-    border-color: #a5d6a7;
   }
-  .action-btn.found:hover {
+  .btn-small.found:hover {
     background: #c8e6c9;
-    border-color: #81c784;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(46, 125, 50, 0.15);
   }
-
-  .action-btn-icon {
-    font-size: 24px;
-  }
-
-  html[data-theme="dark"] .action-btn.lost {
+  html[data-theme="dark"] .btn-small.lost {
     background: #5d3a14;
     color: #ffcc80;
-    border-color: #8d551a;
   }
-  html[data-theme="dark"] .action-btn.lost:hover {
-    background: #7a4a1a;
-  }
-  html[data-theme="dark"] .action-btn.found {
+  html[data-theme="dark"] .btn-small.found {
     background: #1e4620;
     color: #a5d6a7;
-    border-color: #2e7d32;
-  }
-  html[data-theme="dark"] .action-btn.found:hover {
-    background: #265c28;
   }
 
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: 24px 0;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .divider::before,
-  .divider::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--border);
+  /* Search Bar — Compact */
+  .search-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-soft);
   }
 
   .search-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 14px;
-    margin-bottom: 18px;
   }
 
   .search-field label {
@@ -182,7 +129,7 @@
   .search-field input,
   .search-field select {
     width: 100%;
-    padding: 12px 16px;
+    padding: 11px 14px;
     border: 1.5px solid var(--border);
     border-radius: 10px;
     background: var(--surface);
@@ -200,82 +147,44 @@
 
   .search-actions {
     display: flex;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    border: none;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    gap: 10px;
+    margin-top: 16px;
   }
 
   .btn-primary {
+    padding: 11px 22px;
+    border-radius: 10px;
     background: var(--primary);
     color: #fff;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
   }
   .btn-primary:hover {
     background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(7, 92, 59, 0.2);
   }
 
   .btn-secondary {
+    padding: 11px 22px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
     background: transparent;
     color: var(--text);
-    border: 1.5px solid var(--border);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
   }
   .btn-secondary:hover {
     background: var(--surface-alt);
-    border-color: var(--muted);
   }
 
-  /* ========== REPORTS SECTION ========== */
-  .reports-section {
-    margin-top: 0;
-  }
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .section-header h2 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .reports-count {
-    background: var(--primary-soft);
-    color: var(--primary);
-    padding: 4px 12px;
-    border-radius: 50px;
-    font-size: 13px;
-    font-weight: 700;
-  }
-
+  /* Reports Grid */
   .reports-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 22px;
   }
 
   .report-card {
@@ -295,19 +204,19 @@
 
   .report-image {
     width: 100%;
-    height: 160px;
+    height: 170px;
     object-fit: cover;
     background: var(--surface-alt);
   }
 
   .report-image-placeholder {
     width: 100%;
-    height: 160px;
+    height: 170px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, var(--primary-soft), var(--surface-alt));
-    font-size: 40px;
+    font-size: 42px;
   }
 
   .report-body {
@@ -316,15 +225,14 @@
 
   .report-type-tag {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 50px;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
-
   .report-type-tag.lost {
     background: #fff1cc;
     color: #805700;
@@ -344,7 +252,7 @@
 
   .report-title {
     margin: 0 0 12px;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--text);
   }
@@ -366,7 +274,7 @@
 
   .report-status-tag {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 50px;
     font-size: 11px;
     font-weight: 700;
@@ -376,18 +284,19 @@
     background: #e3f2fd;
     color: #0d47a1;
   }
-  .report-status-tag.pending {
+  .report-status-tag.pending-claim {
     background: #fff8e1;
     color: #e65100;
   }
-  .report-status-tag.resolved {
+  .report-status-tag.returned,
+  .report-status-tag.archived {
     background: #e8f5e9;
     color: #2e7d32;
   }
 
   .view-detail-btn {
     width: 100%;
-    padding: 10px;
+    padding: 11px;
     text-align: center;
     background: var(--primary);
     color: #fff;
@@ -405,48 +314,48 @@
 
   .empty-state {
     text-align: center;
-    padding: 48px 24px;
+    padding: 60px 24px;
     border: 1px dashed var(--border);
     border-radius: 16px;
     background: var(--surface);
   }
 
   .empty-icon {
-    font-size: 48px;
+    font-size: 52px;
     margin-bottom: 16px;
   }
 
   .empty-state h3 {
-    margin: 0 0 8px;
-    font-size: 18px;
+    margin: 0 0 10px;
+    font-size: 20px;
     font-weight: 700;
   }
 
   .empty-state p {
-    margin: 0;
+    margin: 0 auto 24px;
     color: var(--muted);
-    max-width: 400px;
-    margin: 0 auto;
+    max-width: 460px;
+    line-height: 1.7;
   }
 
-  /* ========== RESPONSIVE ========== */
-  @media (max-width: 720px) {
-    .action-buttons {
-      grid-template-columns: 1fr;
-    }
+  /* Responsive */
+  @media (max-width: 768px) {
     .search-grid {
       grid-template-columns: 1fr;
     }
     .search-actions {
       flex-direction: column;
     }
-    .btn-primary,
-    .btn-secondary {
+    .btn-primary, .btn-secondary {
       width: 100%;
       justify-content: center;
     }
     .reports-grid {
       grid-template-columns: 1fr;
+    }
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 
@@ -460,48 +369,39 @@
 {% endblock %}
 
 {% block content %}
-<div class="home-wrapper">
-  <section class="home-hero">
-    <div class="hero-badges">
-      <span class="hero-badge">🎒 Bags & Wallets</span>
-      <span class="hero-badge">🔑 Keys & IDs</span>
-      <span class="hero-badge">📱 Gadgets</span>
-      <span class="hero-badge">📚 Books & Notes</span>
+<div class="reports-page-wrapper">
+  <!-- Back to Home -->
+  <div class="back-nav">
+    <a href="{{ url_for('home') }}" class="back-btn">← Back to Home</a>
+  </div>
+
+  <!-- Page Header -->
+  <div class="section-header">
+    <h1>
+      📋 All Reports
+      {% if reports %}
+        <span class="reports-count">{{ reports|length }}</span>
+      {% endif %}
+    </h1>
+    <div class="header-actions">
+      <a href="{{ url_for('new_report') }}?type=Lost" class="btn-small lost">+ Report Lost</a>
+      <a href="{{ url_for('new_report') }}?type=Found" class="btn-small found">+ Report Found</a>
     </div>
+  </div>
 
-    <h1>SLSU JGE FindHub</h1>
-    <p class="hero-subtitle">Your trusted campus space for lost and found</p>
-    <p class="hero-desc">
-      Report items you've lost or discovered, and help reunite them with their rightful owners — building a more connected and caring SLSU JGE community.
-    </p>
-  </section>
-
-  <!-- Main Action & Search Card -->
-  <div class="action-card">
-    <div class="action-buttons">
-      <a href="{{ url_for('new_report') }}?type=Lost" class="action-btn lost">
-        <span class="action-btn-icon">⚠️</span>
-        Report Lost Item
-      </a>
-      <a href="{{ url_for('new_report') }}?type=Found" class="action-btn found">
-        <span class="action-btn-icon">🔍</span>
-        Report Found Item
-      </a>
-    </div>
-
-    <div class="divider">or search below</div>
-
-    <form method="GET" action="{{ url_for('home') }}" role="search">
+  <!-- Search Filter -->
+  <div class="search-box">
+    <form method="GET" action="{{ url_for('view_reports') }}" role="search">
       <div class="search-grid">
         <div class="search-field">
           <label for="q">Search Keywords</label>
           <input id="q" name="q" type="search"
-                 placeholder="Item, location, description..."
+                 placeholder="Item name, location, description..."
                  value="{{ request.args.get('q', '') }}"
                  maxlength="200">
         </div>
         <div class="search-field">
-          <label for="type">Type</label>
+          <label for="type">Report Type</label>
           <select id="type" name="type">
             <option value="">All Types</option>
             <option value="Lost" {% if request.args.get('type')=='Lost' %}selected{% endif %}>Lost</option>
@@ -518,71 +418,74 @@
           </select>
         </div>
       </div>
-
       <div class="search-actions">
-        <button type="submit" class="btn-primary">🔎 Search Reports</button>
-        <a href="{{ url_for('home') }}" class="btn-secondary">Clear Filters</a>
+        <button type="submit" class="btn-primary">🔎 Search</button>
+        <a href="{{ url_for('view_reports') }}" class="btn-secondary">Clear</a>
       </div>
     </form>
   </div>
 
-  <!-- All Reports Section -->
-  <section class="reports-section">
-    <div class="section-header">
-      <h2>
-        📋 All Reports
-        {% if reports %}
-          <span class="reports-count">{{ reports|length }}</span>
+  <!-- Reports List -->
+  {% if reports %}
+    <div class="reports-grid">
+      {% for report in reports %}
+        <article class="report-card">
+          {% if report.photo %}
+            <img src="{{ photo_src(report.photo) }}"
+                 alt="Photo of {{ report.item_name }}"
+                 class="report-image" loading="lazy">
+          {% else %}
+            <div class="report-image-placeholder">
+              {% if report.report_type|lower == 'lost' %}⚠️{% else %}🔍{% endif %}
+            </div>
+          {% endif %}
+
+          <div class="report-body">
+            <span class="report-type-tag {{ report.report_type|lower }}">
+              {{ report.report_type }}
+            </span>
+            <h3 class="report-title">{{ report.item_name }}</h3>
+            <div class="report-meta">
+              <span>📍 {{ report.location or 'Location not specified' }}</span>
+              {% if report.incident_date %}
+                <span>📅 {{ report.incident_date }}</span>
+              {% endif %}
+            </div>
+            {% set status_slug = report.status|lower|replace(' ', '-') %}
+            <span class="report-status-tag {{ status_slug }}">
+              {{ report.status or 'Open' }}
+            </span>
+            <a href="{{ url_for('report_detail', report_id=report.id) }}"
+               class="view-detail-btn">View Details →</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🕵️</div>
+      <h3>
+        {% if request.args.get('q') or request.args.get('type') or request.args.get('status') %}
+          No Matching Reports Found
+        {% else %}
+          No Reports Yet
         {% endif %}
-      </h2>
-      <div style="display: flex; gap: 8px;">
-        <a href="{{ url_for('new_report') }}?type=Lost" class="btn-secondary" style="padding: 8px 14px; font-size: 13px;">+ Lost</a>
-        <a href="{{ url_for('new_report') }}?type=Found" class="btn-secondary" style="padding: 8px 14px; font-size: 13px;">+ Found</a>
+      </h3>
+      <p>
+        {% if request.args.get('q') or request.args.get('type') or request.args.get('status') %}
+          Try different keywords or clear your filters to see all reports.
+        {% else %}
+          Be the first to report a lost or found item and help reunite it with its owner!
+        {% endif %}
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('new_report') }}?type=Lost" class="btn-small lost">+ Report Lost</a>
+        <a href="{{ url_for('new_report') }}?type=Found" class="btn-small found">+ Report Found</a>
+        {% if request.args.get('q') or request.args.get('type') or request.args.get('status') %}
+          <a href="{{ url_for('view_reports') }}" class="btn-secondary" style="font-weight: 600;">Clear Filters</a>
+        {% endif %}
       </div>
     </div>
-
-    {% if reports %}
-      <div class="reports-grid">
-        {% for report in reports %}
-          <article class="report-card">
-            {% if report.photo %}
-              <img src="{{ photo_src(report.photo) }}" 
-                   alt="Photo of {{ report.item_name }}" 
-                   class="report-image" loading="lazy">
-            {% else %}
-              <div class="report-image-placeholder">
-                {% if report.report_type|lower == 'lost' %}⚠️{% else %}🔍{% endif %}
-              </div>
-            {% endif %}
-            
-            <div class="report-body">
-              <span class="report-type-tag {{ report.report_type|lower }}">
-                {{ report.report_type }}
-              </span>
-              <h3 class="report-title">{{ report.item_name }}</h3>
-              <div class="report-meta">
-                <span>📍 {{ report.location or 'Location not specified' }}</span>
-                {% if report.incident_date %}
-                  <span>📅 {{ report.incident_date }}</span>
-                {% endif %}
-              </div>
-              {% set status_class = report.status|lower|replace(' ', '-') %}
-              <span class="report-status-tag {{ status_class }}">
-                {{ report.status or 'Open' }}
-              </span>
-              <a href="{{ url_for('report_detail', report_id=report.id) }}" 
-                 class="view-detail-btn">View Details →</a>
-            </div>
-          </article>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-icon">🕵️</div>
-        <h3>No Reports Yet</h3>
-        <p>Be the first to report a lost or found item and help our community!</p>
-      </div>
-    {% endif %}
-  </section>
+  {% endif %}
 </div>
 {% endblock %}
