@@ -4,36 +4,19 @@
 {% block head %}
 <style>
   /* ============================================================
-     ADMIN DASHBOARD — Professional Redesign
-     - No emojis (inline SVG icons only)
-     - Theme-variable based (works with light + dark mode)
-     - Clean status pills, scrollable table
+     ADMIN DASHBOARD — Clean, minimal boxes
+     Header (no box) → slim stats strip → single panel (toolbar + table)
   ============================================================ */
-
-  :root {
-    --ad-red: #c0392b;
-    --ad-red-soft: rgba(192,57,43,.1);
-    --ad-green: #1e8449;
-    --ad-green-soft: rgba(30,132,73,.1);
-    --ad-blue: #2471a3;
-    --ad-blue-soft: rgba(36,113,163,.1);
-    --ad-amber: #b9770e;
-    --ad-amber-soft: rgba(185,119,14,.12);
-    --ad-gray: #6c7a89;
-    --ad-gray-soft: rgba(108,122,137,.12);
-  }
-
   .ad-wrap {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 16px 20px 72px;
+    padding: 20px 20px 72px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 22px;
   }
-
   .ad-icon {
-    width: 18px; height: 18px;
+    width: 17px; height: 17px;
     flex-shrink: 0;
     stroke: currentColor;
     stroke-width: 2;
@@ -41,27 +24,20 @@
     stroke-linejoin: round;
     fill: none;
   }
-  .ad-icon--sm { width: 14px; height: 14px; }
-  .ad-icon--lg { width: 22px; height: 22px; }
+  .ad-icon--sm { width: 13px; height: 13px; }
+  .ad-icon--lg { width: 20px; height: 20px; }
 
-  /* ============================================================
-     TOP HEADER
-  ============================================================ */
-  .ad-header {
+  /* ---------- Top header (no box) ---------- */
+  .ad-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
-    padding: 24px 28px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    background: var(--surface);
-    box-shadow: var(--shadow);
+    gap: 14px;
   }
-  .ad-header__title h1 {
-    margin: 0 0 4px;
-    font-size: 24px;
+  .ad-top h1 {
+    margin: 0 0 3px;
+    font-size: 26px;
     font-weight: 800;
     color: var(--text);
     letter-spacing: -.01em;
@@ -69,175 +45,137 @@
     align-items: center;
     gap: 10px;
   }
-  .ad-header__title h1 .ad-title-icon {
-    width: 38px; height: 38px;
-    border-radius: 12px;
+  .ad-top h1 .ad-title-icon {
+    width: 36px; height: 36px;
+    border-radius: 11px;
     background: var(--primary-soft);
     color: var(--primary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
-  .ad-header__title p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 14px;
-  }
+  .ad-top p { margin: 0; color: var(--muted); font-size: 14px; }
+
   .ad-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-height: 42px;
-    padding: 0 18px;
-    border-radius: 12px;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 11px;
     border: 1.5px solid transparent;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
+    font-family: inherit;
     transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    white-space: nowrap;
   }
-  .ad-btn:hover { transform: translateY(-2px); }
-  .ad-btn:active { transform: translateY(0); }
-  .ad-btn--primary {
-    background: var(--primary);
-    color: #fff;
-  }
-  .ad-btn--primary:hover {
-    background: var(--primary-dark);
-    color: #fff;
-    box-shadow: 0 8px 20px rgba(7,92,59,.28);
-  }
-  .ad-btn--ghost {
-    background: transparent;
-    color: var(--text);
-    border-color: var(--border);
-  }
-  .ad-btn--ghost:hover {
-    background: var(--surface-alt);
-    box-shadow: 0 4px 12px rgba(0,0,0,.06);
-  }
-  .ad-btn--danger-ghost {
-    background: transparent;
-    color: var(--ad-red);
-    border-color: rgba(192,57,43,.3);
-  }
-  .ad-btn--danger-ghost:hover {
-    background: var(--ad-red-soft);
-  }
-  .ad-btn--sm {
-    min-height: 34px;
-    padding: 0 12px;
-    font-size: 13px;
-    border-radius: 9px;
-  }
+  .ad-btn:hover { transform: translateY(-1px); }
+  .ad-btn--primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .ad-btn--primary:hover { background: var(--primary-dark); box-shadow: 0 6px 16px rgba(7,92,59,.25); color: #fff; }
+  .ad-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
+  .ad-btn--ghost:hover { background: var(--surface-alt); }
+  .ad-btn--danger { background: transparent; color: #c0392b; border-color: rgba(192,57,43,.35); }
+  .ad-btn--danger:hover { background: #c0392b; border-color: #c0392b; color: #fff; }
+  .ad-btn--sm { min-height: 32px; padding: 0 11px; font-size: 12.5px; border-radius: 9px; }
   .ad-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 7px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.28);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; padding: 0 6px;
+    border-radius: 999px; background: rgba(255,255,255,.3);
+    color: #fff; font-size: 11.5px; font-weight: 800;
   }
 
-  /* ============================================================
-     STATS CARDS — 7 metrics
-  ============================================================ */
+  /* ---------- Slim stats strip (no individual boxes) ---------- */
   .ad-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-    gap: 14px;
-  }
-  .ad-stat {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 18px 18px;
+    flex-wrap: wrap;
+    gap: 0;
     border: 1px solid var(--border);
     border-radius: 16px;
     background: var(--surface);
     box-shadow: var(--shadow);
-    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    overflow: hidden;
   }
-  .ad-stat:hover {
-    transform: translateY(-3px);
-    border-color: var(--primary);
-    box-shadow: 0 10px 24px rgba(0,0,0,.08);
+  .ad-stat {
+    flex: 1 1 130px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-right: 1px solid var(--border);
+    min-width: 130px;
   }
+  .ad-stat:last-child { border-right: none; }
   .ad-stat__icon {
-    width: 44px; height: 44px;
-    border-radius: 12px;
+    width: 36px; height: 36px;
+    border-radius: 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
   .ad-stat__icon--neutral { background: var(--primary-soft); color: var(--primary); }
-  .ad-stat__icon--red { background: var(--ad-red-soft); color: var(--ad-red); }
-  .ad-stat__icon--green { background: var(--ad-green-soft); color: var(--ad-green); }
-  .ad-stat__icon--blue { background: var(--ad-blue-soft); color: var(--ad-blue); }
-  .ad-stat__icon--amber { background: var(--ad-amber-soft); color: var(--ad-amber); }
-  .ad-stat__icon--gray { background: var(--ad-gray-soft); color: var(--ad-gray); }
-
-  .ad-stat__body { min-width: 0; }
+  .ad-stat__icon--red { background: rgba(192,57,43,.1); color: #c0392b; }
+  .ad-stat__icon--green { background: rgba(30,132,73,.1); color: #1e8449; }
+  .ad-stat__icon--blue { background: rgba(36,113,163,.1); color: #2471a3; }
+  .ad-stat__icon--amber { background: rgba(185,119,14,.12); color: #b9770e; }
+  .ad-stat__icon--gray { background: rgba(108,122,137,.12); color: #6c7a89; }
   .ad-stat__label {
-    margin: 0 0 2px;
-    font-size: 12px;
+    display: block;
+    font-size: 11px;
     font-weight: 600;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: .05em;
-    white-space: nowrap;
+    margin-bottom: 2px;
   }
   .ad-stat__value {
-    margin: 0;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
   }
   .ad-stat--total .ad-stat__value { color: var(--text); }
-  .ad-stat--lost .ad-stat__value { color: var(--ad-red); }
-  .ad-stat--found .ad-stat__value { color: var(--ad-green); }
-  .ad-stat--open .ad-stat__value { color: var(--ad-blue); }
-  .ad-stat--pending .ad-stat__value { color: var(--ad-amber); }
-  .ad-stat--returned .ad-stat__value { color: var(--ad-green); }
-  .ad-stat--archived .ad-stat__value { color: var(--ad-gray); }
+  .ad-stat--lost .ad-stat__value { color: #c0392b; }
+  .ad-stat--found .ad-stat__value { color: #1e8449; }
+  .ad-stat--open .ad-stat__value { color: #2471a3; }
+  .ad-stat--pending .ad-stat__value { color: #b9770e; }
+  .ad-stat--returned .ad-stat__value { color: #1e8449; }
+  .ad-stat--archived .ad-stat__value { color: #6c7a89; }
 
-  /* ============================================================
-     ACTION BAR — claims + filters
-  ============================================================ */
-  .ad-actions {
+  /* ---------- Single panel: toolbar + table ---------- */
+  .ad-panel {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .ad-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 14px;
-    padding: 16px 20px;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    background: var(--surface);
-    box-shadow: var(--shadow);
+    gap: 12px;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
   }
   .ad-pills {
     display: inline-flex;
-    gap: 4px;
-    padding: 4px;
-    border-radius: 12px;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 10px;
     background: var(--surface-alt);
     border: 1px solid var(--border);
     flex-wrap: wrap;
   }
   .ad-pill {
-    padding: 8px 16px;
-    border-radius: 9px;
-    font-size: 13px;
+    padding: 7px 15px;
+    border-radius: 8px;
+    font-size: 12.5px;
     font-weight: 600;
     color: var(--muted);
     text-decoration: none;
@@ -248,209 +186,147 @@
   .ad-pill.active {
     background: var(--surface);
     color: var(--primary);
-    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
     font-weight: 700;
   }
-  .ad-actions__right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  /* ============================================================
-     TABLE CARD
-  ============================================================ */
-  .ad-table-card {
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    background: var(--surface);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-  .ad-table-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--border);
-  }
-  .ad-table-head h2 {
+  .ad-toolbar__right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ad-panel-title {
     margin: 0;
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 700;
+    color: var(--text);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
-  .ad-table-head h2 .ad-title-icon {
-    width: 32px; height: 32px;
-    border-radius: 10px;
-    background: var(--primary-soft);
-    color: var(--primary);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .ad-table-count {
-    font-size: 13px;
-    color: var(--muted);
+  .ad-panel-title .ad-count {
+    font-size: 12px;
     font-weight: 600;
+    color: var(--muted);
+    background: var(--surface-alt);
+    padding: 3px 9px;
+    border-radius: 999px;
   }
 
-  .ad-table-scroll { overflow-x: auto; }
-  .ad-table { min-width: 920px; width: 100%; }
-
+  /* ---------- Table ---------- */
+  .ad-scroll { overflow-x: auto; }
+  .ad-table { min-width: 900px; width: 100%; }
   .ad-row {
     display: grid;
-    grid-template-columns: 70px minmax(180px, 2fr) 90px 130px 160px 110px 140px;
+    grid-template-columns: 60px minmax(170px, 2fr) 85px 125px 155px 105px 140px;
     gap: 12px;
     align-items: center;
-    padding: 14px 24px;
+    padding: 13px 22px;
     border-bottom: 1px solid var(--border);
   }
-  .ad-row--header {
+  .ad-row--head {
     background: var(--surface-alt);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--muted);
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: 11px;
+    padding-bottom: 11px;
   }
-  .ad-row--data { transition: background .2s ease; }
+  .ad-row--data { transition: background .15s ease; }
   .ad-row--data:hover { background: var(--surface-alt); }
   .ad-row--data:last-child { border-bottom: none; }
-
-  .ad-col-id {
+  .ad-id {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     color: var(--muted);
-  }
-  .ad-col-item {
-    min-width: 0;
-    overflow-wrap: anywhere;
   }
   .ad-item-link {
     color: var(--text);
     font-weight: 600;
     text-decoration: none;
-    font-size: 14.5px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
     transition: color .2s ease;
   }
   .ad-item-link:hover { color: var(--primary); text-decoration: underline; }
-
-  .ad-type {
+  .ad-pill-tag {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 4px 10px;
     border-radius: 999px;
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .03em;
-  }
-  .ad-type::before {
-    content: "";
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-  .ad-type--lost { background: var(--ad-red-soft); color: var(--ad-red); }
-  .ad-type--found { background: var(--ad-green-soft); color: var(--ad-green); }
-
-  .ad-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 11px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
     white-space: nowrap;
   }
-  .ad-status::before {
-    content: "";
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+  .ad-pill-tag::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
   }
-  .ad-status--open { background: var(--ad-blue-soft); color: var(--ad-blue); }
-  .ad-status--pending-claim { background: var(--ad-amber-soft); color: var(--ad-amber); }
-  .ad-status--returned { background: var(--ad-green-soft); color: var(--ad-green); }
-  .ad-status--archived { background: var(--ad-gray-soft); color: var(--ad-gray); }
+  .ad-pill-tag--lost { background: rgba(192,57,43,.1); color: #c0392b; }
+  .ad-pill-tag--found { background: rgba(30,132,73,.1); color: #1e8449; }
+  .ad-pill-tag--open { background: rgba(36,113,163,.1); color: #2471a3; }
+  .ad-pill-tag--pending-claim { background: rgba(185,119,14,.12); color: #b9770e; }
+  .ad-pill-tag--returned { background: rgba(30,132,73,.1); color: #1e8449; }
+  .ad-pill-tag--archived { background: rgba(108,122,137,.12); color: #6c7a89; }
 
-  .ad-select-wrap select {
+  .ad-select select {
     width: 100%;
-    padding: 8px 10px;
+    padding: 7px 9px;
     border: 1.5px solid var(--border);
-    border-radius: 10px;
+    border-radius: 9px;
     background: var(--surface);
     color: var(--text);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
+    font-family: inherit;
     transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .ad-select-wrap select:focus {
+  .ad-select select:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(7,92,59,.12);
   }
-
-  .ad-col-date {
-    font-size: 13px;
+  .ad-date {
+    font-size: 12.5px;
     color: var(--muted);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  .ad-col-actions {
-    display: flex;
-    gap: 6px;
-  }
-  .ad-col-actions form { margin: 0; }
+  .ad-actions { display: flex; gap: 5px; }
+  .ad-actions form { margin: 0; }
 
   .ad-empty {
-    padding: 56px 24px;
+    padding: 52px 24px;
     text-align: center;
     color: var(--muted);
   }
   .ad-empty__icon {
-    width: 64px; height: 64px;
-    margin: 0 auto 14px;
+    width: 56px; height: 56px;
+    margin: 0 auto 12px;
     border-radius: 50%;
     background: var(--primary-soft);
     color: var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
   }
-  .ad-empty__icon svg { width: 28px; height: 28px; }
-  .ad-empty p { margin: 0; font-size: 15px; font-weight: 600; color: var(--text); }
-  .ad-empty span { font-size: 13.5px; }
+  .ad-empty__icon svg { width: 24px; height: 24px; }
+  .ad-empty p { margin: 0 0 3px; font-size: 15px; font-weight: 700; color: var(--text); }
+  .ad-empty span { font-size: 13px; }
 
-  /* ============================================================
-     RESPONSIVE
-  ============================================================ */
   @media (max-width: 700px) {
-    .ad-wrap { padding: 12px 14px 56px; gap: 18px; }
-    .ad-header { padding: 20px; flex-direction: column; align-items: stretch; }
-    .ad-header .ad-btn { width: 100%; }
-    .ad-actions { flex-direction: column; align-items: stretch; }
-    .ad-actions__right { justify-content: stretch; }
-    .ad-actions__right .ad-btn { flex: 1; }
+    .ad-wrap { padding: 14px 12px 56px; gap: 16px; }
+    .ad-top { flex-direction: column; align-items: stretch; }
+    .ad-top .ad-btn { width: 100%; }
+    .ad-stat { border-right: none; border-bottom: 1px solid var(--border); flex: 1 1 50%; }
+    .ad-toolbar { flex-direction: column; align-items: stretch; }
+    .ad-toolbar__right { justify-content: stretch; }
+    .ad-toolbar__right .ad-btn { flex: 1; }
     .ad-pills { width: 100%; justify-content: space-between; }
     .ad-pill { flex: 1; text-align: center; }
     .ad-row { padding: 12px 16px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .ad-stat:hover, .ad-btn:hover { transform: none !important; }
+    .ad-btn:hover { transform: none !important; }
   }
 </style>
 {% endblock %}
@@ -458,9 +334,9 @@
 {% block content %}
 <div class="ad-wrap">
 
-  <!-- ============ TOP HEADER ============ -->
-  <header class="ad-header">
-    <div class="ad-header__title">
+  <!-- ============ TOP HEADER (no box) ============ -->
+  <header class="ad-top">
+    <div>
       <h1>
         <span class="ad-title-icon" aria-hidden="true">
           <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 4 4 5-5"/></svg>
@@ -475,90 +351,76 @@
     </a>
   </header>
 
-  <!-- ============ STATS CARDS (7) ============ -->
+  <!-- ============ SLIM STATS STRIP ============ -->
   <section class="ad-stats" aria-label="Report statistics">
     <div class="ad-stat ad-stat--total">
       <span class="ad-stat__icon ad-stat__icon--neutral" aria-hidden="true">
-        <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+        <svg class="ad-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
       </span>
-      <div class="ad-stat__body">
-        <p class="ad-stat__label">Total Reports</p>
-        <h3 class="ad-stat__value">{{ stats.total }}</h3>
+      <div>
+        <span class="ad-stat__label">Total</span>
+        <span class="ad-stat__value">{{ stats.total }}</span>
       </div>
     </div>
-
     <div class="ad-stat ad-stat--lost">
       <span class="ad-stat__icon ad-stat__icon--red" aria-hidden="true">
-        <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        <svg class="ad-icon" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
       </span>
-      <div class="ad-stat__body">
-        <p class="ad-stat__label">Lost Items</p>
-        <h3 class="ad-stat__value">{{ stats.lost }}</h3>
+      <div>
+        <span class="ad-stat__label">Lost</span>
+        <span class="ad-stat__value">{{ stats.lost }}</span>
       </div>
     </div>
-
     <div class="ad-stat ad-stat--found">
       <span class="ad-stat__icon ad-stat__icon--green" aria-hidden="true">
-        <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <svg class="ad-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       </span>
-      <div class="ad-stat__body">
-        <p class="ad-stat__label">Found Items</p>
-        <h3 class="ad-stat__value">{{ stats.found }}</h3>
+      <div>
+        <span class="ad-stat__label">Found</span>
+        <span class="ad-stat__value">{{ stats.found }}</span>
       </div>
     </div>
-
     <div class="ad-stat ad-stat--open">
       <span class="ad-stat__icon ad-stat__icon--blue" aria-hidden="true">
-        <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <svg class="ad-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </span>
-      <div class="ad-stat__body">
-        <p class="ad-stat__label">Open</p>
-        <h3 class="ad-stat__value">{{ stats.open }}</h3>
+      <div>
+        <span class="ad-stat__label">Open</span>
+        <span class="ad-stat__value">{{ stats.open }}</span>
       </div>
     </div>
-
     <div class="ad-stat ad-stat--pending">
       <span class="ad-stat__icon ad-stat__icon--amber" aria-hidden="true">
-        <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><path d="M5.5 12a6.5 6.5 0 0 1 13 0"/><path d="M12 12v6"/><path d="M12 21h.01"/><path d="M12 2v3"/></svg>
+        <svg class="ad-icon" viewBox="0 0 24 24"><path d="M5.5 12a6.5 6.5 0 0 1 13 0"/><path d="M12 12v6"/><path d="M12 21h.01"/><path d="M12 2v3"/></svg>
       </span>
-      <div class="ad-stat__body">
-        <p class="ad-stat__label">Pending Claims</p>
-        <h3 class="ad-stat__value">{{ stats.pending_claims }}</h3>
+      <div>
+        <span class="ad-stat__label">Pending</span>
+        <span class="ad-stat__value">{{ stats.pending_claims }}</span>
       </div>
     </div>
-
     <div class="ad-stat ad-stat--returned">
       <span class="ad-stat__icon ad-stat__icon--green" aria-hidden="true">
-        <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        <svg class="ad-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
       </span>
-      <div class="ad-stat__body">
-        <p class="ad-stat__label">Returned</p>
-        <h3 class="ad-stat__value">{{ stats.returned }}</h3>
+      <div>
+        <span class="ad-stat__label">Returned</span>
+        <span class="ad-stat__value">{{ stats.returned }}</span>
       </div>
     </div>
-
     <div class="ad-stat ad-stat--archived">
       <span class="ad-stat__icon ad-stat__icon--gray" aria-hidden="true">
-        <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+        <svg class="ad-icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
       </span>
-      <div class="ad-stat__body">
-        <p class="ad-stat__label">Archived</p>
-        <h3 class="ad-stat__value">{{ stats.archived }}</h3>
+      <div>
+        <span class="ad-stat__label">Archived</span>
+        <span class="ad-stat__value">{{ stats.archived }}</span>
       </div>
     </div>
   </section>
 
-  <!-- ============ ACTION BAR ============ -->
-  <div class="ad-actions">
-    <a href="{{ url_for('admin_claims') }}" class="ad-btn ad-btn--primary">
-      <svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-      Review Claims
-      {% if stats.pending_claims > 0 %}
-        <span class="ad-badge">{{ stats.pending_claims }}</span>
-      {% endif %}
-    </a>
-
-    <div class="ad-actions__right">
+  <!-- ============ SINGLE PANEL: toolbar + table ============ -->
+  <div class="ad-panel">
+    <div class="ad-toolbar">
       <nav class="ad-pills" aria-label="Filter reports">
         <a href="{{ url_for('admin_dashboard') }}"
            class="ad-pill {% if not request.args.get('filter') %}active{% endif %}">All</a>
@@ -567,91 +429,79 @@
         <a href="{{ url_for('admin_dashboard') }}?filter=Found"
            class="ad-pill {% if request.args.get('filter') == 'Found' %}active{% endif %}">Found</a>
       </nav>
-      <a href="{{ url_for('admin_history') }}" class="ad-btn ad-btn--ghost ad-btn--sm">
-        <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
-        Deleted
-      </a>
-    </div>
-  </div>
 
-  <!-- ============ REPORTS TABLE ============ -->
-  <div class="ad-table-card">
-    <div class="ad-table-head">
-      <h2>
-        <span class="ad-title-icon" aria-hidden="true">
-          <svg class="ad-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-        </span>
-        {% if request.args.get('filter') == 'Lost' %}
-          Lost Reports
-        {% elif request.args.get('filter') == 'Found' %}
-          Found Reports
-        {% else %}
-          All Reports
-        {% endif %}
-      </h2>
-      {% if reports %}
-        <span class="ad-table-count">{{ reports|length }} record{{ 's' if reports|length != 1 else '' }}</span>
-      {% endif %}
+      <div class="ad-toolbar__right">
+        <h2 class="ad-panel-title">
+          {% if request.args.get('filter') == 'Lost' %}Lost Reports
+          {% elif request.args.get('filter') == 'Found' %}Found Reports
+          {% else %}All Reports{% endif %}
+          {% if reports %}<span class="ad-count">{{ reports|length }}</span>{% endif %}
+        </h2>
+        <a href="{{ url_for('admin_claims') }}" class="ad-btn ad-btn--primary ad-btn--sm">
+          <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          Review Claims
+          {% if stats.pending_claims > 0 %}<span class="ad-badge">{{ stats.pending_claims }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('admin_history') }}" class="ad-btn ad-btn--ghost ad-btn--sm">
+          <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          Deleted
+        </a>
+      </div>
     </div>
 
     {% if reports %}
-      <div class="ad-table-scroll">
+      <div class="ad-scroll">
         <div class="ad-table">
-          <div class="ad-row ad-row--header">
-            <span>ID</span>
-            <span>Item Name</span>
-            <span>Type</span>
-            <span>Status</span>
-            <span>Update Status</span>
-            <span>Date</span>
-            <span>Actions</span>
+          <div class="ad-row ad-row--head">
+            <span>ID</span><span>Item</span><span>Type</span><span>Status</span>
+            <span>Update</span><span>Date</span><span>Actions</span>
           </div>
 
           {% for report in reports %}
             {% set current_filter = request.args.get('filter') %}
             {% if not current_filter or current_filter == report.report_type %}
             <div class="ad-row ad-row--data">
-              <span class="ad-col-id">#{{ report.id }}</span>
+              <span class="ad-id">#{{ report.id }}</span>
 
-              <span class="ad-col-item">
+              <span>
                 <a href="{{ url_for('report_detail', report_id=report.id) }}" class="ad-item-link">
                   {{ report.item_name }}
                 </a>
               </span>
 
               <span>
-                <span class="ad-type ad-type--{{ report.report_type|lower }}">
+                <span class="ad-pill-tag ad-pill-tag--{{ report.report_type|lower }}">
                   {{ report.report_type }}
                 </span>
               </span>
 
               <span>
-                <span class="ad-status ad-status--{{ report.status|replace(' ', '-')|lower }}">
+                <span class="ad-pill-tag ad-pill-tag--{{ report.status|replace(' ', '-')|lower }}">
                   {{ report.status }}
                 </span>
               </span>
 
               <form action="{{ url_for('admin_update_report_status', report_id=report.id) }}"
-                    method="POST" class="ad-select-wrap">
+                    method="POST" class="ad-select">
                 <select name="status" onchange="this.form.submit()" aria-label="Update status for {{ report.item_name }}">
                   <option value="Open" {% if report.status == 'Open' %}selected{% endif %}>Open</option>
-                  <option value="Pending Claim" {% if report.status == 'Pending Claim' %}selected{% endif %}>Pending Claim</option>
+                  <option value="Pending Claim" {% if report.status == 'Pending Claim' %}selected{% endif %}>Pending</option>
                   <option value="Returned" {% if report.status == 'Returned' %}selected{% endif %}>Returned</option>
                   <option value="Archived" {% if report.status == 'Archived' %}selected{% endif %}>Archived</option>
                 </select>
               </form>
 
-              <span class="ad-col-date">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
+              <span class="ad-date">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
 
-              <span class="ad-col-actions">
+              <span class="ad-actions">
                 <a href="{{ url_for('report_detail', report_id=report.id) }}" class="ad-btn ad-btn--ghost ad-btn--sm">
                   <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                   View
                 </a>
                 <form action="{{ url_for('admin_delete_report', report_id=report.id) }}" method="POST"
-                      onsubmit="return confirm('Delete this report? This can be restored from Deleted history.');">
-                  <button type="submit" class="ad-btn ad-btn--danger-ghost ad-btn--sm">
-                    <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                      onsubmit="return confirm('Delete this report? It will be saved to Deleted history.');">
+                  <button type="submit" class="ad-btn ad-btn--danger ad-btn--sm">
+                    <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     Delete
                   </button>
                 </form>
