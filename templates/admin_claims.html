@@ -3,557 +3,463 @@
 
 {% block head %}
 <style>
-/* ==========================================
-   PAGE BACKGROUND & WRAPPER
-   ========================================== */
-.claims-wrapper {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
-}
-
-/* ==========================================
-   HEADER
-   ========================================== */
-.claims-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 16px;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-}
-
-.claims-header h1 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.5rem;
-  color: #055c34;
-  font-weight: 700;
-}
-
-.claims-header p {
-  margin: 0;
-  color: #557563;
-  font-size: 0.95rem;
-}
-
-.btn-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(7, 92, 59, 0.08);
-  color: #075c3b;
-  padding: 0.7rem 1.3rem;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 600;
-  border: 1px solid rgba(7, 92, 59, 0.15);
-  transition: all 0.3s ease;
-}
-
-.btn-back:hover {
-  background: rgba(7, 92, 59, 0.15);
-  transform: translateY(-1px);
-}
-
-/* ==========================================
-   STATS GRID
-   ========================================== */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 14px;
-  padding: 1.25rem;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  background: rgba(255, 255, 255, 0.85);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(7, 92, 59, 0.06);
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: #668072;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.stat-value {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #1a3024;
-}
-
-.stat-value.pending { color: #f39c12; }
-.stat-value.approved { color: #27ae60; }
-.stat-value.rejected { color: #c0392b; }
-
-/* ==========================================
-   FILTERS BAR
-   ========================================== */
-.filters-bar {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 12px;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-}
-
-.filter-group {
-  flex: 1;
-  min-width: 220px;
-}
-
-.filter-group label {
-  display: block;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #557563;
-  margin-bottom: 0.4rem;
-}
-
-.filter-group input,
-.filter-group select {
-  width: 100%;
-  padding: 0.7rem 0.9rem;
-  border: 1.5px solid rgba(7, 92, 59, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 0.95rem;
-  transition: all 0.25s ease;
-}
-
-.filter-group input:focus,
-.filter-group select:focus {
-  outline: none;
-  border-color: #075c3b;
-  box-shadow: 0 0 0 3px rgba(7, 92, 59, 0.1);
-}
-
-/* ==========================================
-   CLAIMS TABLE
-   ========================================== */
-.claims-table-wrapper {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 16px;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-  overflow: hidden;
-}
-
-.table-header-row {
-  display: grid;
-  grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
-  background: rgba(7, 92, 59, 0.04);
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: #557563;
-  border-bottom: 1px solid rgba(7, 92, 59, 0.08);
-}
-
-.table-row {
-  display: grid;
-  grid-template-columns: 1.6fr 1.4fr 2fr 1.4fr;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(7, 92, 59, 0.06);
-  align-items: flex-start;
-  transition: background 0.25s ease;
-}
-
-.table-row:hover {
-  background: rgba(7, 92, 59, 0.02);
-}
-
-.claim-id {
-  font-size: 0.95rem;
-  color: #1a3024;
-  font-weight: 700;
-}
-
-.item-name {
-  margin: 0.4rem 0 0.2rem;
-  font-weight: 600;
-  color: #075c3b;
-  font-size: 1rem;
-}
-
-.meta {
-  display: block;
-  font-size: 0.85rem;
-  color: #668072;
-  margin: 0.25rem 0;
-}
-
-.meta.muted {
-  color: #99a89f;
-}
-
-.link-view {
-  display: inline-block;
-  margin-top: 0.5rem;
-  color: #075c3b;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: color 0.2s ease;
-}
-
-.link-view:hover {
-  text-decoration: underline;
-  color: #055c34;
-}
-
-.proof-col {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  color: #2d4a3b;
-  line-height: 1.6;
-  font-size: 0.9rem;
-}
-
-/* ==========================================
-   STATUS & FORM
-   ========================================== */
-.status-tag {
-  display: inline-block;
-  padding: 0.4rem 0.9rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  margin-bottom: 0.8rem;
-}
-
-.status-tag.pending { 
-  background: #fef3e0; 
-  color: #b77900; 
-}
-.status-tag.approved { 
-  background: #e6f9e9; 
-  color: #219646; 
-}
-.status-tag.rejected { 
-  background: #fde8e8; 
-  color: #b02020; 
-}
-
-.status-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.status-form label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #557563;
-}
-
-.status-form select {
-  padding: 0.6rem 0.8rem;
-  border: 1.5px solid rgba(7, 92, 59, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
-  transition: all 0.25s ease;
-}
-
-.status-form select:focus {
-  outline: none;
-  border-color: #075c3b;
-  box-shadow: 0 0 0 3px rgba(7, 92, 59, 0.1);
-}
-
-.btn-save {
-  background: linear-gradient(135deg, #075c3b, #087443);
-  color: #ffffff;
-  border: none;
-  padding: 0.7rem 1rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 0.25rem;
-  transition: all 0.3s ease;
-}
-
-.btn-save:hover {
-  background: #064d32;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(7, 92, 59, 0.2);
-}
-
-.no-results {
-  padding: 3rem;
-  text-align: center;
-  color: #668072;
-  font-weight: 500;
-  display: none;
-  margin: 0;
-}
-
-/* ==========================================
-   EMPTY STATE
-   ========================================== */
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 16px;
-  border: 1px solid rgba(7, 92, 59, 0.12);
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 1rem;
-  opacity: 0.7;
-}
-
-.empty-state h3 {
-  margin: 0 0 0.5rem;
-  color: #1a3024;
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-.empty-state p {
-  margin: 0 0 1.5rem;
-  color: #668072;
-}
-
-.btn-primary {
-  display: inline-block;
-  background: linear-gradient(135deg, #075c3b, #087443);
-  color: #ffffff;
-  padding: 0.8rem 1.6rem;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  background: #064d32;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(7, 92, 59, 0.2);
-}
-
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
-@media (max-width: 1024px) {
-  .table-header-row { display: none; }
-  .table-row {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  /* ============================================================
+     CLAIM REQUESTS — Clean, minimal boxes
+     Header (no box) → slim stats strip → single panel (search + list)
+  ============================================================ */
+  .cl-wrap {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px 20px 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
   }
-}
+  .cl-icon {
+    width: 17px; height: 17px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  .cl-icon--sm { width: 13px; height: 13px; }
+  .cl-icon--lg { width: 20px; height: 20px; }
 
-@media (max-width: 600px) {
-  .claims-header { flex-direction: column; align-items: flex-start; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .filters-bar { flex-direction: column; }
-  .filter-group { width: 100%; }
-}
+  /* ---------- Top header (no box) ---------- */
+  .cl-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .cl-top h1 {
+    margin: 0 0 3px;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cl-top h1 .cl-title-icon {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cl-top p { margin: 0; color: var(--muted); font-size: 14px; max-width: 560px; line-height: 1.6; }
+
+  .cl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 11px;
+    border: 1.5px solid transparent;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    white-space: nowrap;
+  }
+  .cl-btn:hover { transform: translateY(-1px); }
+  .cl-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
+  .cl-btn--ghost:hover { background: var(--surface-alt); }
+  .cl-btn--primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .cl-btn--primary:hover { background: var(--primary-dark); box-shadow: 0 6px 16px rgba(7,92,59,.25); color: #fff; }
+
+  /* ---------- Slim stats strip ---------- */
+  .cl-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .cl-stat {
+    flex: 1 1 140px;
+    padding: 16px 22px;
+    border-right: 1px solid var(--border);
+    min-width: 140px;
+  }
+  .cl-stat:last-child { border-right: none; }
+  .cl-stat__label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 3px;
+  }
+  .cl-stat__value {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .cl-stat--all .cl-stat__value { color: var(--text); }
+  .cl-stat--pending .cl-stat__value { color: #b9770e; }
+  .cl-stat--approved .cl-stat__value { color: #1e8449; }
+  .cl-stat--rejected .cl-stat__value { color: #c0392b; }
+
+  /* ---------- Single panel: search + list ---------- */
+  .cl-panel {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .cl-toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-end;
+  }
+  .cl-field { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px; }
+  .cl-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .cl-field input, .cl-field select {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13.5px;
+    font-family: inherit;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .cl-field input:focus, .cl-field select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
+  }
+
+  /* ---------- Claim rows ---------- */
+  .cl-scroll { overflow-x: auto; }
+  .cl-table { min-width: 860px; width: 100%; }
+  .cl-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1.3fr 1.8fr 1.2fr;
+    gap: 18px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+    transition: background .15s ease;
+  }
+  .cl-row--head {
+    background: var(--surface-alt);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .cl-row--data:hover { background: var(--surface-alt); }
+  .cl-row--data:last-child { border-bottom: none; }
+
+  .cl-claim-id {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .cl-item-name {
+    margin: 0 0 4px;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 14px;
+  }
+  .cl-meta {
+    display: block;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 2px 0;
+  }
+  .cl-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 12.5px;
+  }
+  .cl-link:hover { text-decoration: underline; }
+
+  .cl-claimant-name { font-weight: 700; color: var(--text); font-size: 14px; display: block; margin-bottom: 4px; }
+  .cl-proof {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .cl-status-tag {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin-bottom: 12px;
+  }
+  .cl-status-tag.pending { background: rgba(185,119,14,.12); color: #b9770e; }
+  .cl-status-tag.approved { background: rgba(30,132,73,.1); color: #1e8449; }
+  .cl-status-tag.rejected { background: rgba(192,57,43,.1); color: #c0392b; }
+
+  .cl-status-form { display: flex; flex-direction: column; gap: 8px; }
+  .cl-status-form label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .cl-status-form select {
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .cl-status-form select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
+  }
+
+  .cl-no-results {
+    display: none;
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* ---------- Empty state ---------- */
+  .cl-empty {
+    padding: 56px 24px;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+  }
+  .cl-empty__icon {
+    width: 60px; height: 60px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cl-empty__icon svg { width: 26px; height: 26px; }
+  .cl-empty h3 { margin: 0 0 6px; font-size: 18px; font-weight: 700; color: var(--text); }
+  .cl-empty p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+
+  @media (max-width: 700px) {
+    .cl-wrap { padding: 14px 12px 56px; gap: 16px; }
+    .cl-top { flex-direction: column; align-items: stretch; }
+    .cl-top .cl-btn { width: 100%; }
+    .cl-stat { border-right: none; border-bottom: 1px solid var(--border); flex: 1 1 50%; }
+    .cl-row { grid-template-columns: 1fr; gap: 14px; }
+    .cl-row--head { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cl-btn:hover { transform: none !important; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="claims-wrapper">
+<div class="cl-wrap">
 
-  <!-- HEADER -->
-  <div class="claims-header">
+  <!-- ============ TOP HEADER (no box) ============ -->
+  <header class="cl-top">
     <div>
-      <h1>Claim Requests</h1>
-      <p>Review ownership proof and update claim decisions. Approved claims mark the item as Returned.</p>
+      <h1>
+        <span class="cl-title-icon" aria-hidden="true">
+          <svg class="cl-icon cl-icon--lg" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6"/><path d="M19 8v6"/></svg>
+        </span>
+        Claim Requests
+      </h1>
+      <p>Review ownership proof and update claim decisions. Approved claims automatically mark the item as Returned.</p>
     </div>
-    <a href="{{ url_for('admin_dashboard') }}" class="btn-back">← Back to Dashboard</a>
-  </div>
+    <a href="{{ url_for('admin_dashboard') }}" class="cl-btn cl-btn--ghost">
+      <svg class="cl-icon cl-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Back to Dashboard
+    </a>
+  </header>
 
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">All Claims</div>
-      <div class="stat-value">{{ claims|length }}</div>
+  <!-- ============ SLIM STATS STRIP ============ -->
+  {% set pending_n = claims|selectattr('status', 'equalto', 'Pending')|list|length %}
+  {% set approved_n = claims|selectattr('status', 'equalto', 'Approved')|list|length %}
+  {% set rejected_n = claims|selectattr('status', 'equalto', 'Rejected')|list|length %}
+  <section class="cl-stats" aria-label="Claim statistics">
+    <div class="cl-stat cl-stat--all">
+      <span class="cl-stat__label">All Claims</span>
+      <span class="cl-stat__value">{{ claims|length }}</span>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Pending</div>
-      <div class="stat-value pending">{{ claims|selectattr('status', 'equalto', 'Pending')|list|length }}</div>
+    <div class="cl-stat cl-stat--pending">
+      <span class="cl-stat__label">Pending</span>
+      <span class="cl-stat__value">{{ pending_n }}</span>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Approved</div>
-      <div class="stat-value approved">{{ claims|selectattr('status', 'equalto', 'Approved')|list|length }}</div>
+    <div class="cl-stat cl-stat--approved">
+      <span class="cl-stat__label">Approved</span>
+      <span class="cl-stat__value">{{ approved_n }}</span>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Rejected</div>
-      <div class="stat-value rejected">{{ claims|selectattr('status', 'equalto', 'Rejected')|list|length }}</div>
+    <div class="cl-stat cl-stat--rejected">
+      <span class="cl-stat__label">Rejected</span>
+      <span class="cl-stat__value">{{ rejected_n }}</span>
     </div>
-  </div>
+  </section>
 
-  <!-- FILTERS -->
   {% if claims %}
-  <div class="filters-bar">
-    <div class="filter-group">
-      <label for="claim-search">Search claims</label>
-      <input
-        id="claim-search"
-        type="search"
-        placeholder="Search item, claimant, contact, or ID..."
-      >
-    </div>
-    <div class="filter-group">
-      <label for="claim-filter">Filter by status</label>
-      <select id="claim-filter">
-        <option value="all">All statuses</option>
-        <option value="pending">Pending</option>
-        <option value="approved">Approved</option>
-        <option value="rejected">Rejected</option>
-      </select>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- CLAIMS TABLE -->
-  {% if claims %}
-  <div class="claims-table-wrapper">
-    <div class="claims-table">
-      <div class="table-header-row">
-        <span>Claim / Item</span>
-        <span>Claimant</span>
-        <span>Proof of Ownership</span>
-        <span>Status / Review</span>
+  <!-- ============ SINGLE PANEL: search + list ============ -->
+  <div class="cl-panel">
+    <div class="cl-toolbar">
+      <div class="cl-field">
+        <label for="claim-search">Search</label>
+        <input id="claim-search" type="search" placeholder="Item, claimant, contact, or ID...">
       </div>
-      <div id="claims-rows">
-        {% for c in claims %}
-        <div class="table-row claim-row" data-status="{{ c.status|lower }}">
-          <div class="claim-item-col">
-            <strong class="claim-id">Claim #{{ c.id }}</strong>
-            {% if c.report %}
-              <p class="item-name">{{ c.report.item_name }}</p>
-              <span class="meta">Report #{{ c.report.id }} · {{ c.report.report_type }}</span>
-              <span class="meta">Status: {{ c.report.status }}</span>
-              <a href="{{ url_for('report_detail', report_id=c.report.id) }}" class="link-view">View Report →</a>
-            {% else %}
-              <span class="meta muted">Associated report unavailable</span>
-            {% endif %}
-          </div>
+      <div class="cl-field" style="max-width: 220px;">
+        <label for="claim-filter">Status</label>
+        <select id="claim-filter">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
 
-          <div class="claimant-col">
-            <strong>{{ c.claimant_name }}</strong>
-            <span class="meta">Contact: {{ c.claimant_contact }}</span>
-            <span class="meta">Submitted:
-              {% if c.created_at %}
-                {{ c.created_at.strftime('%b %d, %Y %I:%M %p') }}
-              {% else %}
-                N/A
-              {% endif %}
-            </span>
-          </div>
-
-          <div class="proof-col">
-            {{ c.proof }}
-          </div>
-
-          <div class="status-col">
-            {% if c.status|lower == 'pending' %}
-              <span class="status-tag pending">Pending</span>
-            {% elif c.status|lower == 'approved' %}
-              <span class="status-tag approved">Approved</span>
-            {% elif c.status|lower == 'rejected' %}
-              <span class="status-tag rejected">Rejected</span>
-            {% else %}
-              <span class="status-tag">{{ c.status }}</span>
-            {% endif %}
-
-            <form
-              method="POST"
-              action="{{ url_for('admin_update_claim_status', claim_id=c.id) }}"
-              class="status-form"
-              onsubmit="return confirm('Save this claim decision?');"
-            >
-              <label for="claim-{{ c.id }}">Update status</label>
-              <select id="claim-{{ c.id }}" name="status" required>
-                {% for s in ['Pending', 'Approved', 'Rejected'] %}
-                  <option value="{{ s }}"
-                    {% if c.status|lower == s|lower %}selected{% endif %}>
-                    {{ s }}
-                  </option>
-                {% endfor %}
-              </select>
-              <button type="submit" class="btn-save">Save Review</button>
-            </form>
-          </div>
+    <div class="cl-scroll">
+      <div class="cl-table">
+        <div class="cl-row cl-row--head">
+          <span>Claim / Item</span>
+          <span>Claimant</span>
+          <span>Proof of Ownership</span>
+          <span>Status / Review</span>
         </div>
-        {% endfor %}
+
+        <div id="claims-rows">
+          {% for c in claims %}
+          <div class="cl-row cl-row--data claim-row" data-status="{{ c.status|lower }}">
+            <div>
+              <strong class="cl-claim-id">Claim #{{ c.id }}</strong>
+              {% if c.report %}
+                <p class="cl-item-name">{{ c.report.item_name }}</p>
+                <span class="cl-meta">Report #{{ c.report.id }} · {{ c.report.report_type }}</span>
+                <span class="cl-meta">Report status: {{ c.report.status }}</span>
+                <a href="{{ url_for('report_detail', report_id=c.report.id) }}" class="cl-link">
+                  View Report
+                  <svg class="cl-icon cl-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+              {% else %}
+                <span class="cl-meta">Associated report unavailable</span>
+              {% endif %}
+            </div>
+
+            <div>
+              <strong class="cl-claimant-name">{{ c.claimant_name }}</strong>
+              <span class="cl-meta">{{ c.claimant_contact }}</span>
+              <span class="cl-meta">
+                Submitted {{ c.created_at.strftime('%b %d, %Y · %I:%M %p') if c.created_at else 'N/A' }}
+              </span>
+            </div>
+
+            <p class="cl-proof">{{ c.proof }}</p>
+
+            <div>
+              <span class="cl-status-tag {{ c.status|lower }}">{{ c.status }}</span>
+              <form method="POST" action="{{ url_for('admin_update_claim_status', claim_id=c.id) }}"
+                    class="cl-status-form"
+                    onsubmit="return confirm('Save this claim decision?');">
+                <label for="claim-{{ c.id }}">Update status</label>
+                <select id="claim-{{ c.id }}" name="status" required>
+                  {% for s in ['Pending', 'Approved', 'Rejected'] %}
+                    <option value="{{ s }}" {% if c.status|lower == s|lower %}selected{% endif %}>{{ s }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="cl-btn cl-btn--primary" style="min-height: 36px; font-size: 12.5px;">
+                  Save Review
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <p id="claims-no-results" class="cl-no-results">
+          No claims match your search or selected filter.
+        </p>
       </div>
     </div>
-    <p id="claims-no-results" class="no-results">
-      No claims match your search or selected filter.
-    </p>
   </div>
   {% else %}
-  <div class="empty-state">
-    <div class="empty-icon">📭</div>
+  <div class="cl-empty">
+    <div class="cl-empty__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
     <h3>No Claim Requests Yet</h3>
     <p>New requests will appear here after someone submits a claim for a report.</p>
-    <a href="{{ url_for('admin_dashboard') }}" class="btn-primary">Return to Dashboard</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="cl-btn cl-btn--primary">Return to Dashboard</a>
   </div>
   {% endif %}
 </div>
 
 {% if claims %}
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const searchInput = document.getElementById("claim-search");
-  const statusFilter = document.getElementById("claim-filter");
-  const rows = Array.from(document.querySelectorAll(".claim-row"));
-  const noResults = document.getElementById("claims-no-results");
+  (function () {
+    var searchInput = document.getElementById('claim-search');
+    var statusFilter = document.getElementById('claim-filter');
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.claim-row'));
+    var noResults = document.getElementById('claims-no-results');
 
-  function filterClaims() {
-    const query = searchInput.value.trim().toLowerCase();
-    const selectedStatus = statusFilter.value;
-    let visibleCount = 0;
-
-    rows.forEach(function (row) {
-      const matchesSearch = row.textContent.toLowerCase().includes(query);
-      const matchesStatus = selectedStatus === "all" || row.dataset.status === selectedStatus;
-      const show = matchesSearch && matchesStatus;
-      row.style.display = show ? "" : "none";
-      if (show) visibleCount++;
-    });
-
-    noResults.style.display = visibleCount === 0 ? "block" : "none";
-  }
-
-  searchInput.addEventListener("input", filterClaims);
-  statusFilter.addEventListener("change", filterClaims);
-});
+    function filterClaims() {
+      var query = (searchInput.value || '').trim().toLowerCase();
+      var selected = statusFilter.value;
+      var visible = 0;
+      rows.forEach(function (row) {
+        var matchesSearch = row.textContent.toLowerCase().indexOf(query) !== -1;
+        var matchesStatus = selected === 'all' || row.dataset.status === selected;
+        var show = matchesSearch && matchesStatus;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+    searchInput.addEventListener('input', filterClaims);
+    statusFilter.addEventListener('change', filterClaims);
+  })();
 </script>
 {% endif %}
 {% endblock %}
