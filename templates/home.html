@@ -7,8 +7,7 @@
   /* ============================================================
      SLSU JGE FindHub — HOME (Professional Redesign)
      - No emojis (inline SVG icons only)
-     - No stat boxes
-     - Fresh layout, not based on previous design
+     - When searching: hero hidden, only matching reports show
   ============================================================ */
 
   :root {
@@ -56,7 +55,7 @@
   .fh-icon--lg { width: 22px; height: 22px; }
 
   /* ============================================================
-     HERO — two-column: copy left, visual panel right
+     HERO — HIDDEN when searching (body.search-active)
   ============================================================ */
   .fh-hero {
     display: grid;
@@ -72,6 +71,7 @@
     box-shadow: var(--shadow);
     overflow: hidden;
   }
+  body.search-active .fh-hero { display: none !important; }
 
   .fh-hero__eyebrow {
     display: inline-flex;
@@ -142,41 +142,22 @@
     color: var(--fh-accent-lost);
     border-color: var(--fh-accent-lost-border);
   }
-  .fh-btn--lost:hover {
-    box-shadow: 0 8px 20px rgba(194,65,12,.18);
-  }
+  .fh-btn--lost:hover { box-shadow: 0 8px 20px rgba(194,65,12,.18); }
   .fh-btn--found {
     background: var(--fh-accent-found-soft);
     color: var(--fh-accent-found);
     border-color: var(--fh-accent-found-border);
   }
-  .fh-btn--found:hover {
-    box-shadow: 0 8px 20px rgba(21,128,61,.18);
-  }
-  .fh-btn--primary {
-    background: var(--primary);
-    color: #fff;
-  }
+  .fh-btn--found:hover { box-shadow: 0 8px 20px rgba(21,128,61,.18); }
+  .fh-btn--primary { background: var(--primary); color: #fff; }
   .fh-btn--primary:hover {
     background: var(--primary-dark);
     box-shadow: 0 8px 20px rgba(7,92,59,.28);
     color: #fff;
   }
-  .fh-btn--ghost {
-    background: transparent;
-    color: var(--text);
-    border-color: var(--border);
-  }
-  .fh-btn--ghost:hover {
-    background: var(--surface-alt);
-    box-shadow: 0 4px 12px rgba(0,0,0,.06);
-  }
-  .fh-btn--sm {
-    min-height: 36px;
-    padding: 0 14px;
-    font-size: 13px;
-    border-radius: 10px;
-  }
+  .fh-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
+  .fh-btn--ghost:hover { background: var(--surface-alt); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+  .fh-btn--sm { min-height: 36px; padding: 0 14px; font-size: 13px; border-radius: 10px; }
 
   .fh-hero__meta {
     display: flex;
@@ -185,18 +166,9 @@
     font-size: 13px;
     color: var(--muted);
   }
-  .fh-hero__meta span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .fh-hero__meta span { display: inline-flex; align-items: center; gap: 6px; }
 
-  /* Hero visual panel — "How it works" steps */
-  .fh-hero__visual {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
+  .fh-hero__visual { display: flex; flex-direction: column; gap: 14px; }
   .fh-step {
     display: flex;
     align-items: flex-start;
@@ -224,21 +196,11 @@
     font-weight: 800;
     font-size: 14px;
   }
-  .fh-step__body h4 {
-    margin: 0 0 3px;
-    font-size: 14.5px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .fh-step__body p {
-    margin: 0;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.55;
-  }
+  .fh-step__body h4 { margin: 0 0 3px; font-size: 14.5px; font-weight: 700; color: var(--text); }
+  .fh-step__body p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
 
   /* ============================================================
-     SEARCH SECTION — prominent, card-based
+     SEARCH SECTION — more compact when searching
   ============================================================ */
   .fh-search {
     padding: 28px 30px;
@@ -248,12 +210,10 @@
     box-shadow: var(--shadow);
     scroll-margin-top: 90px;
   }
-  .fh-search__head {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
-  }
+  body.search-active .fh-search { padding: 20px 24px; }
+  body.search-active .fh-search__head p { display: none; }
+
+  .fh-search__head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
   .fh-search__icon {
     width: 40px; height: 40px;
     border-radius: 12px;
@@ -264,31 +224,16 @@
     justify-content: center;
     flex-shrink: 0;
   }
-  .fh-search__head h2 {
-    margin: 0;
-    font-size: 19px;
-    font-weight: 700;
-  }
-  .fh-search__head p {
-    margin: 2px 0 0;
-    font-size: 13px;
-    color: var(--muted);
-  }
+  .fh-search__head h2 { margin: 0; font-size: 19px; font-weight: 700; }
+  .fh-search__head p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
   .fh-search__form {
     display: grid;
     grid-template-columns: 2.2fr 1fr 1fr auto;
     gap: 12px;
     align-items: end;
   }
-  .fh-field label {
-    display: block;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .fh-field input,
-  .fh-field select {
+  .fh-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .fh-field input, .fh-field select {
     width: 100%;
     padding: 11px 14px;
     border: 1.5px solid var(--border);
@@ -297,18 +242,39 @@
     color: var(--text);
     font-size: 14px;
     transition: border-color .2s ease, box-shadow .2s ease;
+    font-family: inherit;
   }
-  .fh-field input:focus,
-  .fh-field select:focus {
+  .fh-field input:focus, .fh-field select:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(7,92,59,.12);
   }
-  .fh-search__actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 14px;
-    justify-content: flex-end;
+  .fh-search__actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+
+  /* Search results summary bar (shown only when searching) */
+  .fh-results-summary {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 20px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  body.search-active .fh-results-summary { display: flex; }
+  .fh-results-summary a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    border-bottom: 1px solid currentColor;
   }
 
   /* ============================================================
@@ -448,11 +414,7 @@
   }
   .fh-card:hover .fh-card__title { color: var(--primary); }
 
-  .fh-card__meta {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
+  .fh-card__meta { display: grid; gap: 8px; margin-bottom: 14px; }
   .fh-card__meta-row {
     display: flex;
     align-items: flex-start;
@@ -461,11 +423,7 @@
     color: var(--muted);
     overflow-wrap: anywhere;
   }
-  .fh-card__meta-row .fh-icon {
-    margin-top: 1px;
-    color: var(--primary);
-    opacity: .8;
-  }
+  .fh-card__meta-row .fh-icon { margin-top: 1px; color: var(--primary); opacity: .8; }
 
   .fh-status {
     display: inline-flex;
@@ -478,12 +436,7 @@
     margin-bottom: 16px;
     align-self: flex-start;
   }
-  .fh-status::before {
-    content: "";
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-  }
+  .fh-status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .fh-status--open { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); }
   .fh-status--pending { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); }
   .fh-status--closed { background: var(--surface-alt); color: var(--muted); }
@@ -512,11 +465,7 @@
     justify-content: center;
   }
   .fh-empty__icon svg { width: 32px; height: 32px; }
-  .fh-empty h3 {
-    margin: 0 0 8px;
-    font-size: 20px;
-    font-weight: 700;
-  }
+  .fh-empty h3 { margin: 0 0 8px; font-size: 20px; font-weight: 700; }
   .fh-empty p {
     max-width: 440px;
     margin: 0 auto 24px;
@@ -524,23 +473,14 @@
     font-size: 14.5px;
     line-height: 1.7;
   }
-  .fh-empty__actions {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+  .fh-empty__actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
 
   /* ============================================================
      REPORTS-ONLY VIEW (hides hero + search)
   ============================================================ */
   body.reports-only .fh-hero,
-  body.reports-only .fh-search {
-    display: none !important;
-  }
-  body.reports-only .fh-reports {
-    animation: fhFadeIn .45s ease both;
-  }
+  body.reports-only .fh-search { display: none !important; }
+  body.reports-only .fh-reports { animation: fhFadeIn .45s ease both; }
   @keyframes fhFadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -589,7 +529,7 @@
 {% block content %}
 <div class="fh-home">
 
-  <!-- ===================== HERO ===================== -->
+  <!-- ===================== HERO (hidden when searching) ===================== -->
   <section class="fh-hero" aria-label="Welcome">
     <div class="fh-hero__copy">
       <span class="fh-hero__eyebrow">
@@ -705,6 +645,22 @@
       </div>
     </form>
   </section>
+
+  <!-- ===================== RESULTS SUMMARY (only when searching) ===================== -->
+  <div class="fh-results-summary">
+    <span>
+      {% if reports %}
+        {{ reports|length }} result{{ 's' if reports|length != 1 else '' }} found
+        {% if request.args.get('q') %}for “{{ request.args.get('q') }}”{% endif %}
+      {% else %}
+        No results found{% if request.args.get('q') %} for “{{ request.args.get('q') }}”{% endif %}
+      {% endif %}
+    </span>
+    <a href="{{ url_for('home') }}">
+      <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Back to Home
+    </a>
+  </div>
 
   <!-- ===================== REPORTS ===================== -->
   <section class="fh-reports" id="reports-section" aria-labelledby="fh-reports-title">
@@ -826,6 +782,11 @@
     var backBtn = document.getElementById('fh-back-btn');
     var reportsSection = document.getElementById('reports-section');
 
+    /* KEY FIX: when searching, add body.search-active → CSS hides the hero */
+    if (hasSearch) {
+      document.body.classList.add('search-active');
+    }
+
     if (hasSearch || isReportsView) {
       if (reportsSection) reportsSection.style.display = '';
     } else {
@@ -857,6 +818,7 @@
         if (isReportsView && !hasSearch) return;
         e.preventDefault();
         document.body.classList.remove('reports-only');
+        document.body.classList.remove('search-active');
         if (!hasSearch && reportsSection) reportsSection.style.display = 'none';
         backBtn.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
