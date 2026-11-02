@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% block title %}Safety Claiming Guidelines | SLSU JGE FindHub{% endblock %}
+{% block head %}
+<style>
+  :root {
+    --fh-accent-lost: #c2410c;
+    --fh-accent-lost-soft: #fff7ed;
+    --fh-accent-found: #15803d;
+    --fh-accent-found-soft: #f0fdf4;
+    --fh-warning: #b45309;
+    --fh-warning-soft: #fffbeb;
+    --fh-danger: #b91c1c;
+    --fh-danger-soft: #fef2f2;
+    --fh-radius: 16px;
+    --fh-radius-lg: 24px;
+  }
+  html[data-theme="dark"] {
+    --fh-accent-lost-soft: rgba(194,65,12,.18);
+    --fh-accent-found-soft: rgba(21,128,61,.2);
+    --fh-warning-soft: rgba(180,83,9,.15);
+    --fh-danger-soft: rgba(185,28,28,.15);
+  }
+
+  .fh-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 20px 72px;
+  }
+
+  .fh-page-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .fh-page-icon {
+    width: 64px; height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fh-page-icon svg { width: 32px; height: 32px; }
+  .fh-page-header h1 {
+    margin: 0 0 8px;
+    font-size: clamp(26px, 5vw, 36px);
+    font-weight: 800;
+    color: var(--text);
+  }
+  .fh-page-header p {
+    margin: 0;
+    font-size: 15.5px;
+    color: var(--muted);
+    max-width: 540px;
+    margin-left: auto; margin-right: auto;
+  }
+
+  .fh-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--fh-radius);
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .fh-card h2 {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 20px;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .fh-card h2 span {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800;
+  }
+
+  .fh-check-list, .fh-cross-list {
+    list-style: none;
+    padding: 0; margin: 0;
+    display: grid; gap: 12px;
+  }
+  .fh-check-list li, .fh-cross-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 4px 0;
+  }
+  .fh-check-list li::before {
+    content: "";
+    width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2315803d' stroke-width='2'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") no-repeat center;
+  }
+  .fh-cross-list li::before {
+    content: "";
+    width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23b91c1c' stroke-width='2'%3E%3Cpath d='M6 18L18 6M6 6l12 12'/%3E%3C/svg%3E") no-repeat center;
+  }
+
+  .fh-alert {
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 20px 0;
+  }
+  .fh-alert--warning {
+    background: var(--fh-warning-soft);
+    border-left: 4px solid var(--fh-warning);
+  }
+  .fh-alert--danger {
+    background: var(--fh-danger-soft);
+    border-left: 4px solid var(--fh-danger);
+  }
+  .fh-alert--success {
+    background: var(--fh-accent-found-soft);
+    border-left: 4px solid var(--fh-accent-found);
+  }
+  .fh-alert h3 {
+    margin: 0 0 8px;
+    font-size: 15px; font-weight: 700;
+  }
+  .fh-alert p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .fh-steps {
+    counter-reset: step;
+    list-style: none; padding: 0; margin: 0;
+    display: grid; gap: 16px;
+  }
+  .fh-steps li {
+    display: flex; gap: 14px;
+  }
+  .fh-steps li::before {
+    counter-increment: step;
+    content: counter(step);
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+  }
+  .fh-step-body h4 {
+    margin: 0 0 4px;
+    font-size: 15px; font-weight: 700;
+  }
+  .fh-step-body p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .fh-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+  .fh-table th, .fh-table td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .fh-table th {
+    background: var(--surface-alt);
+    font-weight: 700;
+  }
+
+  .fh-cta {
+    text-align: center;
+    margin-top: 32px;
+  }
+  .fh-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; min-height: 48px; padding: 0 28px;
+    border-radius: 12px; border: none;
+    font-size: 15px; font-weight: 700; text-decoration: none;
+    background: var(--primary); color: #fff;
+    cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .fh-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(7,92,59,.25);
+    color: #fff;
+  }
+
+  @media (max-width: 600px) {
+    .fh-container { padding: 16px 14px 48px; }
+    .fh-card { padding: 20px 18px; }
+    .fh-table th, .fh-table td { padding: 10px 8px; font-size: 13px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fh-container">
+
+  <div class="fh-page-header">
+    <div class="fh-page-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="m9 12 2 2 4-4"/>
+      </svg>
+    </div>
+    <h1>Safe Claiming Guidelines</h1>
+    <p>Your safety and security matter. Follow these steps to safely recover or return items at SLSU JGE Campus.</p>
+  </div>
+
+  <!-- Rule #1 — What to Prove -->
+  <div class="fh-card">
+    <h2>
+      <span style="background: var(--fh-accent-found-soft); color: var(--fh-accent-found);">1</span>
+      You Must Prove Ownership
+    </h2>
+    <p style="margin:0 0 16px; color:var(--muted); font-size:14px;">"It looks like mine" is <strong>not enough</strong>. You must provide <strong>3 or more</strong> of the following:</p>
+    
+    <table class="fh-table">
+      <thead>
+        <tr>
+          <th>Proof Type</th>
+          <th>Examples</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>🪪 School/Government ID</strong></td>
+          <td>Student ID, PhilSys ID — name must match exactly</td>
+        </tr>
+        <tr>
+          <td><strong>📝 Unique Details</strong></td>
+          <td>Serial number, scratches, stickers, lock PIN, saved photos</td>
+        </tr>
+        <tr>
+          <td><strong>📅 Exact Circumstances</strong></td>
+          <td>Time, exact location, who you were with — details only you would know</td>
+        </tr>
+        <tr>
+          <td><strong>🧾 Purchase Proof</strong></td>
+          <td>Receipt, box photo, warranty, online order screenshot</td>
+        </tr>
+        <tr>
+          <td><strong>👤 Witness</strong></td>
+          <td>Name & contact of someone who saw you with it</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Process Steps -->
+  <div class="fh-card">
+    <h2>
+      <span style="background: var(--fh-accent-found-soft); color: var(--fh-accent-found);">2</span>
+      How the Claim Process Works
+    </h2>
+    <ol class="fh-steps">
+      <li>
+        <div class="fh-step-body">
+          <h4>Submit a Claim Request</h4>
+          <p>Go to the report page and fill in the verification form. Never share private info before verification.</p>
+        </div>
+      </li>
+      <li>
+        <div class="fh-step-body">
+          <h4>Reporter Reviews Your Details</h4>
+          <p>They compare your answers to what they know. No contact info shared yet.</p>
+        </div>
+      </li>
+      <li>
+        <div class="fh-step-body">
+          <h4>✅ Match → Arrange Meeting</h4>
+          <p>Reporter shares contact & meeting details. <strong>❌ No match → try again or provide more details.</strong></p>
+        </div>
+      </li>
+      <li>
+        <div class="fh-step-body">
+          <h4>Meet & Confirm Handover</h4>
+          <p>Show your ID in person. Sign simple confirmation. Mark item as Returned in the system.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- Safe Meeting Spots -->
+  <div class="fh-card">
+    <h2>
+      <span style="background: var(--fh-accent-found-soft); color: var(--fh-accent-found);">3</span>
+      Safe Meeting Spots — SLSU JGE Only
+    </h2>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <h4 style="color:var(--fh-accent-found); margin:0 0 10px;">✅ Safe Locations</h4>
+        <ul class="fh-check-list">
+          <li>Campus Security / Guard House</li>
+          <li>Student Center or Covered Court</li>
+          <li>Library Lobby or Admin Building</li>
+          <li>Your Department Office</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--fh-danger); margin:0 0 10px;">❌ Never Go</h4>
+        <ul class="fh-cross-list">
+          <li>Private rooms or empty areas</li>
+          <li>Off-campus locations</li>
+          <li>Meetings after dark</li>
+          <li>Alone — always bring a friend</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fh-alert fh-alert--warning" style="margin-top:20px;">
+      <h3>🕐 Best Practice</h3>
+      <p>Meet between <strong>8:00 AM – 5:00 PM</strong> during weekdays. Bring <strong>1 companion</strong> whenever possible.</p>
+    </div>
+  </div>
+
+  <!-- Red Flags -->
+  <div class="fh-card">
+    <h2>
+      <span style="background: var(--fh-danger-soft); color: var(--fh-danger);">!</span>
+      Red Flags — Stop & Report
+    </h2>
+    
+    <div class="fh-alert fh-alert--danger">
+      <h3>🚩 These are NOT normal — report immediately</h3>
+      <ul style="margin:8px 0 0 18px; padding:0;">
+        <li>Asking for <strong>money, load, or payment</strong> to return an item</li>
+        <li>Pressuring you: <em>"Someone else is coming — hurry!"</em></li>
+        <li>Refusing in-person meeting — insisting on shipping or photos only</li>
+        <li>Asking for passwords, PINs, or full ID photos before verification</li>
+        <li>Story changes or details don't match what was posted</li>
+      </ul>
+    </div>
+
+    <div class="fh-alert fh-alert--success" style="margin-top:16px;">
+      <h3>📞 Report Concerns To</h3>
+      <p><strong>Campus Security / Admin Office</strong> — or message through this platform. We will review and take action.</p>
+    </div>
+  </div>
+
+  <!-- Quick Summary -->
+  <div class="fh-card">
+    <h2>
+      <span style="background: var(--fh-accent-found-soft); color: var(--fh-accent-found);">✓</span>
+      Quick Rules to Remember
+    </h2>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <h4 style="color:var(--fh-accent-found); margin:0 0 10px;">✅ DO</h4>
+        <ul class="fh-check-list">
+          <li>Verify details first</li>
+          <li>Meet in public, well-lit areas</li>
+          <li>Bring your ID & a friend</li>
+          <li>Report suspicious behavior</li>
+          <li>Mark item as Returned</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--fh-danger); margin:0 0 10px;">❌ DON'T</h4>
+        <ul class="fh-cross-list">
+          <li>Never send money</li>
+          <li>Don't share info too early</li>
+          <li>Don't meet alone or at night</li>
+          <li>Don't rush — take your time</li>
+          <li>Don't hand over without ID check</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="fh-cta">
+    <a href="{{ url_for('home') }}" class="fh-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back to FindHub
+    </a>
+  </div>
+
+</div>
+{% endblock %}
