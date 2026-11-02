@@ -89,7 +89,7 @@ if not database_url.startswith(("postgresql+psycopg2://", "sqlite:///")):
 
 if IS_VERCEL and database_url.startswith("sqlite:///"):
     raise RuntimeError(
-        "SQLite is not suitable for persistent Vercel production data. "
+        "SQLite is not suitable for persistent Vercel production. "
         "Configure PostgreSQL using DATABASE_URL."
     )
 
@@ -170,7 +170,6 @@ class Notification(db.Model):
     is_read = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
-# ========== DELETED REPORTS HISTORY MODEL ==========
 class DeletedReport(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     original_report_id = db.Column(db.Integer, nullable=False)
@@ -187,7 +186,6 @@ class DeletedReport(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
     deleted_at = db.Column(db.DateTime, default=utcnow, nullable=False)
     deleted_by = db.Column(db.String(120), nullable=True)
-# ========================================================
 
 with app.app_context():
     db.create_all()
@@ -261,12 +259,11 @@ def save_photo(file_storage):
         return None
     original_name = secure_filename(file_storage.filename)
     if not original_name or not allowed_file(original_name):
-        raise ValueError("Use a PNG, JPG, JPEG, GIF, or WEBP image.")
+        raise ValueError("Use PNG, JPG, JPEG, GIF, or WEBP image.")
     if not USE_CLOUDINARY:
         if IS_VERCEL:
             raise RuntimeError(
-                "Photo storage is not configured. Set CLOUDINARY_URL "
-                "in Vercel Environment Variables."
+                "CLOUDINARY_URL not set. Photo uploads need Cloudinary on Vercel."
             )
         filename = f"{secrets.token_hex(12)}_{original_name}"
         file_storage.save(UPLOAD_FOLDER / filename)
@@ -374,7 +371,7 @@ def home():
     )
 
 # ==================================================
-# VIEW ALL REPORTS — DEDICATED PAGE
+# ALL REPORTS PAGE
 # ==================================================
 @app.route("/reports")
 def view_reports():
@@ -427,10 +424,10 @@ def view_reports():
     )
 
 # ==================================================
-# CREATE A REPORT
+# NEW REPORT
 # ==================================================
 @app.route("/report/new", methods=["GET", "POST"])
 def new_report():
     if request.method == "POST":
         report_type = get_report_form_value("report_type")
-       
+        item_name = get_report_form_value("item_name
