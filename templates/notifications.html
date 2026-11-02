@@ -1,15 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Notifications | SLSU JGE FindHub{% endblock %}
+
 {% block head %}
 <style>
-  .notifications-page {
-    width: 100%;
+  /* ============================================================
+     NOTIFICATIONS — Professional (no emojis, SVG icons)
+  ============================================================ */
+  .nt-wrap {
     max-width: 900px;
-    margin: 28px auto;
-    padding: 0 12px;
-    box-sizing: border-box;
+    margin: 24px auto;
+    padding: 0 16px 72px;
   }
-  .notifications-header {
+  .nt-icon {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  .nt-icon--sm { width: 14px; height: 14px; }
+
+  .nt-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -17,220 +30,209 @@
     gap: 14px;
     margin-bottom: 24px;
   }
-  .notifications-header h1 {
+  .nt-header h1 {
     margin: 0;
-    color: var(--primary-dark, #075c3b);
-    font-size: clamp(1.5rem, 4vw, 2rem);
-  }
-  .notifications-subtitle {
-    margin: 6px 0 0;
-    color: var(--muted, #6b7f72);
-    line-height: 1.6;
-  }
-  .notification-actions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
+    font-size: clamp(22px, 4vw, 28px);
+    font-weight: 800;
+    color: var(--text);
   }
-  .notification-list {
-    display: grid;
-    gap: 14px;
-  }
-  .notification-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 20px;
-    border: 1px solid var(--border, #d4ded7);
-    border-radius: 16px;
-    background: var(--surface, #ffffff);
-    box-shadow: 0 2px 12px rgba(7, 92, 59, 0.06);
-    overflow-wrap: anywhere;
-    transition: all 0.25s ease;
-  }
-  .notification-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(7, 92, 59, 0.1);
-  }
-  .notification-item.unread {
-    border-left: 5px solid var(--primary, #075c3b);
-    background: linear-gradient(to right, var(--primary-soft, rgba(7,92,59,0.06)), transparent);
-  }
-  .notification-icon {
-    flex: 0 0 48px;
-    width: 48px;
-    height: 48px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--primary-soft, rgba(7,92,59,0.12));
-    font-size: 1.4rem;
-  }
-  .notification-body {
-    flex: 1;
-    min-width: 0;
-  }
-  .notification-title {
-    margin: 0 0 6px;
-    font-size: 1.08rem;
-    font-weight: 700;
-    color: var(--text, #1a2e22);
-  }
-  .notification-message {
-    margin: 0 0 10px;
-    color: var(--text, #1a2e22);
-    white-space: pre-wrap;
-    line-height: 1.6;
-  }
-  .notification-date {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--muted, #6b7f72);
-  }
-  .unread-dot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin-left: 8px;
-    border-radius: 50%;
-    background: var(--primary, #075c3b);
-    vertical-align: middle;
-  }
-  .notification-empty {
-    padding: 60px 24px;
-    text-align: center;
-    border-radius: 16px;
-    background: var(--surface, #ffffff);
-    border: 1px solid var(--border, #d4ded7);
-  }
-  .notification-empty .empty-icon {
-    font-size: 3.2rem;
-    margin-bottom: 16px;
-    opacity: 0.6;
-  }
-  .notification-empty h2 {
-    margin: 0 0 10px;
-    color: var(--text, #1a2e22);
-    font-size: 1.25rem;
-  }
-  .notification-empty p {
-    margin: 0;
-    color: var(--muted, #6b7f72);
-    line-height: 1.7;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .notification-actions-row {
-    display: flex;
-    flex-shrink: 0;
-    gap: 8px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-  .notification-actions-row form,
-  .notification-actions-row a {
-    flex-shrink: 0;
-  }
-  .btn-base {
+  .nt-header h1 .nt-title-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    color: var(--primary);
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 9px 14px;
+    justify-content: center;
+  }
+  .nt-sub {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .nt-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .nt-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 38px;
+    padding: 0 14px;
     border-radius: 10px;
+    border: 1.5px solid transparent;
     font-size: 13px;
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.2s ease;
-    line-height: 1.4;
-    border: 1px solid transparent;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
     white-space: nowrap;
+    font-family: inherit;
   }
-  .btn-open {
-    background: linear-gradient(135deg, var(--primary, #075c3b) 0%, var(--primary-dark, #05432a) 100%);
-    border-color: var(--primary, #075c3b);
-    color: #fff !important;
-    box-shadow: 0 2px 8px rgba(7, 92, 59, 0.2);
+  .nt-btn:hover { transform: translateY(-1px); }
+  .nt-btn--primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
   }
-  .btn-open:hover {
-    background: var(--primary-dark, #05432a);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(7, 92, 59, 0.25);
-    color: #fff !important;
+  .nt-btn--primary:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(7,92,59,.25); color: #fff; }
+  .nt-btn--ghost {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
   }
-  .btn-mark-read {
-    background: var(--surface, #fff);
-    border-color: var(--border, #d4ded7);
-    color: var(--text, #1a2e22);
-  }
-  .btn-mark-read:hover {
-    background: var(--primary-soft, rgba(7,92,59,0.12));
-    border-color: var(--primary, #075c3b);
-    color: var(--primary, #075c3b);
-  }
-  .btn-delete {
-    background: #fff;
-    border-color: #f1c0c0;
+  .nt-btn--ghost:hover { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+  .nt-btn--danger {
+    background: var(--surface);
+    border-color: rgba(192,57,43,.35);
     color: #c0392b;
   }
-  .btn-delete:hover {
-    background: #c0392b;
-    border-color: #c0392b;
-    color: #fff;
-    transform: translateY(-1px);
+  .nt-btn--danger:hover { background: #c0392b; border-color: #c0392b; color: #fff; }
+  .nt-actions form { margin: 0; }
+
+  .nt-list { display: grid; gap: 14px; }
+
+  .nt-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 2px 10px rgba(7,92,59,.05);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
   }
-  @media (max-width: 520px) {
-    .notification-item {
-      padding: 16px;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .notification-icon {
-      flex-basis: 40px;
-      width: 40px;
-      height: 40px;
-      font-size: 1.2rem;
-    }
-    .notification-body {
-      flex-basis: calc(100% - 56px);
-    }
-    .notification-actions-row {
-      margin-left: 0;
-      width: 100%;
-      justify-content: stretch;
-      margin-top: 8px;
-    }
-    .notification-actions-row .btn-base {
-      flex: 1;
-      justify-content: center;
-      font-size: 12px;
-      padding: 9px 8px;
-    }
+  .nt-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(7,92,59,.1);
+  }
+  .nt-item.unread {
+    border-left: 4px solid var(--primary);
+    background: linear-gradient(to right, var(--primary-soft), var(--surface) 40%);
+  }
+
+  .nt-item__icon {
+    flex: 0 0 44px;
+    width: 44px; height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+  .nt-item__icon--claim { background: #fef3c7; color: #92400e; }
+  .nt-item__icon--status { background: #e0f2fe; color: #075985; }
+  .nt-item__icon--success { background: #dcfce7; color: #166534; }
+  .nt-item__icon--warning { background: #fee2e2; color: #b91c1c; }
+  html[data-theme="dark"] .nt-item__icon--claim { background: rgba(146,64,14,.25); }
+  html[data-theme="dark"] .nt-item__icon--status { background: rgba(7,89,133,.3); }
+  html[data-theme="dark"] .nt-item__icon--success { background: rgba(22,101,52,.3); }
+  html[data-theme="dark"] .nt-item__icon--warning { background: rgba(185,28,28,.3); }
+
+  .nt-item__body { flex: 1; min-width: 0; }
+  .nt-item__title {
+    margin: 0 0 6px;
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .nt-unread-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.18);
+    flex-shrink: 0;
+  }
+  .nt-item__msg {
+    margin: 0 0 8px;
+    color: var(--text);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+  .nt-item__date {
+    display: block;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .nt-item__actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 6px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .nt-item__actions form { margin: 0; }
+
+  .nt-empty {
+    padding: 56px 24px;
+    text-align: center;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 2px dashed var(--border);
+  }
+  .nt-empty__icon {
+    width: 68px; height: 68px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nt-empty__icon svg { width: 30px; height: 30px; }
+  .nt-empty h2 { margin: 0 0 8px; font-size: 19px; font-weight: 700; color: var(--text); }
+  .nt-empty p { margin: 0 auto; max-width: 400px; color: var(--muted); line-height: 1.7; font-size: 14px; }
+
+  @media (max-width: 560px) {
+    .nt-item { flex-wrap: wrap; padding: 16px; }
+    .nt-item__icon { flex-basis: 40px; width: 40px; height: 40px; }
+    .nt-item__body { flex-basis: calc(100% - 54px); }
+    .nt-item__actions { width: 100%; justify-content: stretch; margin-top: 6px; }
+    .nt-item__actions .nt-btn { flex: 1; justify-content: center; font-size: 12px; padding: 0 10px; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<main class="notifications-page">
-  <header class="notifications-header">
+<main class="nt-wrap">
+  <header class="nt-header">
     <div>
-      <h1>🔔 Notifications</h1>
-      <p class="notifications-subtitle">
-        {% set unread_count = notifications|selectattr('is_read', 'equalto', false)|list|length %}
+      <h1>
+        <span class="nt-title-icon" aria-hidden="true">
+          <svg class="nt-icon" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </span>
+        Notifications
+      </h1>
+      {% set unread_count = notifications|selectattr('is_read', 'equalto', false)|list|length %}
+      <p class="nt-sub">
         {% if unread_count > 0 %}
-          You have <strong>{{ unread_count }} unread</strong> notification{% if unread_count > 1 %}s{% endif %}
+          You have <strong>{{ unread_count }} unread</strong> notification{% if unread_count > 1 %}s{% endif %}.
         {% else %}
-          All caught up!
+          All caught up — no unread notifications.
         {% endif %}
       </p>
     </div>
     {% if unread_count > 0 %}
-      <div class="notification-actions">
+      <div class="nt-actions">
         <form method="POST" action="{{ url_for('mark_all_notifications_read') }}">
-          <button type="submit" class="btn-base btn-open">
-            ✓ Mark All as Read
+          <button type="submit" class="nt-btn nt-btn--primary">
+            <svg class="nt-icon nt-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            Mark All as Read
           </button>
         </form>
       </div>
@@ -238,63 +240,66 @@
   </header>
 
   {% if notifications %}
-    <section class="notification-list" aria-label="Notification list">
+    <section class="nt-list" aria-label="Notification list">
       {% for notification in notifications %}
-        <article class="notification-item {% if not notification.is_read %}unread{% endif %}">
-          <div class="notification-icon" aria-hidden="true">
+        {% set report_url = url_for('report_detail', report_id=notification.report_id) if notification.report_id else None %}
+        {% set mark_url = url_for('mark_notification_read', notification_id=notification.id) %}
+        <article class="nt-item {% if not notification.is_read %}unread{% endif %}">
+          <div class="nt-item__icon nt-item__icon--{{ notification.notification_type }}" aria-hidden="true">
             {% if notification.notification_type == 'claim' %}
-              ✋
+              <svg class="nt-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
             {% elif notification.notification_type == 'status' %}
-              🔄
+              <svg class="nt-icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
             {% elif notification.notification_type == 'success' %}
-              ✅
+              <svg class="nt-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
             {% elif notification.notification_type == 'warning' %}
-              ⚠️
+              <svg class="nt-icon" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
             {% else %}
-              📋
+              <svg class="nt-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
             {% endif %}
           </div>
 
-          <div class="notification-body">
-            <h2 class="notification-title">
+          <div class="nt-item__body">
+            <h2 class="nt-item__title">
               {{ notification.title }}
-              {% if not notification.is_read %}
-                <span class="unread-dot" title="Unread"></span>
-              {% endif %}
+              {% if not notification.is_read %}<span class="nt-unread-dot" title="Unread"></span>{% endif %}
             </h2>
-            <p class="notification-message">{{ notification.message }}</p>
-            <time class="notification-date">
-              {% if notification.created_at %}
+            <p class="nt-item__msg">{{ notification.message }}</p>
+            {% if notification.created_at %}
+              <time class="nt-item__date">
                 {{ notification.created_at.strftime('%b %d, %Y · %I:%M %p') }}
-              {% endif %}
-            </time>
+              </time>
+            {% endif %}
           </div>
 
-          <div class="notification-actions-row">
-            {% if notification.report_id %}
-              <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}?next={{ url_for('report_detail', report_id=notification.report_id) }}"
-                 class="btn-base btn-open"
+          <div class="nt-item__actions">
+            {% if report_url %}
+              <!-- Open Report: marks as read via fetch, then navigates to report -->
+              <a href="{{ report_url }}"
+                 class="nt-btn nt-btn--primary"
+                 data-mark-url="{{ mark_url }}"
+                 data-next-url="{{ report_url }}"
+                 data-open-report
                  aria-label="Open related report and mark as read">
-                👁 Open Report
+                <svg class="nt-icon nt-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                Open Report
               </a>
             {% endif %}
 
             {% if not notification.is_read %}
-              <form method="POST"
-                    action="{{ url_for('mark_notification_read', notification_id=notification.id) }}">
-                <button type="submit" class="btn-base btn-mark-read"
-                        aria-label="Mark notification as read">
-                  ✓ Mark Read
+              <form method="POST" action="{{ mark_url }}">
+                <button type="submit" class="nt-btn nt-btn--ghost" aria-label="Mark notification as read">
+                  <svg class="nt-icon nt-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                  Mark Read
                 </button>
               </form>
             {% endif %}
 
-            <form method="POST"
-                  action="{{ url_for('delete_notification', notification_id=notification.id) }}"
-                  onsubmit="return confirm('Delete this notification? Cannot undo.');">
-              <button type="submit" class="btn-base btn-delete"
-                      aria-label="Delete notification">
-                🗑 Delete
+            <form method="POST" action="{{ url_for('delete_notification', notification_id=notification.id) }}"
+                  onsubmit="return confirm('Delete this notification? This cannot be undone.');">
+              <button type="submit" class="nt-btn nt-btn--danger" aria-label="Delete notification">
+                <svg class="nt-icon nt-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Delete
               </button>
             </form>
           </div>
@@ -302,14 +307,40 @@
       {% endfor %}
     </section>
   {% else %}
-    <div class="notification-empty">
-      <div class="empty-icon" aria-hidden="true">🔔</div>
+    <div class="nt-empty">
+      <div class="nt-empty__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </div>
       <h2>No Notifications Yet</h2>
-      <p>
-        You'll see updates here when new reports are submitted, 
-        claim requests are made, or statuses change.
-      </p>
+      <p>Updates will appear here when new reports are submitted, claim requests are made, or statuses change.</p>
     </div>
   {% endif %}
 </main>
+
+<script>
+  /* Open Report: mark notification as read in the background, then go to the report.
+     Falls back to plain navigation if the request fails. */
+  (function () {
+    document.querySelectorAll('[data-open-report]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        var markUrl = this.getAttribute('data-mark-url');
+        var nextUrl = this.getAttribute('data-next-url');
+        if (!markUrl || !nextUrl) return;
+        e.preventDefault();
+        var done = function () { window.location.href = nextUrl; };
+        try {
+          fetch(markUrl, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+          }).then(done).catch(done);
+          // Safety: navigate even if fetch hangs
+          setTimeout(done, 1200);
+        } catch (err) {
+          done();
+        }
+      });
+    });
+  })();
+</script>
 {% endblock %}
