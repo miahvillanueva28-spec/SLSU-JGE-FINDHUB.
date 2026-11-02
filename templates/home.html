@@ -5,6 +5,7 @@
   :root {
     --shadow-soft: 0 4px 20px rgba(0, 75, 43, 0.08);
     --shadow-strong: 0 8px 30px rgba(0, 75, 43, 0.12);
+    --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   }
 
   .home-wrapper {
@@ -13,7 +14,7 @@
     padding: clamp(30px, 5vw, 50px) 20px;
   }
 
-  /* ========== HERO — CLEAN & CENTERED ========== */
+  /* ========== HERO ========== */
   .home-hero {
     text-align: center;
     margin-bottom: 36px;
@@ -62,7 +63,7 @@
     line-height: 1.7;
   }
 
-  /* ========== MAIN ACTION CARD — ALL IN ONE ========== */
+  /* ========== MAIN ACTION CARD ========== */
   .action-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -70,6 +71,7 @@
     padding: 32px;
     box-shadow: var(--shadow-soft);
     transition: box-shadow 0.3s ease, transform 0.3s ease;
+    margin-bottom: 40px;
   }
 
   .action-card:hover {
@@ -77,7 +79,6 @@
     transform: translateY(-2px);
   }
 
-  /* — Buttons Row — */
   .action-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -144,7 +145,6 @@
     background: #265c28;
   }
 
-  /* — Divider — */
   .divider {
     display: flex;
     align-items: center;
@@ -164,7 +164,6 @@
     background: var(--border);
   }
 
-  /* — Search Form — */
   .search-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -240,6 +239,196 @@
     border-color: var(--muted);
   }
 
+  /* ========== REPORTS SECTION ========== */
+  .reports-section {
+    margin-top: 0;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .section-header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .reports-count {
+    background: var(--primary-soft);
+    color: var(--primary);
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+  }
+
+  .report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 50, 30, 0.1);
+    border-color: var(--primary);
+  }
+
+  .report-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: var(--surface-alt);
+  }
+
+  .report-image-placeholder {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-soft), var(--surface-alt));
+    font-size: 40px;
+  }
+
+  .report-body {
+    padding: 20px;
+  }
+
+  .report-type-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  .report-type-tag.lost {
+    background: #fff1cc;
+    color: #805700;
+  }
+  .report-type-tag.found {
+    background: #dff4e7;
+    color: #176b45;
+  }
+  html[data-theme="dark"] .report-type-tag.lost {
+    background: #45381c;
+    color: #f2d18a;
+  }
+  html[data-theme="dark"] .report-type-tag.found {
+    background: #203a2d;
+    color: #9be0b6;
+  }
+
+  .report-title {
+    margin: 0 0 12px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .report-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .report-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .report-status-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .report-status-tag.open {
+    background: #e3f2fd;
+    color: #0d47a1;
+  }
+  .report-status-tag.pending {
+    background: #fff8e1;
+    color: #e65100;
+  }
+  .report-status-tag.resolved {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .view-detail-btn {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    transition: background 0.25s ease;
+    display: inline-block;
+  }
+  .view-detail-btn:hover {
+    background: var(--primary-dark);
+    color: #fff;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .empty-state h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .empty-state p {
+    margin: 0;
+    color: var(--muted);
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
   /* ========== RESPONSIVE ========== */
   @media (max-width: 720px) {
     .action-buttons {
@@ -255,6 +444,9 @@
     .btn-secondary {
       width: 100%;
       justify-content: center;
+    }
+    .reports-grid {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -284,8 +476,8 @@
     </p>
   </section>
 
+  <!-- Main Action & Search Card -->
   <div class="action-card">
-    <!-- Report Buttons Side by Side -->
     <div class="action-buttons">
       <a href="{{ url_for('new_report') }}?type=Lost" class="action-btn lost">
         <span class="action-btn-icon">⚠️</span>
@@ -299,7 +491,6 @@
 
     <div class="divider">or search below</div>
 
-    <!-- Search Form — Tightly Connected -->
     <form method="GET" action="{{ url_for('home') }}" role="search">
       <div class="search-grid">
         <div class="search-field">
@@ -334,5 +525,64 @@
       </div>
     </form>
   </div>
+
+  <!-- All Reports Section -->
+  <section class="reports-section">
+    <div class="section-header">
+      <h2>
+        📋 All Reports
+        {% if reports %}
+          <span class="reports-count">{{ reports|length }}</span>
+        {% endif %}
+      </h2>
+      <div style="display: flex; gap: 8px;">
+        <a href="{{ url_for('new_report') }}?type=Lost" class="btn-secondary" style="padding: 8px 14px; font-size: 13px;">+ Lost</a>
+        <a href="{{ url_for('new_report') }}?type=Found" class="btn-secondary" style="padding: 8px 14px; font-size: 13px;">+ Found</a>
+      </div>
+    </div>
+
+    {% if reports %}
+      <div class="reports-grid">
+        {% for report in reports %}
+          <article class="report-card">
+            {% if report.photo %}
+              <img src="{{ photo_src(report.photo) }}" 
+                   alt="Photo of {{ report.item_name }}" 
+                   class="report-image" loading="lazy">
+            {% else %}
+              <div class="report-image-placeholder">
+                {% if report.report_type|lower == 'lost' %}⚠️{% else %}🔍{% endif %}
+              </div>
+            {% endif %}
+            
+            <div class="report-body">
+              <span class="report-type-tag {{ report.report_type|lower }}">
+                {{ report.report_type }}
+              </span>
+              <h3 class="report-title">{{ report.item_name }}</h3>
+              <div class="report-meta">
+                <span>📍 {{ report.location or 'Location not specified' }}</span>
+                {% if report.incident_date %}
+                  <span>📅 {{ report.incident_date }}</span>
+                {% endif %}
+              </div>
+              {% set status_class = report.status|lower|replace(' ', '-') %}
+              <span class="report-status-tag {{ status_class }}">
+                {{ report.status or 'Open' }}
+              </span>
+              <a href="{{ url_for('report_detail', report_id=report.id) }}" 
+                 class="view-detail-btn">View Details →</a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🕵️</div>
+        <h3>No Reports Yet</h3>
+        <p>Be the first to report a lost or found item and help our community!</p>
+      </div>
+    {% endif %}
+  </section>
 </div>
 {% endblock %}
