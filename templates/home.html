@@ -4,9 +4,6 @@
 {% endblock %}
 {% block head %}
 <style>
-  /* ==============================================
-     GLOBAL RESET & BASE LAYOUT
-  ============================================== */
   .home-page {
     max-width: 1200px;
     margin: 0 auto;
@@ -16,9 +13,7 @@
     gap: 32px;
   }
 
-  /* ==============================================
-     HERO SECTION — FRESH & CENTERED
-  ============================================== */
+  /* ===== HERO SECTION ===== */
   .home-hero {
     position: relative;
     padding: clamp(48px, 8vw, 80px) clamp(24px, 5vw, 48px);
@@ -118,9 +113,7 @@
     color: #a5d6a7;
   }
 
-  /* ==============================================
-     STATS — 2x2 CLEAN CARDS
-  ============================================== */
+  /* ===== STATS GRID ===== */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -162,9 +155,7 @@
     font-weight: 600;
   }
 
-  /* ==============================================
-     SEARCH PANEL — COMPACT & CENTERED
-  ============================================== */
+  /* ===== SEARCH SECTION ===== */
   .search-section {
     padding: 32px 28px;
     border-radius: 20px;
@@ -257,11 +248,21 @@
     background: var(--surface-alt);
   }
 
-  /* ==============================================
-     REPORTS GRID — CLEAN & CONSISTENT
-  ============================================== */
+  /* ===== REPORTS SECTION ===== */
   .reports-section {
     margin-top: 8px;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .back-link:hover {
+    text-decoration: underline;
   }
   .reports-top-bar {
     display: flex;
@@ -281,18 +282,6 @@
   .reports-actions {
     display: flex;
     gap: 8px;
-  }
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    margin-bottom: 16px;
-  }
-  .back-link:hover {
-    text-decoration: underline;
   }
   .reports-grid {
     display: grid;
@@ -406,9 +395,7 @@
     background: var(--primary-dark);
   }
 
-  /* ==============================================
-     EMPTY STATE
-  ============================================== */
+  /* ===== EMPTY STATE ===== */
   .empty-state {
     padding: 60px 24px;
     text-align: center;
@@ -429,18 +416,14 @@
     color: var(--muted);
   }
 
-  /* ==============================================
-     REPORTS-ONLY VIEW
-  ============================================== */
+  /* ===== REPORTS-ONLY VIEW ===== */
   body.reports-only .home-hero,
   body.reports-only .stats-grid,
   body.reports-only .search-section {
     display: none;
   }
 
-  /* ==============================================
-     REDUCED MOTION
-  ============================================== */
+  /* ===== REDUCED MOTION ===== */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: .01ms !important;
@@ -462,7 +445,7 @@
   <h1>Find What Matters</h1>
   <p class="hero-tagline">SLSU JGE Lost & Found Hub</p>
   <p class="hero-subtext">
-    Lost something? Found something? Post here. Together we return items to their owners — fast.
+    Lost something? Found something? Post it here. Together we return items to their owners — fast.
   </p>
 
   <div class="hero-buttons">
@@ -567,7 +550,7 @@
           {% if r.photo %}
           <img src="{{ photo_src(r.photo) }}" alt="{{ r.item_name }}" loading="lazy">
           {% else %}
-          <span>{{ r.report_type=='Lost' and '⚠️' or '🔍' }}</span>
+          <span>{{ '⚠️' if r.report_type == 'Lost' else '🔍' }}</span>
           {% endif %}
         </div>
         <div class="card-body">
@@ -578,4 +561,12 @@
             {% if r.incident_date %}<p>📅 {{ r.incident_date }}</p>{% endif %}
           </div>
           <span class="card-status
-            {%
+            {% if r.status == 'Open' %}open
+            {% elif r.status == 'Pending Claim' %}pending
+            {% else %}resolved{% endif %}">
+            {{ r.status or 'Open' }}
+          </span>
+          <a href="{{ url_for('report_detail', report_id=r.id) }}" class="card-link">
+            View Details →
+          </a>
+       
