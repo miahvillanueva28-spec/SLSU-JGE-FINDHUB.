@@ -43,7 +43,9 @@
                 <span></span>
             </button>
             <nav class="primary-navigation" id="primary-navigation">
+                {% if not admin_logged_in|default(false) %}
                 <a href="{{ url_for('home') }}">Home</a>
+                {% endif %}
                 <a href="{{ url_for('home') }}?view=reports" id="nav-view-reports">View Reports</a>
                 {% if admin_logged_in|default(false) %}
                     <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
