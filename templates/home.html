@@ -7,6 +7,7 @@
   /* ============================================================
      SLSU JGE FindHub — HOME (Professional Redesign)
      - No emojis (inline SVG icons only)
+     - Search bar moved to top of reports (View Reports), compact
      - When searching: hero hidden, only matching reports show
   ============================================================ */
 
@@ -200,56 +201,38 @@
   .fh-step__body p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
 
   /* ============================================================
-     SEARCH SECTION — more compact when searching
+     COMPACT SEARCH BAR — at top of reports (View Reports only)
+     No heading, no text, no filters — just input + Search button
   ============================================================ */
-  .fh-search {
-    padding: 28px 30px;
+  .fh-reports-search {
+    display: none;
+    gap: 8px;
+    padding: 10px 12px;
     border: 1px solid var(--border);
-    border-radius: var(--fh-radius-lg);
+    border-radius: 12px;
     background: var(--surface);
     box-shadow: var(--shadow);
-    scroll-margin-top: 90px;
   }
-  body.search-active .fh-search { padding: 20px 24px; }
-  body.search-active .fh-search__head p { display: none; }
-
-  .fh-search__head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-  .fh-search__icon {
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    background: var(--primary-soft);
-    color: var(--primary);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .fh-search__head h2 { margin: 0; font-size: 19px; font-weight: 700; }
-  .fh-search__head p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
-  .fh-search__form {
-    display: grid;
-    grid-template-columns: 2.2fr 1fr 1fr auto;
-    gap: 12px;
-    align-items: end;
-  }
-  .fh-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .fh-field input, .fh-field select {
-    width: 100%;
-    padding: 11px 14px;
+  body.reports-only .fh-reports-search,
+  body.search-active .fh-reports-search { display: flex; }
+  .fh-reports-search input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
     border: 1.5px solid var(--border);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--surface);
     color: var(--text);
-    font-size: 14px;
-    transition: border-color .2s ease, box-shadow .2s ease;
+    font-size: 13.5px;
     font-family: inherit;
+    transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .fh-field input:focus, .fh-field select:focus {
+  .fh-reports-search input:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(7,92,59,.12);
   }
-  .fh-search__actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+  .fh-reports-search .fh-btn { min-height: 40px; padding: 0 18px; }
 
   /* Search results summary bar (shown only when searching) */
   .fh-results-summary {
@@ -497,10 +480,9 @@
   .fh-empty__actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
 
   /* ============================================================
-     REPORTS-ONLY VIEW (hides hero + search)
+     REPORTS-ONLY VIEW (hides hero)
   ============================================================ */
-  body.reports-only .fh-hero,
-  body.reports-only .fh-search { display: none !important; }
+  body.reports-only .fh-hero { display: none !important; }
   body.reports-only .fh-reports { animation: fhFadeIn .45s ease both; }
   @keyframes fhFadeIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -513,8 +495,6 @@
   @media (max-width: 960px) {
     .fh-hero { grid-template-columns: 1fr; gap: 32px; }
     .fh-hero__visual { order: 2; }
-    .fh-search__form { grid-template-columns: 1fr 1fr; }
-    .fh-search__form .fh-field:first-child { grid-column: 1 / -1; }
     .fh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 600px) {
@@ -522,10 +502,8 @@
     .fh-hero { padding: 28px 20px; }
     .fh-hero__actions { flex-direction: column; }
     .fh-hero__actions .fh-btn { width: 100%; }
-    .fh-search { padding: 22px 18px; }
-    .fh-search__form { grid-template-columns: 1fr; }
-    .fh-search__actions { justify-content: stretch; flex-direction: column; }
-    .fh-search__actions .fh-btn { width: 100%; }
+    .fh-reports-search { flex-direction: column; padding: 10px; }
+    .fh-reports-search .fh-btn { width: 100%; }
     .fh-reports__bar { align-items: stretch; }
     .fh-reports__actions { width: 100%; }
     .fh-reports__actions .fh-btn { flex: 1; }
@@ -557,7 +535,7 @@
         <span class="fh-dot" aria-hidden="true"></span>
         SLSU — JGE Campus
       </span>
-      <h1>SLSU JGE<br><span>FINDHUB.</span></h1>
+      <h1>Lost something on campus?<br><span>Let's find it together.</span></h1>
       <p class="fh-hero__sub">
         The official lost and found hub of SLSU JGE. Report a missing item,
         browse found items, and claim what's yours — all in one place.
@@ -573,6 +551,23 @@
           Report a Found Item
         </a>
       </div>
+
+      <div class="fh-hero__meta">
+        <span>
+          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          Free to use
+        </span>
+        <span>
+          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          Open to all students &amp; staff
+        </span>
+        <span>
+          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          Managed by campus administration
+        </span>
+      </div>
+    </div>
+
     <div class="fh-hero__visual" aria-hidden="true">
       <div class="fh-step">
         <span class="fh-step__num">1</span>
@@ -598,58 +593,6 @@
     </div>
   </section>
 
-  <!-- ===================== SEARCH ===================== -->
-  <section class="fh-search" id="find-item" aria-labelledby="fh-search-title">
-    <div class="fh-search__head">
-      <span class="fh-search__icon" aria-hidden="true">
-        <svg class="fh-icon fh-icon--lg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      </span>
-      <div>
-        <h2 id="fh-search-title">Find an Item</h2>
-        <p>Search by keyword or filter by report type and status.</p>
-      </div>
-    </div>
-
-    <form method="GET" action="{{ url_for('home') }}" role="search" aria-label="Search lost and found reports">
-      <div class="fh-search__form">
-        <div class="fh-field">
-          <label for="fh-q">Keyword</label>
-          <input id="fh-q" type="search" name="q"
-                 placeholder="Item name, description, or location..."
-                 value="{{ request.args.get('q', '') }}"
-                 maxlength="200" autocomplete="off">
-        </div>
-        <div class="fh-field">
-          <label for="fh-type">Report Type</label>
-          <select id="fh-type" name="type">
-            <option value="">All Types</option>
-            <option value="Lost" {% if request.args.get('type', '') == 'Lost' %}selected{% endif %}>Lost</option>
-            <option value="Found" {% if request.args.get('type', '') == 'Found' %}selected{% endif %}>Found</option>
-          </select>
-        </div>
-        <div class="fh-field">
-          <label for="fh-status">Status</label>
-          <select id="fh-status" name="status">
-            <option value="">All Statuses</option>
-            {% for status_option in ['Open', 'Pending Claim', 'Returned', 'Archived'] %}
-              <option value="{{ status_option }}"
-                {% if request.args.get('status', '') == status_option %}selected{% endif %}>
-                {{ status_option }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-        <button type="submit" class="fh-btn fh-btn--primary">
-          <svg class="fh-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          Search
-        </button>
-      </div>
-      <div class="fh-search__actions">
-        <a class="fh-btn fh-btn--ghost fh-btn--sm" href="{{ url_for('home') }}">Clear filters</a>
-      </div>
-    </form>
-  </section>
-
   <!-- ===================== RESULTS SUMMARY (only when searching) ===================== -->
   <div class="fh-results-summary">
     <span>
@@ -668,6 +611,18 @@
 
   <!-- ===================== REPORTS ===================== -->
   <section class="fh-reports" id="reports-section" aria-labelledby="fh-reports-title">
+
+    <!-- COMPACT SEARCH BAR — only visible in View Reports / when searching -->
+    <form method="GET" action="{{ url_for('home') }}" class="fh-reports-search" role="search" aria-label="Search reports">
+      <input type="search" name="q"
+             placeholder="Search items, description, or location..."
+             value="{{ request.args.get('q', '') }}"
+             maxlength="200" autocomplete="off" aria-label="Search keyword">
+      <button type="submit" class="fh-btn fh-btn--primary">
+        <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Search
+      </button>
+    </form>
 
     <div class="fh-back-row">
       <a class="fh-back-link" href="{{ url_for('home') }}" id="fh-back-btn" style="display:none;">
@@ -761,7 +716,7 @@
         </h3>
         <p>
           {% if search_performed %}
-            We couldn't find any items matching your search. Try a different keyword or clear the filters.
+            We couldn't find any items matching your search. Try a different keyword.
           {% else %}
             Be the first to post a report and help reunite items with their owners.
           {% endif %}
@@ -770,7 +725,7 @@
           <a class="fh-btn fh-btn--lost" href="{{ url_for('new_report') }}?type=Lost">Report Lost Item</a>
           <a class="fh-btn fh-btn--found" href="{{ url_for('new_report') }}?type=Found">Report Found Item</a>
           {% if search_performed %}
-            <a class="fh-btn fh-btn--ghost" href="{{ url_for('home') }}">Clear Filters</a>
+            <a class="fh-btn fh-btn--ghost" href="{{ url_for('home') }}">Clear Search</a>
           {% endif %}
         </div>
       </div>
@@ -786,7 +741,7 @@
     var backBtn = document.getElementById('fh-back-btn');
     var reportsSection = document.getElementById('reports-section');
 
-    /* KEY FIX: when searching, add body.search-active → CSS hides the hero */
+    /* when searching, add body.search-active → CSS hides the hero */
     if (hasSearch) {
       document.body.classList.add('search-active');
     }
