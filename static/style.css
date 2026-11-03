@@ -620,15 +620,14 @@ html[data-theme="dark"] .form-field input, html[data-theme="dark"] .form-field s
     .image-modal { padding: 12px; }
     .image-modal-close { top: 12px; right: 12px; width: 38px; height: 38px; }
 
-    /* HOME PAGE FROSTED-GLASS HERO — on cellphone: hide logo & all text,
-       keep ONLY the Lost/Found report buttons + the search bar */
-    .fh-glass__logo,
-    .fh-glass__logo-mark,
+    /* HOME PAGE FROSTED-GLASS HERO — on cellphone: hide text only,
+       keep logo + Lost/Found report buttons + search bar */
     .fh-glass h1,
     .fh-glass__sub {
         display: none !important;
     }
-    .fh-glass { padding: 20px 16px !important; border-radius: 20px !important; }
+    .fh-glass { padding: 24px 16px !important; border-radius: 20px !important; }
+    .fh-glass__logo, .fh-glass__logo-mark { width: 64px !important; height: 64px !important; margin-bottom: 16px !important; }
     .fh-glass__actions { margin-bottom: 14px !important; gap: 10px !important; }
 }
 
