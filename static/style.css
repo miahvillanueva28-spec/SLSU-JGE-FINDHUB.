@@ -1,6 +1,7 @@
 /* ==========================================
    SLSU JGE FINDHUB — HIGH CONTRAST / READABLE
-   - Font sizes UNCHANGED — only contrast boosted
+   - Font sizes UNCHANGED on desktop — only contrast boosted
+   - Mobile (cellphone): smaller boxes & fonts to fit the screen
    - Boxes stay translucent (slightly more opaque for readability)
    - Inter font loaded in base.html
    ========================================== */
@@ -492,19 +493,143 @@ html[data-theme="dark"] .form-field input, html[data-theme="dark"] .form-field s
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* 17. RESPONSIVE */
+/* 17. RESPONSIVE — TABLET */
 @media (max-width: 900px) {
     .home-page .report-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .form-grid { grid-template-columns: 1fr; }
 }
+
+/* 18. RESPONSIVE — CELLPHONE (smaller boxes & fonts to fit screen) */
 @media (max-width: 600px) {
-    .home-page .home-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .home-page .report-grid { grid-template-columns: 1fr; }
-    .filter-grid { grid-template-columns: 1fr; }
-    .page-container { width: calc(100% - 24px); margin: 20px auto 40px; }
-    .header-inner, .footer-inner { width: calc(100% - 24px); }
+    /* Base font slightly smaller on mobile */
+    body { font-size: 14px; line-height: 1.6; }
+
+    /* Header — more compact */
+    .header-inner {
+        width: calc(100% - 24px);
+        min-height: 58px;
+        gap: 10px;
+    }
+    .brand-logo, .brand-mark { width: 36px; height: 36px; flex: 0 0 36px; }
+    .brand-copy strong { font-size: 0.85rem; }
+    .brand-copy small { font-size: 0.65rem; margin-top: 1px; }
+    .menu-toggle { width: 40px; height: 40px; padding: 8px; }
+
+    /* Mobile nav — tighter */
+    .primary-navigation { padding: 10px 16px 14px; gap: 2px; }
+    .primary-navigation > a { padding: 11px 12px; font-size: 0.85rem; border-radius: 8px; }
+
+    /* Page container — narrower margins */
+    .page-container {
+        width: calc(100% - 24px);
+        margin: 16px auto 32px;
+    }
+    .flash-stack { width: calc(100% - 24px); margin-top: 12px; }
+
+    /* Hero box — smaller padding & radius */
+    .home-hero {
+        width: calc(100% - 24px);
+        margin: 14px auto;
+        padding: 20px 16px;
+        border-radius: 16px;
+    }
+    .home-hero h1 { font-size: clamp(20px, 6vw, 26px); margin-bottom: 8px; }
+    .home-hero .tagline { font-size: 16px; }
+    .home-hero .hero-description { font-size: 13.5px; }
+
+    /* Stats — 2 columns, smaller */
+    .home-page .home-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    .home-stats .stat { padding: 14px 12px; gap: 4px; border-radius: 12px; }
+    .home-stats .stat-label { font-size: 10.5px; letter-spacing: 0.02em; }
+    .home-stats .stat strong { font-size: 22px; }
+
+    /* Search panel — smaller */
+    .home-page .search-panel {
+        padding: 18px 16px;
+        margin-bottom: 20px;
+        border-radius: 14px;
+    }
+    .search-heading { font-size: 18px; gap: 8px; margin-bottom: 10px; }
+    .search-heading .heading-icon { width: 36px; height: 36px; flex: 0 0 36px; }
+    .search-description { font-size: 13px; margin-bottom: 14px; }
+    .filter-grid { grid-template-columns: 1fr; gap: 10px; }
+    .filter-grid label { font-size: 12px; }
+    .filter-grid input, .filter-grid select { padding: 9px 11px; font-size: 13.5px; }
+    .search-actions { margin-top: 12px; }
+
+    /* Buttons — smaller height & padding */
+    .button, .btn, button.btn, input[type="submit"] {
+        min-height: 42px;
+        padding: 9px 16px;
+        font-size: 13.5px;
+        border-radius: 10px;
+    }
+
+    /* Reports grid — 1 column, smaller cards */
+    .home-page .report-grid { grid-template-columns: 1fr; gap: 14px; }
+    .home-report-card { border-radius: 14px; }
+    .home-report-card .report-photo, .home-report-card .placeholder-photo { height: 150px; }
+    .home-report-card .report-card-body { padding: 14px; gap: 8px; }
+    .home-report-card .report-title { font-size: 15px; }
+    .home-report-card .report-meta { font-size: 12px; }
+    .reports-heading { margin: 4px 0 14px; }
+    .reports-heading h2 { font-size: 17px; }
+
+    /* Empty state — smaller */
+    .empty-state { padding: 32px 18px; border-radius: 14px; }
+    .empty-state h3 { font-size: 17px; }
+    .empty-state p { font-size: 13px; }
+
+    /* Pagination — smaller */
+    .pagination a, .pagination span { min-width: 36px; height: 36px; font-size: 13px; }
+
+    /* Forms — smaller */
+    .form-panel { padding: 20px 16px; border-radius: 14px; }
+    .form-field label { font-size: 12.5px; }
+    .form-field input, .form-field select, .form-field textarea { padding: 10px 12px; font-size: 13.5px; }
+    .form-actions { flex-direction: column; }
+    .form-actions .button, .form-actions .btn { width: 100%; }
+
+    /* Admin tables — smaller cells, horizontal scroll kept */
+    .admin-table th, .admin-table td { padding: 9px 12px; font-size: 12.5px; }
+    .admin-table th { font-size: 10.5px; }
+
+    /* Flash messages — smaller */
+    .flash-message { padding: 11px 14px; font-size: 13px; border-radius: 10px; }
+
+    /* Footer — stacked, smaller */
+    .footer-inner {
+        width: calc(100% - 24px);
+        flex-direction: column;
+        text-align: center;
+        padding: 14px 0;
+        gap: 6px;
+    }
+    .footer-inner p { font-size: 11.5px; }
+
+    /* Toast — smaller, fits screen */
+    .toast-container { right: 12px; bottom: 12px; left: 12px; }
+    .toast { max-width: 100%; font-size: 13px; padding: 12px 14px; }
+
+    /* Image modal — tighter padding */
+    .image-modal { padding: 12px; }
+    .image-modal-close { top: 12px; right: 12px; width: 38px; height: 38px; }
 }
+
+/* 19. RESPONSIVE — VERY SMALL CELLPHONE (<=400px) */
+@media (max-width: 400px) {
+    body { font-size: 13.5px; }
+    .home-page .home-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .home-stats .stat strong { font-size: 20px; }
+    .brand-copy small { display: none; } /* hide subtitle on very small screens */
+    .home-hero h1 { font-size: 19px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
 }
