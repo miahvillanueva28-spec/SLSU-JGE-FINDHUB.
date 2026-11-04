@@ -8,6 +8,7 @@
      SLSU JGE FindHub — HOME (Professional Redesign)
      - No emojis (inline SVG icons only)
      - Search bar moved to top of reports (View Reports), compact
+     - Back to Home button integrated inside the search bar
      - When searching: hero hidden, only matching reports show
   ============================================================ */
 
@@ -96,17 +97,32 @@
   }
 
   .fh-hero h1 {
-    margin: 0 0 14px;
-    font-size: clamp(30px, 4.5vw, 46px);
-    line-height: 1.12;
-    letter-spacing: -.02em;
+    margin: 0 0 16px;
+    font-size: clamp(34px, 5.5vw, 54px);
+    line-height: 1.08;
+    letter-spacing: -.03em;
     font-weight: 800;
     color: var(--text);
   }
-  .fh-hero h1 span { color: var(--primary); }
+  .fh-hero h1 .fh-brand {
+    background: linear-gradient(120deg, var(--primary) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--primary); /* fallback */
+  }
+
+  .fh-hero__rule {
+    display: block;
+    width: 72px;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    margin: 0 0 22px;
+  }
 
   .fh-hero__sub {
-    margin: 0 0 28px;
+    margin: 0 0 30px;
     max-width: 480px;
     color: var(--muted);
     font-size: 15.5px;
@@ -117,7 +133,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 22px;
+    margin-bottom: 0;
   }
 
   .fh-btn {
@@ -160,15 +176,6 @@
   .fh-btn--ghost:hover { background: var(--surface-alt); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
   .fh-btn--sm { min-height: 36px; padding: 0 14px; font-size: 13px; border-radius: 10px; }
 
-  .fh-hero__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .fh-hero__meta span { display: inline-flex; align-items: center; gap: 6px; }
-
   .fh-hero__visual { display: flex; flex-direction: column; gap: 14px; }
   .fh-step {
     display: flex;
@@ -202,14 +209,15 @@
 
   /* ============================================================
      COMPACT SEARCH BAR — at top of reports (View Reports only)
-     No heading, no text, no filters — just input + Search button
+     Back to Home button is integrated on the left side.
   ============================================================ */
   .fh-reports-search {
     display: none;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
     padding: 10px 12px;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--surface);
     box-shadow: var(--shadow);
   }
@@ -232,7 +240,29 @@
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(7,92,59,.12);
   }
-  .fh-reports-search .fh-btn { min-height: 40px; padding: 0 18px; }
+  .fh-reports-search .fh-btn { min-height: 40px; padding: 0 18px; flex-shrink: 0; }
+
+  /* Back to Home — compact ghost button inside the search bar */
+  #fh-back-btn {
+    display: none;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: var(--surface-alt);
+    color: var(--text) !important;
+    border: 1.5px solid var(--border);
+    font-weight: 700;
+    font-size: 13.5px;
+    flex-shrink: 0;
+    transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+  }
+  #fh-back-btn:hover {
+    background: var(--primary-soft);
+    border-color: var(--primary);
+    color: var(--primary) !important;
+    transform: translateY(-1px);
+    text-decoration: none !important;
+  }
 
   /* Search results summary bar (shown only when searching) */
   .fh-results-summary {
@@ -291,37 +321,6 @@
   }
   .fh-reports__actions { display: flex; gap: 8px; }
 
-  .fh-back-row { display: flex; }
-  .fh-back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 6px 0;
-  }
-  .fh-back-link:hover { text-decoration: underline; }
-
-  /* Visible "Back to Home" button in reports-only view */
-  #fh-back-btn {
-    display: none;
-    padding: 11px 22px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #fff !important;
-    font-weight: 700;
-    font-size: 14px;
-    box-shadow: 0 4px 14px rgba(7,92,59,.28);
-    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
-  }
-  #fh-back-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(7,92,59,.35);
-    filter: brightness(1.06);
-    text-decoration: none !important;
-  }
   /* Hide +Lost / +Found buttons in reports-only view */
   body.reports-only .fh-reports__actions { display: none !important; }
 
@@ -502,8 +501,9 @@
     .fh-hero { padding: 28px 20px; }
     .fh-hero__actions { flex-direction: column; }
     .fh-hero__actions .fh-btn { width: 100%; }
-    .fh-reports-search { flex-direction: column; padding: 10px; }
-    .fh-reports-search .fh-btn { width: 100%; }
+    .fh-reports-search { flex-direction: column; align-items: stretch; padding: 10px; }
+    .fh-reports-search .fh-btn,
+    .fh-reports-search #fh-back-btn { width: 100%; }
     .fh-reports__bar { align-items: stretch; }
     .fh-reports__actions { width: 100%; }
     .fh-reports__actions .fh-btn { flex: 1; }
@@ -533,11 +533,12 @@
     <div class="fh-hero__copy">
       <span class="fh-hero__eyebrow">
         <span class="fh-dot" aria-hidden="true"></span>
-        SLSU — JGE Campus
+        Official Campus Lost &amp; Found
       </span>
-      <h1>Lost something on campus?<br><span>Let's find it together.</span></h1>
+      <h1>SLSU JGE <span class="fh-brand">FindHub</span></h1>
+      <span class="fh-hero__rule" aria-hidden="true"></span>
       <p class="fh-hero__sub">
-        The official lost and found hub of SLSU JGE. Report a missing item,
+        The official lost and found hub of SLSU — JGE Campus. Report a missing item,
         browse found items, and claim what's yours — all in one place.
       </p>
 
@@ -550,21 +551,6 @@
           <svg class="fh-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           Report a Found Item
         </a>
-      </div>
-
-      <div class="fh-hero__meta">
-        <span>
-          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-          Free to use
-        </span>
-        <span>
-          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-          Open to all students &amp; staff
-        </span>
-        <span>
-          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-          Managed by campus administration
-        </span>
       </div>
     </div>
 
@@ -612,8 +598,12 @@
   <!-- ===================== REPORTS ===================== -->
   <section class="fh-reports" id="reports-section" aria-labelledby="fh-reports-title">
 
-    <!-- COMPACT SEARCH BAR — only visible in View Reports / when searching -->
+    <!-- COMPACT SEARCH BAR with Back to Home integrated on the left -->
     <form method="GET" action="{{ url_for('home') }}" class="fh-reports-search" role="search" aria-label="Search reports">
+      <a class="fh-btn" href="{{ url_for('home') }}" id="fh-back-btn" style="display:none;">
+        <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        Back to Home
+      </a>
       <input type="search" name="q"
              placeholder="Search items, description, or location..."
              value="{{ request.args.get('q', '') }}"
@@ -623,13 +613,6 @@
         Search
       </button>
     </form>
-
-    <div class="fh-back-row">
-      <a class="fh-back-link" href="{{ url_for('home') }}" id="fh-back-btn" style="display:none;">
-        <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-        Back to Home
-      </a>
-    </div>
 
     <div class="fh-reports__bar">
       <h2 class="fh-reports__title" id="fh-reports-title">
@@ -748,13 +731,13 @@
 
     if (hasSearch || isReportsView) {
       if (reportsSection) reportsSection.style.display = '';
+      if (backBtn) backBtn.style.display = 'inline-flex';
     } else {
       if (reportsSection) reportsSection.style.display = 'none';
     }
 
     if (isReportsView) {
       document.body.classList.add('reports-only');
-      if (backBtn) backBtn.style.display = 'inline-flex';
       document.title = 'All Reports | SLSU JGE FindHub';
     }
 
@@ -774,11 +757,13 @@
 
     if (backBtn) {
       backBtn.addEventListener('click', function (e) {
-        if (isReportsView && !hasSearch) return;
+        /* If we arrived via URL (reports view or active search), let the link
+           navigate to a clean home page instead of patching state in place. */
+        if (isReportsView || hasSearch) return;
         e.preventDefault();
         document.body.classList.remove('reports-only');
         document.body.classList.remove('search-active');
-        if (!hasSearch && reportsSection) reportsSection.style.display = 'none';
+        if (reportsSection) reportsSection.style.display = 'none';
         backBtn.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
         history.pushState({}, '', '{{ url_for('home') }}');
