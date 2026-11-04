@@ -6,6 +6,7 @@
   /* ============================================================
      REPORT DETAIL — Professional (no emojis, SVG icons)
      Smart back button + highly visible action buttons
+     + live proof-photo preview + claim proof thumbnails
   ============================================================ */
   .rd-wrap {
     max-width: 1040px;
@@ -230,6 +231,19 @@
   .rd-textarea { resize: vertical; min-height: 110px; }
   .rd-hint { margin: 2px 0 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
 
+  /* Live proof-photo preview */
+  .rd-proof-preview {
+    display: none;
+    margin-top: 4px;
+    max-width: 180px;
+    max-height: 180px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  }
+  .rd-proof-preview.visible { display: block; }
+
   /* ---------- HIGHLY VISIBLE BUTTONS ---------- */
   .rd-btn {
     display: inline-flex;
@@ -350,9 +364,27 @@
   .rd-claim__link:hover { text-decoration: underline; }
   .rd-claim__date { font-size: 12px !important; color: var(--muted) !important; }
 
+  /* Claimant proof photo thumbnail (admin view) */
+  .rd-claim-proof {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .rd-claim-proof img {
+    width: 64px; height: 64px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    cursor: zoom-in;
+    transition: transform .2s ease;
+  }
+  .rd-claim-proof img:hover { transform: scale(1.05); }
+
   @media (prefers-reduced-motion: reduce) {
     .rd-wrap { animation: none; }
-    .rd-btn:hover, .rd-back a:hover { transform: none !important; }
+    .rd-btn:hover, .rd-back a:hover, .rd-claim-proof img:hover { transform: none !important; }
   }
 </style>
 {% endblock %}
@@ -523,6 +555,7 @@
               <label for="proof_photo">Supporting Documentation <span class="rd-opt">(Optional — Max 5 MB)</span></label>
               <input class="rd-file" type="file" id="proof_photo" name="proof_photo"
                      accept=".jpg,.jpeg,.png,.webp,image/*">
+              <img class="rd-proof-preview" id="proof-preview" alt="Selected proof preview">
               <p class="rd-hint">Upload a photo for verification — receipt, serial number, or matching identifying marks.</p>
             </div>
 
@@ -586,12 +619,25 @@
                 </div>
                 <p><strong>Contact:</strong> {{ claim.claimant_contact }}</p>
                 <p class="rd-proof-text">{{ claim.proof }}</p>
-                {% if claim.proof_file %}
-                  <a href="{{ photo_src(claim.proof_file) }}" target="_blank" rel="noopener" class="rd-claim__link">
-                    <svg class="rd-icon rd-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                    View Attached Proof
-                  </a>
+
+                {% if claim.proof_photo %}
+                  <div class="rd-claim-proof">
+                    <a href="{{ photo_src(claim.proof_photo) }}" target="_blank" rel="noopener" title="Click to enlarge">
+                      <img src="{{ photo_src(claim.proof_photo) }}"
+                           alt="Proof photo by {{ claim.claimant_name }}"
+                           loading="lazy">
+                    </a>
+                    <a href="{{ photo_src(claim.proof_photo) }}" target="_blank" rel="noopener" class="rd-claim__link">
+                      <svg class="rd-icon rd-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                      View full proof photo
+                    </a>
+                  </div>
                 {% endif %}
+
+                {% if claim.review_note %}
+                  <p><strong>Admin note:</strong> {{ claim.review_note }}</p>
+                {% endif %}
+
                 <p class="rd-claim__date">
                   Submitted {{ claim.created_at.strftime('%B %d, %Y at %H:%M') if claim.created_at else 'Date unavailable' }}
                 </p>
@@ -604,4 +650,28 @@
     </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    /* Live preview of the selected proof photo before submit */
+    var fileInput = document.getElementById('proof_photo');
+    var preview = document.getElementById('proof-preview');
+    if (fileInput && preview) {
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files && fileInput.files[0];
+        if (!file) {
+          preview.classList.remove('visible');
+          preview.src = '';
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          preview.src = e.target.result;
+          preview.classList.add('visible');
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  })();
+</script>
 {% endblock %}
