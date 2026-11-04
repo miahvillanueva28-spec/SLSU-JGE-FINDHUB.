@@ -21,7 +21,7 @@ from flask import (
     make_response,
 )
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import or_
+from sqlalchemy import or_, inspect as sa_inspect, text
 from werkzeug.utils import secure_filename
 
 # ==================================================
@@ -156,6 +156,10 @@ class Claim(db.Model):
     claimant_name = db.Column(db.String(120), nullable=False)
     claimant_contact = db.Column(db.String(150), nullable=False)
     proof = db.Column(db.Text, nullable=False)
+    # NEW: photo submitted by the claimant as proof of ownership
+    proof_photo = db.Column(db.String(1000), nullable=True)
+    # NEW: admin's review note / rejection reason
+    review_note = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(30), default="Pending", nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
@@ -189,8 +193,42 @@ class DeletedReport(db.Model):
     deleted_by = db.Column(db.String(120), nullable=True)
 # ========================================================
 
+# ==================================================
+# LIGHTWEIGHT AUTO-MIGRATION
+# Adds new columns (proof_photo, review_note) to an
+# existing claim table without wiping data. Works on
+# both SQLite (local) and PostgreSQL (Vercel).
+# ==================================================
+def ensure_claim_columns():
+    try:
+        inspector = sa_inspect(db.engine)
+        if "claim" not in inspector.get_table_names():
+            return  # create_all will build it fresh
+        existing = {c["name"] for c in inspector.get_columns("claim")}
+    except Exception:
+        app.logger.exception("Auto-migration inspection failed")
+        return
+    with db.engine.begin() as conn:
+        if "proof_photo" not in existing:
+            try:
+                conn.execute(text(
+                    "ALTER TABLE claim ADD COLUMN proof_photo VARCHAR(1000)"
+                ))
+                app.logger.info("Added column claim.proof_photo")
+            except Exception:
+                app.logger.exception("Failed to add proof_photo column")
+        if "review_note" not in existing:
+            try:
+                conn.execute(text(
+                    "ALTER TABLE claim ADD COLUMN review_note TEXT"
+                ))
+                app.logger.info("Added column claim.review_note")
+            except Exception:
+                app.logger.exception("Failed to add review_note column")
+
 with app.app_context():
     db.create_all()
+    ensure_claim_columns()
 
 # ==================================================
 # TEMPLATE CONTEXT
@@ -489,7 +527,7 @@ def report_detail(report_id):
     return render_template("report_detail.html", report=report)
 
 # ==================================================
-# CLAIM SUBMISSION
+# CLAIM SUBMISSION (now accepts proof_photo)
 # ==================================================
 @app.route("/report/<int:report_id>/claim", methods=["POST"])
 def submit_claim(report_id):
@@ -518,11 +556,27 @@ def submit_claim(report_id):
         flash("Your contact details are too long.", "danger")
         return redirect(url_for("report_detail", report_id=report.id))
 
+    # Upload the claimant's proof photo (optional)
+    saved_proof_photo = None
+    try:
+        saved_proof_photo = save_photo(request.files.get("proof_photo"))
+    except ValueError as error:
+        flash(str(error), "danger")
+        return redirect(url_for("report_detail", report_id=report.id))
+    except Exception:
+        app.logger.exception("Claim proof photo upload failed")
+        flash(
+            "Proof photo upload failed. Please try again without the photo.",
+            "danger",
+        )
+        return redirect(url_for("report_detail", report_id=report.id))
+
     claim = Claim(
         report_id=report.id,
         claimant_name=claimant_name,
         claimant_contact=claimant_contact,
         proof=proof,
+        proof_photo=saved_proof_photo,
         status="Pending",
     )
 
@@ -542,6 +596,8 @@ def submit_claim(report_id):
         db.session.commit()
     except Exception:
         db.session.rollback()
+        if saved_proof_photo:
+            delete_photo(saved_proof_photo)
         app.logger.exception("Unable to save claim")
         flash("Unable to submit your claim. Please try again.", "danger")
         return redirect(url_for("report_detail", report_id=report.id))
@@ -758,13 +814,14 @@ def admin_claims():
     return render_template("admin_claims.html", claims=claims)
 
 # ==================================================
-# ADMIN: UPDATE CLAIM STATUS
+# ADMIN: UPDATE CLAIM STATUS (saves review_note)
 # ==================================================
 @app.route("/admin/claim/<int:claim_id>/status", methods=["POST"])
 @admin_required
 def admin_update_claim_status(claim_id):
     claim = db.get_or_404(Claim, claim_id)
     new_status = get_report_form_value("status")
+    review_note = get_report_form_value("review_note")
     if new_status not in CLAIM_STATUSES:
         flash("Invalid claim status.", "danger")
         return redirect(url_for("admin_claims"))
@@ -778,6 +835,7 @@ def admin_update_claim_status(claim_id):
 
     try:
         claim.status = new_status
+        claim.review_note = review_note or None
         if new_status == "Approved":
             report.status = "Returned"
             other_pending = Claim.query.filter(
