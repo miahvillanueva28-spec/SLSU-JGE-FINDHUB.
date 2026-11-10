@@ -3,11 +3,9 @@
 {% block head %}
 <style>
   /* ============================================================
-     SLSU JGE FindHub — REPORT DETAIL
-     Matches home design: no emojis, proper spacing, responsive
-     Layout: Photo + Info (top, 2 cols)
-             Report Info + Item Details (middle, 2 cols)
-             Submitted Claims (bottom, full width)
+     SLSU JGE FindHub — REPORT DETAIL (with working buttons)
+     - Contact Reporter  → reveals contact panel (respects contact_public)
+     - Submit a Claim    → opens inline claim form (POST to submit_claim)
   ============================================================ */
 
   :root {
@@ -36,7 +34,6 @@
     gap: 24px;
   }
 
-  /* Back Button */
   .fh-back-link {
     display: inline-flex;
     align-items: center;
@@ -50,9 +47,7 @@
   }
   .fh-back-link:hover { gap: 10px; text-decoration: underline; }
 
-  /* ============================================================
-     TOP: Photo + Main Info Side by Side
-  ============================================================ */
+  /* ============ TOP: Photo + Main Info ============ */
   .fh-top-grid {
     display: grid;
     grid-template-columns: 1fr 1.1fr;
@@ -68,44 +63,23 @@
     box-shadow: var(--shadow);
     position: relative;
   }
-  .fh-photo-card img {
-    width: 100%;
-    height: 320px;
-    object-fit: cover;
-    display: block;
-  }
+  .fh-photo-card img { width: 100%; height: 320px; object-fit: cover; display: block; }
   .fh-photo-card__ph {
-    width: 100%;
-    height: 320px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%; height: 320px;
+    display: flex; align-items: center; justify-content: center;
     background: linear-gradient(135deg, var(--primary-soft), var(--surface-alt));
     color: var(--primary);
   }
   .fh-photo-card__ph svg { width: 56px; height: 56px; opacity: .5; }
 
   .fh-badge {
-    position: absolute;
-    top: 16px; left: 16px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .04em;
-    text-transform: uppercase;
+    position: absolute; top: 16px; left: 16px;
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
     backdrop-filter: blur(4px);
   }
-  .fh-badge--lost {
-    background: var(--fh-accent-lost-soft);
-    color: var(--fh-accent-lost);
-    border: 1px solid var(--fh-accent-lost-border);
-  }
-  .fh-badge--found {
-    background: var(--fh-accent-found-soft);
-    color: var(--fh-accent-found);
-    border: 1px solid var(--fh-accent-found-border);
-  }
+  .fh-badge--lost { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); border: 1px solid var(--fh-accent-lost-border); }
+  .fh-badge--found { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); border: 1px solid var(--fh-accent-found-border); }
 
   .fh-info-card {
     border: 1px solid var(--border);
@@ -114,87 +88,92 @@
     padding: 24px;
     box-shadow: var(--shadow);
   }
-  .fh-info-card h1 {
-    margin: 0 0 12px;
-    font-size: 26px;
-    font-weight: 800;
-    line-height: 1.25;
-    color: var(--text);
-  }
+  .fh-info-card h1 { margin: 0 0 12px; font-size: 26px; font-weight: 800; line-height: 1.25; color: var(--text); }
 
   .fh-status-line {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 14px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 18px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; margin-bottom: 18px;
   }
-  .fh-status-line::before {
-    content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor;
-  }
+  .fh-status-line::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
   .fh-status--open { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); }
   .fh-status--pending { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); }
   .fh-status--closed { background: var(--surface-alt); color: var(--muted); }
 
   .fh-meta-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 20px;
-    margin-bottom: 18px;
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 14px 20px; margin-bottom: 18px;
   }
-  .fh-meta-item {
-    display: flex;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--muted);
-  }
-  .fh-meta-item svg {
-    width: 16px; height: 16px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    color: var(--primary);
-    opacity: .8;
-  }
+  .fh-meta-item { display: flex; gap: 8px; font-size: 14px; color: var(--muted); }
+  .fh-meta-item svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: var(--primary); opacity: .8; }
   .fh-meta-item strong { color: var(--text); font-weight: 600; }
 
-  .fh-actions-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 6px;
-  }
+  .fh-actions-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
   .fh-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 44px;
-    padding: 0 20px;
-    border-radius: var(--fh-radius-sm);
-    border: 1.5px solid transparent;
-    font-size: 14.5px;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 44px; padding: 0 20px;
+    border-radius: var(--fh-radius-sm); border: 1.5px solid transparent;
+    font-size: 14.5px; font-weight: 700; text-decoration: none; cursor: pointer;
     transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    font-family: inherit;
   }
   .fh-btn:hover { transform: translateY(-2px); }
   .fh-btn:active { transform: translateY(0); }
-
   .fh-btn--primary { background: var(--primary); color: #fff; }
   .fh-btn--primary:hover { background: var(--primary-dark); box-shadow: 0 8px 20px rgba(7,92,59,.25); color: #fff; }
   .fh-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
   .fh-btn--ghost:hover { background: var(--surface-alt); }
   .fh-btn--sm { min-height: 38px; padding: 0 16px; font-size: 13.5px; }
+  .fh-btn--active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
 
-  /* ============================================================
-     SECTIONS: Compact Cards
-     - Report Info + Item Info → 2 columns side by side
-     - Submitted Claims → full width below
-  ============================================================ */
+  /* ============ REVEAL PANELS (contact + claim form) ============ */
+  .fh-reveal {
+    display: none;
+    margin-top: 16px;
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--fh-radius-sm);
+    background: var(--surface-alt);
+    animation: fhSlideDown .3s ease both;
+  }
+  .fh-reveal.open { display: block; }
+  @keyframes fhSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fh-reveal h3 { margin: 0 0 12px; font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .fh-reveal h3 svg { width: 16px; height: 16px; color: var(--primary); }
+
+  .fh-contact-row { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text); margin-bottom: 8px; }
+  .fh-contact-row:last-child { margin-bottom: 0; }
+  .fh-contact-row svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; }
+  .fh-contact-row a { color: var(--primary); font-weight: 600; text-decoration: none; border-bottom: 1px dashed currentColor; }
+  .fh-contact-row a:hover { border-bottom-style: solid; }
+  .fh-contact-private { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0; }
+
+  /* Inline claim form */
+  .fh-claim-form { display: flex; flex-direction: column; gap: 12px; }
+  .fh-claim-form .fh-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .fh-claim-form label { font-size: 13px; font-weight: 700; color: var(--text); display: flex; flex-direction: column; gap: 6px; }
+  .fh-claim-form input, .fh-claim-form textarea {
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .fh-claim-form input:focus, .fh-claim-form textarea:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
+  }
+  .fh-claim-form textarea { resize: vertical; min-height: 80px; }
+  .fh-claim-form .fh-hint { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .fh-claim-form button { align-self: flex-start; }
+
+  /* ============ SECTION CARDS ============ */
   .fh-section-card {
     border: 1px solid var(--border);
     border-radius: var(--fh-radius);
@@ -203,37 +182,18 @@
     box-shadow: var(--shadow);
   }
   .fh-section-card h2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 16px;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text);
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 16px; font-size: 17px; font-weight: 700; color: var(--text);
+    padding-bottom: 10px; border-bottom: 1px solid var(--border);
   }
-  .fh-section-card h2 svg {
-    width: 18px; height: 18px;
-    color: var(--primary);
-    flex-shrink: 0;
-  }
-  .fh-section-card p {
-    font-size: 14.5px;
-    line-height: 1.65;
-    color: var(--text);
-    margin: 0 0 8px;
-  }
+  .fh-section-card h2 svg { width: 18px; height: 18px; color: var(--primary); flex-shrink: 0; }
+  .fh-section-card p { font-size: 14.5px; line-height: 1.65; color: var(--text); margin: 0 0 8px; }
   .fh-section-card p:last-child { margin-bottom: 0; }
   .fh-section-card strong { color: var(--text); font-weight: 600; }
 
-  .fh-two-col {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-  }
+  .fh-two-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
 
-  /* Claim Items */
+  /* Claim items list */
   .fh-claim-item {
     padding: 14px 16px;
     border: 1px solid var(--border);
@@ -245,33 +205,20 @@
   .fh-claim-item:last-child { margin-bottom: 0; }
   .fh-claim-item:hover { border-color: var(--primary); }
   .fh-claim-item__head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 6px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 8px; margin-bottom: 6px;
   }
   .fh-claim-item__name { font-weight: 700; font-size: 14.5px; }
   .fh-claim-item__date { font-size: 12.5px; color: var(--muted); }
-  .fh-claim-item__status {
-    font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
-  }
+  .fh-claim-item__status { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
   .fh-claim-item__status--pending { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); }
   .fh-claim-item__status--approved { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); }
   .fh-claim-item__status--rejected { background: var(--surface-alt); color: var(--muted); }
-  .fh-claim-item__desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
+  .fh-claim-item__desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 4px 0 0; }
 
-  .fh-empty-state {
-    padding: 24px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-  }
+  .fh-empty-state { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
 
-  /* ============================================================
-     RESPONSIVE
-  ============================================================ */
+  /* ============ RESPONSIVE ============ */
   @media (max-width: 900px) {
     .fh-top-grid, .fh-two-col { grid-template-columns: 1fr; }
     .fh-meta-grid { grid-template-columns: 1fr; }
@@ -283,9 +230,10 @@
     .fh-info-card h1 { font-size: 22px; }
     .fh-actions-bar { flex-direction: column; }
     .fh-actions-bar .fh-btn { width: 100%; }
+    .fh-claim-form .fh-row { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .fh-btn:hover, .fh-claim-item:hover { transform: none; }
+    .fh-btn:hover, .fh-claim-item:hover, .fh-reveal { transform: none; animation: none; }
   }
 </style>
 {% endblock %}
@@ -304,7 +252,6 @@
   <!-- ============ TOP: Photo + Main Info ============ -->
   <div class="fh-top-grid">
 
-    <!-- Photo -->
     <div class="fh-photo-card">
       {% if report.photo %}
         <img src="{{ photo_src(report.photo) }}" alt="Photo of {{ report.item_name }}">
@@ -312,14 +259,12 @@
         <div class="fh-photo-card__ph" aria-label="No photo available">
           {% if report.report_type|lower == 'lost' %}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 9v4"/>
-              <path d="M12 17h.01"/>
+              <path d="M12 9v4"/><path d="M12 17h.01"/>
               <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
             </svg>
           {% else %}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.3-4.3"/>
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
             </svg>
           {% endif %}
         </div>
@@ -329,7 +274,6 @@
       </span>
     </div>
 
-    <!-- Main Info Card -->
     <div class="fh-info-card">
       <h1>{{ report.item_name }}</h1>
 
@@ -343,8 +287,7 @@
       <div class="fh-meta-grid">
         <div class="fh-meta-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-            <circle cx="12" cy="10" r="3"/>
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
           </svg>
           <span><strong>Location</strong><br>{{ report.location or 'Not specified' }}</span>
         </div>
@@ -352,10 +295,7 @@
         {% if report.incident_date %}
         <div class="fh-meta-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="18" rx="2"/>
-            <path d="M16 2v4"/>
-            <path d="M8 2v4"/>
-            <path d="M3 10h18"/>
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
           </svg>
           <span><strong>Date</strong><br>{{ report.incident_date }}</span>
         </div>
@@ -363,50 +303,109 @@
 
         <div class="fh-meta-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
           </svg>
-          <span><strong>Reported by</strong><br>{{ report.reporter_name or 'Anonymous' }}</span>
+          <span><strong>Reported by</strong><br>{{ report.contact_name or 'Anonymous' }}</span>
         </div>
 
         <div class="fh-meta-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
           </svg>
           <span><strong>Posted</strong><br>{{ report.created_at.strftime('%b %d, %Y') if report.created_at else '—' }}</span>
         </div>
       </div>
 
       <div class="fh-actions-bar">
-        <a href="#" class="fh-btn fh-btn--primary fh-btn--sm">
+        <button type="button" class="fh-btn fh-btn--primary fh-btn--sm" id="fh-contact-btn" aria-expanded="false" aria-controls="fh-contact-panel">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <path d="m22 6-10 7L2 6"/>
           </svg>
           Contact Reporter
-        </a>
-        <a href="#" class="fh-btn fh-btn--ghost fh-btn--sm">
+        </button>
+        <button type="button" class="fh-btn fh-btn--ghost fh-btn--sm" id="fh-claim-btn" aria-expanded="false" aria-controls="fh-claim-panel">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 11 4.77 5.07 5.07 0 0 0 7 5c-2.23.68-3.86 3.16-3.5 6.28.07.64.24 1.31.5 1.88"/>
           </svg>
           Submit a Claim
-        </a>
+        </button>
+      </div>
+
+      <!-- ===== CONTACT REPORTER PANEL (revealed on click) ===== -->
+      <div class="fh-reveal" id="fh-contact-panel" role="region" aria-label="Reporter contact details">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          Contact the Reporter
+        </h3>
+        {% if report.contact_public %}
+          {% if report.contact_name %}
+          <div class="fh-contact-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>{{ report.contact_name }}</span>
+          </div>
+          {% endif %}
+          <div class="fh-contact-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/>
+            </svg>
+            {% set c = report.contact or '' %}
+            {% if '@' in c %}
+              <a href="mailto:{{ c }}">{{ c }}</a>
+            {% else %}
+              <span>{{ c or 'No contact provided' }}</span>
+            {% endif %}
+          </div>
+        {% else %}
+          <p class="fh-contact-private">
+            The reporter chose to keep their contact details private. Please use the
+            <strong>Submit a Claim</strong> button above and an administrator will connect
+            you with the reporter once your claim is verified.
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- ===== SUBMIT A CLAIM PANEL (inline form, revealed on click) ===== -->
+      <div class="fh-reveal" id="fh-claim-panel" role="region" aria-label="Submit a claim form">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>
+          </svg>
+          Submit a Claim for This Item
+        </h3>
+        <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}" class="fh-claim-form">
+          <div class="fh-row">
+            <label>Your Full Name <span class="fh-hint">(required)</span>
+              <input type="text" name="claimer_name" maxlength="120" required placeholder="Juan Dela Cruz">
+            </label>
+            <label>Your Contact <span class="fh-hint">(required)</span>
+              <input type="text" name="claimer_contact" maxlength="180" required placeholder="Email or phone">
+            </label>
+          </div>
+          <label>Proof of Ownership / Description <span class="fh-hint">(required — describe unique details only the owner would know)</span>
+            <textarea name="proof_description" maxlength="2000" rows="3" required placeholder="e.g., 'Black wallet with a small tear on the top-right corner, contains an SLSU ID ending in 2024.'"></textarea>
+          </label>
+          <button type="submit" class="fh-btn fh-btn--primary fh-btn--sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>
+            </svg>
+            Send Claim
+          </button>
+        </form>
       </div>
     </div>
   </div>
 
-  <!-- ============ MIDDLE: Report Information + Item Details (side by side) ============ -->
+  <!-- ============ MIDDLE: Report Information + Item Details ============ -->
   <div class="fh-two-col">
-
-    <!-- Report Information -->
     <section class="fh-section-card">
       <h2>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <path d="M14 2v6h6"/>
-          <path d="M16 13H8"/>
-          <path d="M16 17H8"/>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>
         </svg>
         Report Information
       </h2>
@@ -416,13 +415,10 @@
       <p><strong>Description:</strong><br>{{ report.description or 'No additional details provided.' }}</p>
     </section>
 
-    <!-- Provide Information About This Item (renamed to "Item Details" for compactness) -->
     <section class="fh-section-card">
       <h2>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 16v-4"/>
-          <path d="M12 8h.01"/>
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
         </svg>
         Item Details
       </h2>
@@ -434,14 +430,12 @@
     </section>
   </div>
 
-  <!-- ============ BOTTOM: Submitted Claims (full width) ============ -->
+  <!-- ============ BOTTOM: Submitted Claims ============ -->
   <section class="fh-section-card">
     <h2>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
       Submitted Claims ({{ claims|length if claims else 0 }})
     </h2>
@@ -450,7 +444,7 @@
       {% for claim in claims %}
         <div class="fh-claim-item">
           <div class="fh-claim-item__head">
-            <span class="fh-claim-item__name">{{ claim.submitter_name or 'Anonymous Claimant' }}</span>
+            <span class="fh-claim-item__name">{{ claim.claimer_name or claim.submitter_name or 'Anonymous Claimant' }}</span>
             <span class="fh-claim-item__date">{{ claim.submitted_at.strftime('%b %d, %Y · %H:%M') if claim.submitted_at else 'Date unknown' }}</span>
             <span class="fh-claim-item__status
               {% if claim.status == 'Approved' %}fh-claim-item__status--approved
@@ -463,11 +457,44 @@
         </div>
       {% endfor %}
     {% else %}
-      <div class="fh-empty-state">
-        No claims submitted yet for this item.
-      </div>
+      <div class="fh-empty-state">No claims submitted yet for this item.</div>
     {% endif %}
   </section>
 
 </div>
+
+<script>
+(function () {
+  var contactBtn = document.getElementById('fh-contact-btn');
+  var claimBtn   = document.getElementById('fh-claim-btn');
+  var contactPanel = document.getElementById('fh-contact-panel');
+  var claimPanel   = document.getElementById('fh-claim-panel');
+
+  function toggle(btn, panel, otherBtn, otherPanel) {
+    var open = panel.classList.toggle('open');
+    btn.classList.toggle('fh-btn--active', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open && otherPanel) {
+      otherPanel.classList.remove('open');
+      otherBtn.classList.remove('fh-btn--active');
+      otherBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  if (contactBtn && contactPanel) {
+    contactBtn.addEventListener('click', function () {
+      toggle(contactBtn, contactPanel, claimBtn, claimPanel);
+    });
+  }
+  if (claimBtn && claimPanel) {
+    claimBtn.addEventListener('click', function () {
+      toggle(claimBtn, claimPanel, contactBtn, contactPanel);
+      if (claimPanel.classList.contains('open')) {
+        var first = claimPanel.querySelector('input, textarea');
+        if (first) first.focus();
+      }
+    });
+  }
+})();
+</script>
 {% endblock %}
