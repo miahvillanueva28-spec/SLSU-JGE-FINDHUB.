@@ -3,8 +3,10 @@
 {% block content %}
 <section class="panel form-panel">
   <div class="form-header">
+    <!-- FIXED: missing form-title heading (the JS targeted .form-title but it didn't exist) -->
+    <h1 class="form-title">Submit a Report</h1>
     <p class="form-subtitle">
-      Your submission will be reviewed and published. Your contact details remain 
+      Your submission will be reviewed and published. Your contact details remain
       confidential unless you choose to share them publicly.
     </p>
   </div>
@@ -121,8 +123,8 @@
             class="checkbox-input"
           >
           <span class="checkbox-text">
-            <strong>Display my contact details publicly</strong> — select this if you want 
-            your name and contact information visible to all visitors. When unchecked, 
+            <strong>Display my contact details publicly</strong> — select this if you want
+            your name and contact information visible to all visitors. When unchecked,
             only administrators can view your details.
           </span>
         </label>
@@ -130,13 +132,12 @@
     </div>
 
     <p class="form-note">
-      <span class="required">*</span> Indicates required field. Please avoid sharing sensitive 
+      <span class="required">*</span> Indicates required field. Please avoid sharing sensitive
       personal information such as passwords or financial details.
     </p>
 
     <div class="form-actions">
       <button type="submit" id="submit-btn" class="btn primary btn-lg">
-        <span class="btn-icon"></span>
         <span id="btn-text">Submit Report</span>
       </button>
       <a href="{{ url_for('home') }}" class="btn secondary btn-lg">Cancel</a>
@@ -164,6 +165,7 @@
   font-size: clamp(26px, 5vw, 32px);
   font-weight: 800;
   line-height: 1.2;
+  transition: opacity .15s ease;
 }
 
 .form-subtitle {
@@ -341,6 +343,7 @@ html[data-theme="dark"] .form-note {
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
+  font-family: inherit;
 }
 
 .btn:hover {
@@ -400,14 +403,15 @@ html[data-theme="dark"] .form-note {
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const reportType = document.getElementById("report_type").value;
-  const dateLabel = document.getElementById("incident-date-label");
-  const formTitle = document.querySelector(".form-title");
-  const btnText = document.getElementById("btn-text");
+  var reportType = document.getElementById("report_type").value;
+  var dateLabel = document.getElementById("incident-date-label");
+  var formTitle = document.querySelector(".form-title");
+  var btnText = document.getElementById("btn-text");
 
-  const fadeUpdate = (element, newText) => {
+  var fadeUpdate = function (element, newText) {
+    if (!element) return;
     element.style.opacity = "0";
-    setTimeout(() => {
+    setTimeout(function () {
       element.innerHTML = newText;
       element.style.opacity = "1";
     }, 150);
@@ -415,16 +419,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (reportType === "Lost") {
     fadeUpdate(dateLabel, "Date Item Was Lost <span class='required'>*</span>");
-    fadeUpdate(formTitle, " Report a Lost Item");
+    fadeUpdate(formTitle, "Report a Lost Item");
     fadeUpdate(btnText, "Submit Lost Report");
   } else if (reportType === "Found") {
     fadeUpdate(dateLabel, "Date Item Was Found <span class='required'>*</span>");
-    fadeUpdate(formTitle, " Report a Found Item");
+    fadeUpdate(formTitle, "Report a Found Item");
     fadeUpdate(btnText, "Submit Found Report");
   }
 
   if (!reportType) {
-    const form = document.querySelector(".form-container");
+    var form = document.querySelector(".form-container");
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       alert("Please start from the homepage and select either 'Report Lost Item' or 'Report Found Item' to proceed.");
