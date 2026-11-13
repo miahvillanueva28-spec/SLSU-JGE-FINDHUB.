@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Submit a Report | SLSU JGE FindHub{% endblock %}
 {% block content %}
+{% set cats = categories|default([]) or item_categories|default([]) %}
 <section class="panel form-panel">
   <div class="form-header">
-    <!-- FIXED: missing form-title heading (the JS targeted .form-title but it didn't exist) -->
     <h1 class="form-title">Submit a Report</h1>
     <p class="form-subtitle">
       Your submission will be reviewed and published. Your contact details remain
@@ -11,9 +11,16 @@
     </p>
   </div>
 
-  <form method="POST" enctype="multipart/form-data" class="form-container">
+  <form method="POST" enctype="multipart/form-data" class="form-container" novalidate>
     <!-- Hidden Report Type Field -->
     <input type="hidden" id="report_type" name="report_type" value="{{ request.args.get('type', '') }}">
+
+    <!-- Honeypot — bots fill this; server silently drops the submission -->
+    <div style="position:absolute;left:-9999px;top:auto;height:1px;width:1px;overflow:hidden;" aria-hidden="true">
+      <label>Leave this field empty
+        <input type="text" name="website" tabindex="-1" autocomplete="off">
+      </label>
+    </div>
 
     <div class="form-grid">
       <!-- Item Name -->
@@ -23,11 +30,38 @@
           id="item_name"
           name="item_name"
           type="text"
-          maxlength="120"
+          maxlength="150"
           required
+          autocomplete="off"
           placeholder="e.g., Black Leather Wallet, ID Card, Blue Backpack"
           class="form-input"
         >
+      </div>
+
+      <!-- Category (NEW) -->
+      <div class="form-group">
+        <label for="category">Category <span class="required">*</span></label>
+        <select id="category" name="category" required class="form-input">
+          <option value="" selected disabled>Select a category</option>
+          {% for cat in cats %}
+            <option value="{{ cat }}">{{ cat }}</option>
+          {% endfor %}
+          {% if not cats %}
+            <option value="School ID / ID Card">School ID / ID Card</option>
+            <option value="Wallet">Wallet</option>
+            <option value="Phone / Gadget">Phone / Gadget</option>
+            <option value="Laptop / Tablet">Laptop / Tablet</option>
+            <option value="Keys">Keys</option>
+            <option value="Bag / Pouch">Bag / Pouch</option>
+            <option value="Book / Notebook">Book / Notebook</option>
+            <option value="Umbrella">Umbrella</option>
+            <option value="Water Bottle / Tumbler">Water Bottle / Tumbler</option>
+            <option value="Jewelry / Watch">Jewelry / Watch</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Eyeglasses">Eyeglasses</option>
+            <option value="Other">Other</option>
+          {% endif %}
+        </select>
       </div>
 
       <!-- Incident Date -->
@@ -52,8 +86,9 @@
           id="contact"
           name="contact"
           type="text"
-          maxlength="180"
+          maxlength="150"
           required
+          autocomplete="email"
           placeholder="Email address, phone number, or social media handle"
           class="form-input"
         >
@@ -67,9 +102,33 @@
           name="contact_name"
           type="text"
           maxlength="120"
+          autocomplete="name"
           placeholder="Enter your name to help the owner identify you"
           class="form-input"
         >
+      </div>
+
+      <!-- Photo Upload -->
+      <div class="form-group">
+        <label for="photo">Reference Image <span class="optional">(Optional)</span></label>
+        <input
+          id="photo"
+          name="photo"
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          class="form-input file-input"
+        >
+        <p class="input-hint">Supports JPG, PNG, WebP • Maximum file size: 5 MB</p>
+        <div id="photo-preview-wrap" hidden style="margin-top:10px;">
+          <img id="photo-preview" alt="Selected photo preview"
+               style="max-width:100%;max-height:180px;border-radius:12px;border:1.5px solid var(--border);object-fit:cover;">
+          <div style="margin-top:8px;">
+            <button type="button" id="photo-preview-remove"
+                    style="padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;cursor:pointer;">
+              Remove image
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Location -->
@@ -79,8 +138,9 @@
           id="location"
           name="location"
           type="text"
-          maxlength="180"
+          maxlength="200"
           required
+          autocomplete="off"
           placeholder="e.g., Main Library, JGE Building — Room 102, Student Canteen"
           class="form-input"
         >
@@ -98,19 +158,6 @@
           placeholder="Include distinctive features: color, brand, markings, contents, or any unique identifiers..."
           class="form-textarea"
         ></textarea>
-      </div>
-
-      <!-- Photo Upload -->
-      <div class="form-group">
-        <label for="photo">Reference Image <span class="optional">(Optional)</span></label>
-        <input
-          id="photo"
-          name="photo"
-          type="file"
-          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-          class="form-input file-input"
-        >
-        <p class="input-hint">Supports JPG, PNG, WebP • Maximum file size: 5 MB</p>
       </div>
 
       <!-- Public Contact Toggle -->
@@ -226,7 +273,8 @@
 }
 
 .form-input,
-.form-textarea {
+.form-textarea,
+select.form-input {
   min-height: 54px;
   padding: 14px 18px;
   border: 1.5px solid var(--border);
@@ -241,6 +289,12 @@
   outline: none;
 }
 
+html[data-theme="dark"] .form-input,
+html[data-theme="dark"] .form-textarea,
+html[data-theme="dark"] select.form-input {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .form-input::placeholder,
 .form-textarea::placeholder {
   color: var(--muted);
@@ -248,7 +302,8 @@
 }
 
 .form-input:focus,
-.form-textarea:focus {
+.form-textarea:focus,
+select.form-input:focus {
   border-color: var(--primary);
   background: rgba(255, 255, 255, 0.75);
   box-shadow: 0 0 0 4px rgba(8, 116, 67, 0.15);
@@ -434,6 +489,38 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Please start from the homepage and select either 'Report Lost Item' or 'Report Found Item' to proceed.");
       window.location.href = "{{ url_for('home') }}";
     });
+  }
+
+  // === Photo preview before upload ===
+  var photoInput = document.getElementById("photo");
+  var previewWrap = document.getElementById("photo-preview-wrap");
+  var previewImg = document.getElementById("photo-preview");
+  var removeBtn = document.getElementById("photo-preview-remove");
+
+  if (photoInput && previewWrap && previewImg) {
+    photoInput.addEventListener("change", function () {
+      var file = photoInput.files && photoInput.files[0];
+      if (!file) { previewWrap.hidden = true; return; }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("This image is larger than 5 MB. Please choose a smaller file.");
+        photoInput.value = "";
+        previewWrap.hidden = true;
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        previewImg.src = e.target.result;
+        previewWrap.hidden = false;
+      };
+      reader.readAsDataURL(file);
+    });
+    if (removeBtn) {
+      removeBtn.addEventListener("click", function () {
+        photoInput.value = "";
+        previewImg.removeAttribute("src");
+        previewWrap.hidden = true;
+      });
+    }
   }
 });
 </script>
