@@ -8,6 +8,7 @@
      - Claimant proof photo + item photo (clickable lightbox)
      - Quick Approve / Reject, rejection reason, clickable stats
      Field names (match app.py): c.proof_photo, c.review_note
+     ENHANCED: added Back to Dashboard button in header
   ============================================================ */
   .cl-wrap {
     max-width: 1300px;
@@ -458,7 +459,7 @@
 {% block content %}
 <div class="cl-wrap">
 
-  <!-- ============ TOP HEADER (no box) ============ -->
+  <!-- ============ TOP HEADER (no box) — ENHANCED: added back button ============ -->
   <header class="cl-top">
     <div>
       <h1>
@@ -467,7 +468,12 @@
         </span>
         Claim Requests
       </h1>
+      <p>Review proof of ownership, approve or reject claims, and return items to their owners.</p>
     </div>
+    <a href="{{ url_for('admin_dashboard') }}" class="cl-btn cl-btn--ghost">
+      <svg class="cl-icon cl-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      Back to Dashboard
+    </a>
   </header>
 
   <!-- ============ SLIM STATS STRIP (clickable to filter) ============ -->
