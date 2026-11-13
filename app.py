@@ -1,9 +1,11 @@
 import os
+import re
 import csv
 import io
 import hmac
 import secrets
 from pathlib import Path
+from collections import defaultdict, deque
 from datetime import date, datetime, timezone
 from functools import wraps
 
@@ -115,6 +117,8 @@ if IS_VERCEL and not USE_CLOUDINARY:
 # ==================================================
 # WEBSITE BRANDING
 # ==================================================
+SITE_NAME = "SLSU JGE FindHub"
+SITE_TAGLINE = "Lost and Found Portal"
 CAMPUS_LOGO = (
     "https://www.slsu.edu.ph/wp-content/uploads/2023/05/"
     "Campuses/Campus-Logo/SLSU-JGE-Logo.png"
@@ -156,9 +160,7 @@ class Claim(db.Model):
     claimant_name = db.Column(db.String(120), nullable=False)
     claimant_contact = db.Column(db.String(150), nullable=False)
     proof = db.Column(db.Text, nullable=False)
-    # NEW: photo submitted by the claimant as proof of ownership
     proof_photo = db.Column(db.String(1000), nullable=True)
-    # NEW: admin's review note / rejection reason
     review_note = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(30), default="Pending", nullable=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
@@ -174,7 +176,6 @@ class Notification(db.Model):
     is_read = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, default=utcnow, nullable=False)
 
-# ========== DELETED REPORTS HISTORY MODEL ==========
 class DeletedReport(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     original_report_id = db.Column(db.Integer, nullable=False)
@@ -191,19 +192,15 @@ class DeletedReport(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
     deleted_at = db.Column(db.DateTime, default=utcnow, nullable=False)
     deleted_by = db.Column(db.String(120), nullable=True)
-# ========================================================
 
 # ==================================================
 # LIGHTWEIGHT AUTO-MIGRATION
-# Adds new columns (proof_photo, review_note) to an
-# existing claim table without wiping data. Works on
-# both SQLite (local) and PostgreSQL (Vercel).
 # ==================================================
 def ensure_claim_columns():
     try:
         inspector = sa_inspect(db.engine)
         if "claim" not in inspector.get_table_names():
-            return  # create_all will build it fresh
+            return
         existing = {c["name"] for c in inspector.get_columns("claim")}
     except Exception:
         app.logger.exception("Auto-migration inspection failed")
@@ -237,8 +234,12 @@ with app.app_context():
 def inject_global_template_values():
     return {
         "today": date.today(),
+        "site_name": SITE_NAME,
+        "site_tagline": SITE_TAGLINE,
         "campus_logo": CAMPUS_LOGO,
         "campus_photo": CAMPUS_PHOTO,
+        "item_categories": ITEM_CATEGORIES,
+        "report_statuses": sorted(REPORT_STATUSES),
         "admin_logged_in": bool(session.get("admin_logged_in")),
     }
 
@@ -256,6 +257,39 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 REPORT_STATUSES = {"Open", "Pending Claim", "Returned", "Archived"}
 CLAIM_STATUSES = {"Pending", "Approved", "Rejected"}
 
+# === ENHANCEMENT: standard category list for the report form + filters ===
+ITEM_CATEGORIES = [
+    "School ID / ID Card",
+    "Wallet",
+    "Phone / Gadget",
+    "Laptop / Tablet",
+    "Keys",
+    "Bag / Pouch",
+    "Book / Notebook",
+    "Umbrella",
+    "Water Bottle / Tumbler",
+    "Jewelry / Watch",
+    "Clothing",
+    "Eyeglasses",
+    "Other",
+]
+
+# === ENHANCEMENT: simple in-memory rate limiter (per IP) ===
+_RATE_BUCKETS = {
+    "report": defaultdict(deque),
+    "login": defaultdict(deque),
+}
+
+def _rate_limited(bucket, key, max_requests, window_seconds):
+    now = datetime.now(timezone.utc).timestamp()
+    dq = _RATE_BUCKETS[bucket][key]
+    while dq and now - dq[0] > window_seconds:
+        dq.popleft()
+    if len(dq) >= max_requests:
+        return True
+    dq.append(now)
+    return False
+
 def create_notification(title, message, notification_type="info", report_id=None):
     notification = Notification(
         title=title,
@@ -266,6 +300,14 @@ def create_notification(title, message, notification_type="info", report_id=None
     )
     db.session.add(notification)
     return notification
+
+# === ENHANCEMENT: human-friendly reference number, e.g. FH-0042 ===
+def report_reference(report):
+    return f"FH-{int(report.id):04d}"
+
+@app.context_processor
+def inject_helpers():
+    return {"photo_src": photo_src, "report_reference": report_reference}
 
 def admin_required(view_function):
     @wraps(view_function)
@@ -289,10 +331,6 @@ def photo_src(photo):
     if photo.startswith(("https://", "http://")):
         return photo
     return url_for("uploaded_photo", filename=photo)
-
-@app.context_processor
-def inject_photo_helper():
-    return {"photo_src": photo_src}
 
 def save_photo(file_storage):
     if not file_storage or not file_storage.filename:
@@ -341,6 +379,53 @@ def parse_incident_date(value):
 def get_report_form_value(name, default=""):
     return (request.form.get(name, default) or "").strip()
 
+# === ENHANCEMENT: auto-match — notify admin of possible opposite-type matches ===
+def create_match_notifications(report):
+    try:
+        opposite = "Found" if report.report_type == "Lost" else "Lost"
+        candidates = Report.query.filter(
+            Report.report_type == opposite,
+            Report.status == "Open",
+            Report.id != report.id,
+        ).all()
+        stopwords = {"the", "and", "for", "with", "na", "nga", "ang", "kay"}
+        keywords = {
+            w.lower()
+            for w in re.findall(r"[A-Za-z0-9]+", report.item_name)
+            if len(w) > 2 and w.lower() not in stopwords
+        }
+        scored = []
+        for cand in candidates:
+            score = 0
+            if report.category and cand.category == report.category:
+                score += 2
+            cand_text = f"{cand.item_name} {cand.description}"
+            cand_words = {
+                w.lower()
+                for w in re.findall(r"[A-Za-z0-9]+", cand_text)
+                if len(w) > 2 and w.lower() not in stopwords
+            }
+            score += len(keywords & cand_words)
+            if score >= 2:
+                scored.append((score, cand))
+        scored.sort(key=lambda x: -x[0])
+        for _score, cand in scored[:3]:
+            create_notification(
+                title="Possible Match Found",
+                message=(
+                    f"{report.report_type} report #{report.id} "
+                    f"'{report.item_name}' may match {opposite.lower()} "
+                    f"report #{cand.id} '{cand.item_name}'."
+                ),
+                notification_type="match",
+                report_id=report.id,
+            )
+        if scored:
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Auto-match notification failed")
+
 # ==================================================
 # HOME AND SEARCH
 # ==================================================
@@ -349,15 +434,18 @@ def home():
     query = request.args.get("q", "").strip()[:100]
     report_type = request.args.get("type", "").strip()
     status = request.args.get("status", "").strip()
+    category = request.args.get("category", "").strip()
     sort = request.args.get("sort", "newest").strip()
 
-    search_performed = bool(query or report_type or status)
+    search_performed = bool(query or report_type or status or category)
     reports_query = Report.query
 
     if report_type in {"Lost", "Found"}:
         reports_query = reports_query.filter(Report.report_type == report_type)
     if status in REPORT_STATUSES:
         reports_query = reports_query.filter(Report.status == status)
+    if category and category in ITEM_CATEGORIES:
+        reports_query = reports_query.filter(Report.category == category)
     if query:
         search_term = f"%{query}%"
         reports_query = reports_query.filter(
@@ -388,12 +476,14 @@ def home():
     total_lost = Report.query.filter_by(report_type="Lost").count()
     total_found = Report.query.filter_by(report_type="Found").count()
     total_open = Report.query.filter_by(status="Open").count()
+    total_returned = Report.query.filter_by(status="Returned").count()
 
     stats = {
         "total": total_reports,
         "lost": total_lost,
         "found": total_found,
         "open": total_open,
+        "returned": total_returned,
     }
 
     return render_template(
@@ -404,10 +494,12 @@ def home():
         total_lost=total_lost,
         total_found=total_found,
         total_open=total_open,
+        total_returned=total_returned,
         search_performed=search_performed,
         query=query,
         selected_type=report_type,
         selected_status=status,
+        selected_category=category,
         selected_sort=sort,
     )
 
@@ -417,6 +509,19 @@ def home():
 @app.route("/report/new", methods=["GET", "POST"])
 def new_report():
     if request.method == "POST":
+        # === ENHANCEMENT: honeypot — bots fill this hidden field; silently drop ===
+        if request.form.get("website"):
+            return redirect(url_for("home"))
+
+        # === ENHANCEMENT: rate limit — max 3 submissions per IP per 10 minutes ===
+        client_ip = request.remote_addr or "unknown"
+        if _rate_limited("report", client_ip, 3, 600):
+            flash(
+                "Too many submissions from this device. Please wait a few minutes.",
+                "danger",
+            )
+            return redirect(url_for("new_report"))
+
         report_type = get_report_form_value("report_type")
         item_name = get_report_form_value("item_name")
         category = get_report_form_value("category")
@@ -452,6 +557,8 @@ def new_report():
         if len(contact_name) > 120:
             flash("Your name is too long.", "danger")
             return redirect(url_for("new_report"))
+        if category not in ITEM_CATEGORIES:
+            category = "Other"
 
         stored_contact_name = contact_name or "Not provided"
         saved_photo = None
@@ -472,7 +579,7 @@ def new_report():
         report = Report(
             report_type=report_type,
             item_name=item_name,
-            category=category or "General",
+            category=category,
             description=description,
             location=location,
             incident_date=incident_date,
@@ -503,10 +610,18 @@ def new_report():
             flash("Unable to save your report. Please try again.", "danger")
             return redirect(url_for("new_report"))
 
-        flash("Your report was submitted successfully!", "success")
+        # === ENHANCEMENT: scan for possible matches after commit ===
+        create_match_notifications(report)
+
+        # === ENHANCEMENT: give the reporter a tracking reference ===
+        flash(
+            f"Submitted successfully! Your reference number is "
+            f"{report_reference(report)}. Save it to track your report.",
+            "success",
+        )
         return redirect(url_for("report_detail", report_id=report.id))
 
-    return render_template("report_form.html")
+    return render_template("report_form.html", categories=ITEM_CATEGORIES)
 
 # ==================================================
 # REPORT DETAILS
@@ -527,7 +642,7 @@ def report_detail(report_id):
     return render_template("report_detail.html", report=report)
 
 # ==================================================
-# CLAIM SUBMISSION (now accepts proof_photo)
+# CLAIM SUBMISSION
 # ==================================================
 @app.route("/report/<int:report_id>/claim", methods=["POST"])
 def submit_claim(report_id):
@@ -537,6 +652,10 @@ def submit_claim(report_id):
             "This report is no longer accepting claim requests.",
             "warning",
         )
+        return redirect(url_for("report_detail", report_id=report.id))
+
+    # === ENHANCEMENT: honeypot on claim form too ===
+    if request.form.get("website"):
         return redirect(url_for("report_detail", report_id=report.id))
 
     claimant_name = get_report_form_value("claimant_name")
@@ -556,7 +675,6 @@ def submit_claim(report_id):
         flash("Your contact details are too long.", "danger")
         return redirect(url_for("report_detail", report_id=report.id))
 
-    # Upload the claimant's proof photo (optional)
     saved_proof_photo = None
     try:
         saved_proof_photo = save_photo(request.files.get("proof_photo"))
@@ -630,6 +748,15 @@ def admin_login():
     if session.get("admin_logged_in"):
         return redirect(url_for("admin_dashboard"))
     if request.method == "POST":
+        # === ENHANCEMENT: login throttle — max 5 attempts per IP per 5 minutes ===
+        client_ip = request.remote_addr or "unknown"
+        if _rate_limited("login", client_ip, 5, 300):
+            flash(
+                "Too many login attempts. Please try again in a few minutes.",
+                "danger",
+            )
+            return render_template("admin_login.html")
+
         username = request.form.get("username", "")
         password = request.form.get("password", "")
         expected_username = os.environ.get("ADMIN_USERNAME", "")
@@ -814,7 +941,7 @@ def admin_claims():
     return render_template("admin_claims.html", claims=claims)
 
 # ==================================================
-# ADMIN: UPDATE CLAIM STATUS (saves review_note)
+# ADMIN: UPDATE CLAIM STATUS
 # ==================================================
 @app.route("/admin/claim/<int:claim_id>/status", methods=["POST"])
 @admin_required
@@ -894,7 +1021,6 @@ def notifications_page():
         unread_count=unread_count,
     )
 
-# ========== FIXED: accepts GET + POST, redirects to ?next= ==========
 @app.route("/notifications/<int:notification_id>/read", methods=["GET", "POST"])
 @admin_required
 def mark_notification_read(notification_id):
@@ -905,7 +1031,6 @@ def mark_notification_read(notification_id):
     except Exception:
         db.session.rollback()
         app.logger.exception("Failed to mark notification as read")
-    # Redirect to the ?next= page (e.g. the report) if provided and safe.
     next_url = request.values.get("next")
     if next_url and next_url.startswith("/") and "://" not in next_url:
         return redirect(next_url)
