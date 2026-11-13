@@ -47,6 +47,23 @@
   }
   .fh-back-link:hover { gap: 10px; text-decoration: underline; }
 
+  /* Reference chip */
+  .fh-ref-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    vertical-align: middle;
+  }
+
   /* ============ TOP: Photo + Main Info ============ */
   .fh-top-grid {
     display: grid;
@@ -108,6 +125,17 @@
   .fh-meta-item svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: var(--primary); opacity: .8; }
   .fh-meta-item strong { color: var(--text); font-weight: 600; }
 
+  .fh-closed-notice {
+    margin-top: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--surface-alt);
+    border-left: 4px solid var(--muted);
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
   .fh-actions-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
   .fh-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -155,7 +183,7 @@
   .fh-claim-form { display: flex; flex-direction: column; gap: 12px; }
   .fh-claim-form .fh-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .fh-claim-form label { font-size: 13px; font-weight: 700; color: var(--text); display: flex; flex-direction: column; gap: 6px; }
-  .fh-claim-form input, .fh-claim-form textarea {
+  .fh-claim-form input, .fh-claim-form textarea, .fh-claim-form input[type="file"] {
     padding: 10px 14px;
     border: 1.5px solid var(--border);
     border-radius: 10px;
@@ -239,6 +267,7 @@
 {% endblock %}
 
 {% block content %}
+{% set claim_open = report.status not in ['Returned', 'Archived'] %}
 <div class="fh-detail-page">
 
   <!-- Back Link -->
@@ -254,7 +283,7 @@
 
     <div class="fh-photo-card">
       {% if report.photo %}
-        <img src="{{ photo_src(report.photo) }}" alt="Photo of {{ report.item_name }}">
+        <img src="{{ photo_src(report.photo) }}" alt="Photo of {{ report.item_name }}" loading="lazy" decoding="async" width="560" height="320">
       {% else %}
         <div class="fh-photo-card__ph" aria-label="No photo available">
           {% if report.report_type|lower == 'lost' %}
@@ -275,7 +304,10 @@
     </div>
 
     <div class="fh-info-card">
-      <h1>{{ report.item_name }}</h1>
+      <h1>
+        {{ report.item_name }}
+        <span class="fh-ref-chip" title="Save this number to track your report">{{ 'FH-{:04d}'.format(report.id) }}</span>
+      </h1>
 
       <span class="fh-status-line
         {% if report.status == 'Pending Claim' %}fh-status--pending
@@ -310,11 +342,18 @@
 
         <div class="fh-meta-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
           </svg>
           <span><strong>Posted</strong><br>{{ report.created_at.strftime('%b %d, %Y') if report.created_at else '—' }}</span>
         </div>
       </div>
+
+      {% if not claim_open %}
+      <div class="fh-closed-notice">
+        This report is <strong>{{ report.status }}</strong> and is no longer accepting new claims.
+        If you believe this is your item, please contact the campus administrator.
+      </div>
+      {% endif %}
 
       <div class="fh-actions-bar">
         <button type="button" class="fh-btn fh-btn--primary fh-btn--sm" id="fh-contact-btn" aria-expanded="false" aria-controls="fh-contact-panel">
@@ -324,12 +363,14 @@
           </svg>
           Contact Reporter
         </button>
+        {% if claim_open %}
         <button type="button" class="fh-btn fh-btn--ghost fh-btn--sm" id="fh-claim-btn" aria-expanded="false" aria-controls="fh-claim-panel">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 11 4.77 5.07 5.07 0 0 0 7 5c-2.23.68-3.86 3.16-3.5 6.28.07.64.24 1.31.5 1.88"/>
           </svg>
           Submit a Claim
         </button>
+        {% endif %}
       </div>
 
       <!-- ===== CONTACT REPORTER PANEL (revealed on click) ===== -->
@@ -370,6 +411,7 @@
       </div>
 
       <!-- ===== SUBMIT A CLAIM PANEL (inline form, revealed on click) ===== -->
+      {% if claim_open %}
       <div class="fh-reveal" id="fh-claim-panel" role="region" aria-label="Submit a claim form">
         <h3>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -377,17 +419,27 @@
           </svg>
           Submit a Claim for This Item
         </h3>
-        <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}" class="fh-claim-form">
-          <div class="fh-row">
-            <label>Your Full Name <span class="fh-hint">(required)</span>
-              <input type="text" name="claimer_name" maxlength="120" required placeholder="Juan Dela Cruz">
-            </label>
-            <label>Your Contact <span class="fh-hint">(required)</span>
-              <input type="text" name="claimer_contact" maxlength="180" required placeholder="Email or phone">
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('submit_claim', report_id=report.id) }}" class="fh-claim-form">
+          <!-- Honeypot — bots fill this; server silently drops the submission -->
+          <div style="position:absolute;left:-9999px;top:auto;height:1px;width:1px;overflow:hidden;" aria-hidden="true">
+            <label>Leave this field empty
+              <input type="text" name="website" tabindex="-1" autocomplete="off">
             </label>
           </div>
-          <label>Proof of Ownership / Description <span class="fh-hint">(required — describe unique details only the owner would know)</span>
-            <textarea name="proof_description" maxlength="2000" rows="3" required placeholder="e.g., 'Black wallet with a small tear on the top-right corner, contains an SLSU ID ending in 2024.'"></textarea>
+
+          <div class="fh-row">
+            <label>Your Full Name <span class="fh-hint">(required)</span>
+              <input type="text" name="claimer_name" maxlength="120" required autocomplete="name" placeholder="Juan Dela Cruz">
+            </label>
+            <label>Your Contact <span class="fh-hint">(required — email or phone)</span>
+              <input type="text" name="claimer_contact" maxlength="150" required autocomplete="email" placeholder="you@example.com or 09XX-XXX-XXXX">
+            </label>
+          </div>
+          <label>Proof of Ownership <span class="fh-hint">(required — describe unique details only the owner would know)</span>
+            <textarea name="proof" maxlength="2000" rows="3" required placeholder="e.g., 'Black wallet with a small tear on the top-right corner, contains an SLSU ID ending in 2024.'"></textarea>
+          </label>
+          <label>Proof Photo <span class="fh-hint">(optional — receipt, screenshot, or photo of the matching item)</span>
+            <input type="file" name="proof_photo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
           </label>
           <button type="submit" class="fh-btn fh-btn--primary fh-btn--sm">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -397,6 +449,7 @@
           </button>
         </form>
       </div>
+      {% endif %}
     </div>
   </div>
 
@@ -411,7 +464,7 @@
       </h2>
       <p><strong>Report Type:</strong> {{ report.report_type }}</p>
       <p><strong>Status:</strong> {{ report.status or 'Open' }}</p>
-      <p><strong>Reference ID:</strong> #{{ report.id }}</p>
+      <p><strong>Reference Number:</strong> {{ 'FH-{:04d}'.format(report.id) }} (internal ID #{{ report.id }})</p>
       <p><strong>Description:</strong><br>{{ report.description or 'No additional details provided.' }}</p>
     </section>
 
@@ -424,9 +477,9 @@
       </h2>
       <p><strong>Item Name:</strong> {{ report.item_name }}</p>
       <p><strong>Category:</strong> {{ report.category or 'Not specified' }}</p>
-      <p><strong>Brand / Color:</strong> {{ report.brand_color or 'Not specified' }}</p>
-      <p><strong>Distinguishing Marks:</strong><br>{{ report.marks or 'None provided' }}</p>
-      <p><strong>Additional Info:</strong><br>{{ report.additional_info or '—' }}</p>
+      <p><strong>Location on Campus:</strong> {{ report.location or 'Not specified' }}</p>
+      {% if report.incident_date %}<p><strong>Date of Occurrence:</strong> {{ report.incident_date }}</p>{% endif %}
+      <p><strong>Reported By:</strong> {{ report.contact_name or 'Anonymous' }}</p>
     </section>
   </div>
 
@@ -437,15 +490,15 @@
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
         <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
-      Submitted Claims ({{ claims|length if claims else 0 }})
+      Submitted Claims ({{ report.claims|length }})
     </h2>
 
-    {% if claims %}
-      {% for claim in claims %}
+    {% if report.claims %}
+      {% for claim in report.claims %}
         <div class="fh-claim-item">
           <div class="fh-claim-item__head">
-            <span class="fh-claim-item__name">{{ claim.claimer_name or claim.submitter_name or 'Anonymous Claimant' }}</span>
-            <span class="fh-claim-item__date">{{ claim.submitted_at.strftime('%b %d, %Y · %H:%M') if claim.submitted_at else 'Date unknown' }}</span>
+            <span class="fh-claim-item__name">{{ claim.claimant_name or 'Anonymous Claimant' }}</span>
+            <span class="fh-claim-item__date">{{ claim.created_at.strftime('%b %d, %Y · %H:%M') if claim.created_at else 'Date unknown' }}</span>
             <span class="fh-claim-item__status
               {% if claim.status == 'Approved' %}fh-claim-item__status--approved
               {% elif claim.status == 'Rejected' %}fh-claim-item__status--rejected
@@ -453,7 +506,10 @@
               {{ claim.status or 'Pending' }}
             </span>
           </div>
-          <p class="fh-claim-item__desc">{{ claim.proof_description or 'No proof description provided.' }}</p>
+          <p class="fh-claim-item__desc">{{ claim.proof or 'No proof description provided.' }}</p>
+          {% if claim.review_note %}
+            <p class="fh-claim-item__desc" style="margin-top:6px;color:var(--text);"><strong>Admin note:</strong> {{ claim.review_note }}</p>
+          {% endif %}
         </div>
       {% endfor %}
     {% else %}
@@ -471,13 +527,16 @@
   var claimPanel   = document.getElementById('fh-claim-panel');
 
   function toggle(btn, panel, otherBtn, otherPanel) {
+    if (!btn || !panel) return;
     var open = panel.classList.toggle('open');
     btn.classList.toggle('fh-btn--active', open);
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     if (open && otherPanel) {
       otherPanel.classList.remove('open');
-      otherBtn.classList.remove('fh-btn--active');
-      otherBtn.setAttribute('aria-expanded', 'false');
+      if (otherBtn) {
+        otherBtn.classList.remove('fh-btn--active');
+        otherBtn.setAttribute('aria-expanded', 'false');
+      }
     }
   }
 
