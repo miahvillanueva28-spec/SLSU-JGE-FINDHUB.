@@ -1,185 +1,384 @@
 {% extends "base.html" %}
 {% block title %}Deleted Reports History — SLSU JGE FindHub{% endblock %}
-{% block content %}
-<div class="dashboard-wrapper">
-  <!-- HEADER -->
-  <div class="dashboard-header">
-    <div>
-      <h1>🕓 Deleted Reports History</h1>
-      <p>Records of all reports deleted from the system.</p>
-    </div>
-    <div style="display: flex; gap: 0.75rem;">
-      <a href="{{ url_for('export_history_csv') }}" class="btn-export">📊 Export CSV</a>
-      <button onclick="window.print()" class="btn-export" style="background: #2980b9;">🖨️ Print</button>
-      <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">← Back to Dashboard</a>
-    </div>
-  </div>
 
-  <!-- DELETED LIST -->
-  <div class="reports-section">
-    {% if deleted_reports %}
-      <div class="reports-table">
-        <div class="table-header">
-          <span>Orig ID</span>
-          <span>Item Name</span>
-          <span>Type</span>
-          <span>Status When Deleted</span>
-          <span>Deleted By</span>
-          <span>Created</span>
-          <span>Deleted At</span>
-        </div>
-        {% for report in deleted_reports %}
-        <div class="table-row">
-          <span class="report-id">#{{ report.original_report_id }}</span>
-          <span class="report-name">{{ report.item_name }}</span>
-          <span class="type-{{ report.report_type|lower }}">{{ report.report_type }}</span>
-          <span class="status-{{ report.status_when_deleted|replace(' ', '-')|lower }}">
-            {{ report.status_when_deleted }}
-          </span>
-          <span>{{ report.deleted_by or 'Unknown' }}</span>
-          <span class="report-date">{{ report.created_at.strftime('%Y-%m-%d') if report.created_at else 'N/A' }}</span>
-          <span class="report-date">{{ report.deleted_at.strftime('%Y-%m-%d %H:%M') if report.deleted_at else 'N/A' }}</span>
-        </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p class="empty-state">No reports have been deleted yet.</p>
-    {% endif %}
-  </div>
-</div>
-
+{% block head %}
 <style>
-  .dashboard-wrapper {
+  /* ============================================================
+     DELETED REPORTS HISTORY — redesigned to match dashboard style
+     Header (no box) → single panel (toolbar + table) + live search
+  ============================================================ */
+  .ad-wrap {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem 1.5rem;
-    background: #ffffff;
+    padding: 20px 20px 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
   }
-  .dashboard-header {
+  .ad-icon {
+    width: 17px; height: 17px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  .ad-icon--sm { width: 13px; height: 13px; }
+  .ad-icon--lg { width: 20px; height: 20px; }
+
+  .ad-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #e0e0e0;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 14px;
   }
-  .dashboard-header h1 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1.5rem;
-    color: #1a1a1a;
-    font-weight: 700;
-  }
-  .dashboard-header p {
-    margin: 0;
-    color: #555555;
-    font-size: 0.95rem;
-  }
-  .btn-export {
-    background: #075c3b;
-    color: #ffffff;
-    padding: 0.6rem 1.25rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-  }
-  .btn-export:hover {
-    background: #064d32;
-    color: #ffffff;
-  }
-  .btn-secondary {
-    background: #f0f0f0;
-    color: #333333;
-    padding: 0.6rem 1.25rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    border: 1px solid #dddddd;
-  }
-  .btn-secondary:hover {
-    background: #e0e0e0;
-    color: #333333;
-  }
-  .reports-section h2 {
-    font-size: 1.1rem;
-    color: #333333;
-    margin-bottom: 1rem;
-    font-weight: 600;
-  }
-  .reports-table {
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #ffffff;
-  }
-  .table-header {
-    display: grid;
-    grid-template-columns: 70px 2fr 100px 180px 150px 120px 160px;
-    gap: 0.5rem;
-    padding: 0.85rem 1rem;
-    background: #f5f5f5;
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: #333333;
-    border-bottom: 2px solid #e0e0e0;
-  }
-  .table-row {
-    display: grid;
-    grid-template-columns: 70px 2fr 100px 180px 150px 120px 160px;
-    gap: 0.5rem;
-    padding: 1rem;
-    border-top: 1px solid #e8e8e8;
+  .ad-top h1 {
+    margin: 0 0 3px;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -.01em;
+    display: flex;
     align-items: center;
-    background: #ffffff;
+    gap: 10px;
   }
-  .table-row:hover {
-    background: #f9f9f9;
+  .ad-top h1 .ad-title-icon {
+    width: 36px; height: 36px;
+    border-radius: 11px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-  .report-id {
-    color: #777777;
-    font-family: monospace;
+  .ad-top p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .ad-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 11px;
+    border: 1.5px solid transparent;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    white-space: nowrap;
+  }
+  .ad-btn:hover { transform: translateY(-1px); }
+  .ad-btn--primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .ad-btn--primary:hover { background: var(--primary-dark); box-shadow: 0 6px 16px rgba(7,92,59,.25); color: #fff; }
+  .ad-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
+  .ad-btn--ghost:hover { background: var(--surface-alt); }
+  .ad-btn--blue { background: #2471a3; color: #fff; border-color: #2471a3; }
+  .ad-btn--blue:hover { background: #1d5d86; box-shadow: 0 6px 16px rgba(36,113,163,.25); color: #fff; }
+  .ad-btn--sm { min-height: 32px; padding: 0 11px; font-size: 12.5px; border-radius: 9px; }
+
+  .ad-panel {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .ad-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ad-panel-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ad-panel-title .ad-count {
+    font-size: 12px;
     font-weight: 600;
+    color: var(--muted);
+    background: var(--surface-alt);
+    padding: 3px 9px;
+    border-radius: 999px;
   }
-  .report-name {
-    color: #333333;
+  .ad-toolbar__right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .ad-search {
+    position: relative;
+    min-width: 220px;
+    flex: 1;
+    max-width: 340px;
+  }
+  .ad-search input {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .ad-search input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
+  }
+  .ad-search svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px; height: 15px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .ad-scroll { overflow-x: auto; }
+  .ad-table { min-width: 980px; width: 100%; }
+  .ad-row {
+    display: grid;
+    grid-template-columns: 70px minmax(180px, 2fr) 90px 150px 130px 110px 160px;
+    gap: 12px;
+    align-items: center;
+    padding: 13px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ad-row--head {
+    background: var(--surface-alt);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+  .ad-row--data { transition: background .15s ease; }
+  .ad-row--data:hover { background: var(--surface-alt); }
+  .ad-row--data:last-child { border-bottom: none; }
+
+  .ad-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
     font-weight: 600;
+    color: var(--muted);
   }
-  .type-lost { color: #c0392b; font-weight: 600; }
-  .type-found { color: #27ae60; font-weight: 600; }
-  .status-open { color: #2980b9; font-weight: 600; }
-  .status-pending-claim { color: #f39c12; font-weight: 600; }
-  .status-returned { color: #27ae60; font-weight: 600; }
-  .status-archived { color: #7f8c8d; font-weight: 600; }
-  .report-date {
-    color: #666666;
-    font-size: 0.9rem;
-    font-weight: 500;
+  .ad-item-name {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 14px;
+    overflow-wrap: anywhere;
   }
-  .empty-state {
+  .ad-pill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    white-space: nowrap;
+  }
+  .ad-pill-tag::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+  }
+  .ad-pill-tag--lost { background: rgba(192,57,43,.1); color: #c0392b; }
+  .ad-pill-tag--found { background: rgba(30,132,73,.1); color: #1e8449; }
+  .ad-pill-tag--open { background: rgba(36,113,163,.1); color: #2471a3; }
+  .ad-pill-tag--pending-claim { background: rgba(185,119,14,.12); color: #b9770e; }
+  .ad-pill-tag--returned { background: rgba(30,132,73,.1); color: #1e8449; }
+  .ad-pill-tag--archived { background: rgba(108,122,137,.12); color: #6c7a89; }
+
+  .ad-date {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .ad-deleted-by {
+    font-size: 12.5px;
+    color: var(--text);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .ad-empty {
+    padding: 52px 24px;
     text-align: center;
-    padding: 3rem;
-    color: #777777;
-    font-weight: 500;
+    color: var(--muted);
   }
-  /* PRINT STYLES — clean when printing */
+  .ad-empty__icon {
+    width: 56px; height: 56px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ad-empty__icon svg { width: 24px; height: 24px; }
+  .ad-empty p { margin: 0 0 3px; font-size: 15px; font-weight: 700; color: var(--text); }
+  .ad-empty span { font-size: 13px; }
+
+  .ad-no-results {
+    display: none;
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 700px) {
+    .ad-wrap { padding: 14px 12px 56px; gap: 16px; }
+    .ad-top { flex-direction: column; align-items: stretch; }
+    .ad-top .ad-btn { width: 100%; }
+    .ad-toolbar { flex-direction: column; align-items: stretch; }
+    .ad-toolbar__right { justify-content: stretch; }
+    .ad-toolbar__right .ad-btn { flex: 1; }
+    .ad-search { max-width: none; }
+    .ad-row { padding: 12px 16px; }
+  }
   @media print {
-    .dashboard-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .btn-export, .btn-secondary, button { display: none !important; }
-    .dashboard-wrapper { padding: 0; }
-    .table-row:hover { background: transparent; }
+    .ad-toolbar, .ad-top .ad-btn { display: none !important; }
+    .ad-wrap { padding: 0; }
+    .ad-row--data:hover { background: transparent; }
   }
-  @media (max-width: 768px) {
-    .table-header { display: none; }
-    .table-row {
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem 1rem;
-    }
+  @media (prefers-reduced-motion: reduce) {
+    .ad-btn:hover { transform: none !important; }
   }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="ad-wrap">
+
+  <!-- ============ TOP HEADER (no box) ============ -->
+  <header class="ad-top">
+    <div>
+      <h1>
+        <span class="ad-title-icon" aria-hidden="true">
+          <svg class="ad-icon ad-icon--lg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        </span>
+        Deleted Reports History
+      </h1>
+      <p>Records of all reports deleted from the system — nothing is permanently lost.</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="{{ url_for('export_history_csv') }}" class="ad-btn ad-btn--primary">
+        <svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        Export CSV
+      </a>
+      <button onclick="window.print()" class="ad-btn ad-btn--blue">
+        <svg class="ad-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print
+      </button>
+      <a href="{{ url_for('admin_dashboard') }}" class="ad-btn ad-btn--ghost">
+        <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        Back to Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- ============ SINGLE PANEL: toolbar + table ============ -->
+  <div class="ad-panel">
+    <div class="ad-toolbar">
+      <h2 class="ad-panel-title">
+        Deleted Records
+        {% if deleted_reports %}<span class="ad-count" id="ad-visible-count">{{ deleted_reports|length }}</span>{% endif %}
+      </h2>
+
+      <div class="ad-toolbar__right">
+        <div class="ad-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="search" id="ad-history-search" placeholder="Search item, ID, or deleted by..." aria-label="Search deleted records">
+        </div>
+      </div>
+    </div>
+
+    {% if deleted_reports %}
+      <div class="ad-scroll">
+        <div class="ad-table">
+          <div class="ad-row ad-row--head">
+            <span>Orig ID</span><span>Item Name</span><span>Type</span>
+            <span>Status When Deleted</span><span>Deleted By</span>
+            <span>Created</span><span>Deleted At</span>
+          </div>
+
+          <div id="ad-history-rows">
+          {% for report in deleted_reports %}
+            <div class="ad-row ad-row--data">
+              <span class="ad-id">#{{ report.original_report_id }}</span>
+              <span class="ad-item-name">{{ report.item_name }}</span>
+              <span>
+                <span class="ad-pill-tag ad-pill-tag--{{ report.report_type|lower }}">{{ report.report_type }}</span>
+              </span>
+              <span>
+                <span class="ad-pill-tag ad-pill-tag--{{ report.status_when_deleted|replace(' ', '-')|lower }}">
+                  {{ report.status_when_deleted }}
+                </span>
+              </span>
+              <span class="ad-deleted-by">{{ report.deleted_by or 'Unknown' }}</span>
+              <span class="ad-date">{{ report.created_at.strftime('%Y-%m-%d') if report.created_at else 'N/A' }}</span>
+              <span class="ad-date">{{ report.deleted_at.strftime('%Y-%m-%d %H:%M') if report.deleted_at else 'N/A' }}</span>
+            </div>
+          {% endfor %}
+          </div>
+
+          <p class="ad-no-results" id="ad-history-no-results">No records match your search.</p>
+        </div>
+      </div>
+    {% else %}
+      <div class="ad-empty">
+        <div class="ad-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+        </div>
+        <p>No reports have been deleted yet</p>
+        <span>Deleted reports will appear here with full details and who removed them.</span>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% if deleted_reports %}
+<script>
+  (function () {
+    var search = document.getElementById('ad-history-search');
+    var rows = Array.prototype.slice.call(document.querySelectorAll('#ad-history-rows .ad-row--data'));
+    var noResults = document.getElementById('ad-history-no-results');
+    var countEl = document.getElementById('ad-visible-count');
+    var total = rows.length;
+
+    function filterRows() {
+      var q = (search.value || '').trim().toLowerCase();
+      var visible = 0;
+      rows.forEach(function (row) {
+        var show = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+      if (countEl) countEl.textContent = visible;
+    }
+    if (search) search.addEventListener('input', filterRows);
+  })();
+</script>
+{% endif %}
 {% endblock %}
