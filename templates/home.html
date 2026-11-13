@@ -5,11 +5,11 @@
 {% block head %}
 <style>
   /* ============================================================
-     SLSU JGE FindHub — HOME (Professional Redesign)
+     SLSU JGE FindHub — HOME (Professional Redesign + Filters)
      - No emojis (inline SVG icons only)
-     - Search bar moved to top of reports (View Reports), compact
-     - Back to Home button integrated inside the search bar
-     - When searching: hero hidden, only matching reports show
+     - Search + filter bar (type / status / category / sort)
+     - Stats strip below hero
+     - When searching/filtering: hero hidden, only matching reports show
   ============================================================ */
 
   :root {
@@ -55,6 +55,40 @@
   }
   .fh-icon--sm { width: 14px; height: 14px; }
   .fh-icon--lg { width: 22px; height: 22px; }
+
+  /* ============================================================
+     STATS STRIP
+  ============================================================ */
+  .fh-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  body.search-active .fh-stats { display: none; }
+  .fh-stat {
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+    border-radius: var(--fh-radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .fh-stat__num {
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .fh-stat__label {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
   /* ============================================================
      HERO — HIDDEN when searching (body.search-active)
@@ -208,14 +242,13 @@
   .fh-step__body p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
 
   /* ============================================================
-     COMPACT SEARCH BAR — at top of reports (View Reports only)
-     Back to Home button is integrated on the left side.
+     SEARCH + FILTER BAR
   ============================================================ */
   .fh-reports-search {
     display: none;
-    align-items: center;
+    flex-direction: column;
     gap: 10px;
-    padding: 10px 12px;
+    padding: 12px;
     border: 1px solid var(--border);
     border-radius: 14px;
     background: var(--surface);
@@ -223,7 +256,13 @@
   }
   body.reports-only .fh-reports-search,
   body.search-active .fh-reports-search { display: flex; }
-  .fh-reports-search input {
+
+  .fh-search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .fh-search-row input {
     flex: 1;
     min-width: 0;
     padding: 9px 12px;
@@ -235,12 +274,38 @@
     font-family: inherit;
     transition: border-color .2s ease, box-shadow .2s ease;
   }
-  .fh-reports-search input:focus {
+  .fh-search-row input:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(7,92,59,.12);
   }
-  .fh-reports-search .fh-btn { min-height: 40px; padding: 0 18px; flex-shrink: 0; }
+  .fh-search-row .fh-btn { min-height: 40px; padding: 0 18px; flex-shrink: 0; }
+
+  .fh-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .fh-filter-row select {
+    flex: 1 1 140px;
+    min-width: 120px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .fh-filter-row select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
+  }
+  .fh-filter-row .fh-btn { flex-shrink: 0; }
 
   /* Back to Home — compact ghost button inside the search bar */
   #fh-back-btn {
@@ -264,7 +329,7 @@
     text-decoration: none !important;
   }
 
-  /* Search results summary bar (shown only when searching) */
+  /* Search results summary bar (shown only when searching/filtering) */
   .fh-results-summary {
     display: none;
     align-items: center;
@@ -407,7 +472,7 @@
     padding: 18px;
   }
   .fh-card__title {
-    margin: 0 0 12px;
+    margin: 0 0 6px;
     font-size: 16px;
     font-weight: 700;
     line-height: 1.4;
@@ -416,6 +481,19 @@
     transition: color .2s ease;
   }
   .fh-card:hover .fh-card__title { color: var(--primary); }
+
+  .fh-card__category {
+    display: inline-block;
+    align-self: flex-start;
+    margin-bottom: 12px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--surface-alt);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .03em;
+  }
 
   .fh-card__meta { display: grid; gap: 8px; margin-bottom: 14px; }
   .fh-card__meta-row {
@@ -495,15 +573,17 @@
     .fh-hero { grid-template-columns: 1fr; gap: 32px; }
     .fh-hero__visual { order: 2; }
     .fh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fh-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   @media (max-width: 600px) {
     .fh-home { padding: 4px 14px 56px; gap: 28px; }
     .fh-hero { padding: 28px 20px; }
     .fh-hero__actions { flex-direction: column; }
     .fh-hero__actions .fh-btn { width: 100%; }
-    .fh-reports-search { flex-direction: column; align-items: stretch; padding: 10px; }
-    .fh-reports-search .fh-btn,
-    .fh-reports-search #fh-back-btn { width: 100%; }
+    .fh-search-row { flex-direction: column; align-items: stretch; }
+    .fh-search-row .fh-btn,
+    #fh-back-btn { width: 100%; }
+    .fh-filter-row select { flex: 1 1 45%; }
     .fh-reports__bar { align-items: stretch; }
     .fh-reports__actions { width: 100%; }
     .fh-reports__actions .fh-btn { flex: 1; }
@@ -566,7 +646,7 @@
         <span class="fh-step__num">2</span>
         <div class="fh-step__body">
           <h4>Search &amp; Match</h4>
-          <p>Browse reports and filter by type, status, or keyword to find a match.</p>
+          <p>Browse reports and filter by type, category, status, or keyword to find a match.</p>
         </div>
       </div>
       <div class="fh-step">
@@ -579,39 +659,93 @@
     </div>
   </section>
 
-  <!-- ===================== RESULTS SUMMARY (only when searching) ===================== -->
+  <!-- ===================== STATS STRIP (hidden when searching) ===================== -->
+  <section class="fh-stats" aria-label="Portal statistics">
+    <div class="fh-stat">
+      <span class="fh-stat__num">{{ stats.total }}</span>
+      <span class="fh-stat__label">Total Reports</span>
+    </div>
+    <div class="fh-stat">
+      <span class="fh-stat__num">{{ stats.lost }}</span>
+      <span class="fh-stat__label">Lost Items</span>
+    </div>
+    <div class="fh-stat">
+      <span class="fh-stat__num">{{ stats.found }}</span>
+      <span class="fh-stat__label">Found Items</span>
+    </div>
+    <div class="fh-stat">
+      <span class="fh-stat__num">{{ stats.returned|default(0) }}</span>
+      <span class="fh-stat__label">Returned to Owners</span>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS SUMMARY (only when searching/filtering) ===================== -->
   <div class="fh-results-summary">
     <span>
       {% if reports %}
         {{ reports|length }} result{{ 's' if reports|length != 1 else '' }} found
-        {% if request.args.get('q') %}for “{{ request.args.get('q') }}”{% endif %}
+        {% if request.args.get('q') %} for “{{ request.args.get('q') }}”{% endif %}
       {% else %}
         No results found{% if request.args.get('q') %} for “{{ request.args.get('q') }}”{% endif %}
       {% endif %}
     </span>
-    <a href="{{ url_for('home') }}">
+    <a href="{{ url_for('home') }}?view=reports">
       <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-      Back to Home
+      Clear filters
     </a>
   </div>
 
   <!-- ===================== REPORTS ===================== -->
   <section class="fh-reports" id="reports-section" aria-labelledby="fh-reports-title">
 
-    <!-- COMPACT SEARCH BAR with Back to Home integrated on the left -->
-    <form method="GET" action="{{ url_for('home') }}" class="fh-reports-search" role="search" aria-label="Search reports">
-      <a class="fh-btn" href="{{ url_for('home') }}" id="fh-back-btn" style="display:none;">
-        <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-        Back to Home
-      </a>
-      <input type="search" name="q"
-             placeholder="Search items, description, or location..."
-             value="{{ request.args.get('q', '') }}"
-             maxlength="200" autocomplete="off" aria-label="Search keyword">
-      <button type="submit" class="fh-btn fh-btn--primary">
-        <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        Search
-      </button>
+    <!-- SEARCH + FILTER BAR with Back to Home integrated on the left -->
+    <form method="GET" action="{{ url_for('home') }}" class="fh-reports-search" role="search" aria-label="Search and filter reports">
+      <div class="fh-search-row">
+        <a class="fh-btn" href="{{ url_for('home') }}" id="fh-back-btn" style="display:none;">
+          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          Back to Home
+        </a>
+        <input type="search" name="q"
+               placeholder="Search items, description, or location..."
+               value="{{ request.args.get('q', '') }}"
+               maxlength="200" autocomplete="off" aria-label="Search keyword">
+        <button type="submit" class="fh-btn fh-btn--primary">
+          <svg class="fh-icon fh-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Search
+        </button>
+      </div>
+
+      <div class="fh-filter-row">
+        <select name="type" aria-label="Filter by type">
+          <option value="">All types</option>
+          <option value="Lost" {% if selected_type == 'Lost' %}selected{% endif %}>Lost</option>
+          <option value="Found" {% if selected_type == 'Found' %}selected{% endif %}>Found</option>
+        </select>
+
+        <select name="category" aria-label="Filter by category">
+          <option value="">All categories</option>
+          {% for cat in item_categories|default([]) %}
+            <option value="{{ cat }}" {% if selected_category|default('') == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="status" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          {% for st in report_statuses|default(['Open','Pending Claim','Returned','Archived']) %}
+            <option value="{{ st }}" {% if selected_status == st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="sort" aria-label="Sort reports">
+          <option value="newest" {% if selected_sort|default('newest') == 'newest' %}selected{% endif %}>Newest first</option>
+          <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+          <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Name A–Z</option>
+        </select>
+
+        {% if search_performed %}
+        <a class="fh-btn fh-btn--ghost fh-btn--sm" href="{{ url_for('home') }}?view=reports">Clear</a>
+        {% endif %}
+      </div>
     </form>
 
     <div class="fh-reports__bar">
@@ -639,7 +773,7 @@
               {% if report.photo %}
                 <img src="{{ photo_src(report.photo) }}"
                      alt="Photo of {{ report.item_name }}"
-                     loading="lazy" decoding="async">
+                     loading="lazy" decoding="async" width="400" height="170">
               {% else %}
                 <div class="fh-card__ph" aria-label="No photo available">
                   {% if report.report_type|lower == 'lost' %}
@@ -656,6 +790,9 @@
 
             <div class="fh-card__body">
               <h3 class="fh-card__title">{{ report.item_name }}</h3>
+              {% if report.category and report.category != 'General' %}
+                <span class="fh-card__category">{{ report.category }}</span>
+              {% endif %}
 
               <div class="fh-card__meta">
                 <div class="fh-card__meta-row">
@@ -699,7 +836,7 @@
         </h3>
         <p>
           {% if search_performed %}
-            We couldn't find any items matching your search. Try a different keyword.
+            We couldn't find any items matching your filters. Try a different keyword or clear the filters.
           {% else %}
             Be the first to post a report and help reunite items with their owners.
           {% endif %}
@@ -708,7 +845,7 @@
           <a class="fh-btn fh-btn--lost" href="{{ url_for('new_report') }}?type=Lost">Report Lost Item</a>
           <a class="fh-btn fh-btn--found" href="{{ url_for('new_report') }}?type=Found">Report Found Item</a>
           {% if search_performed %}
-            <a class="fh-btn fh-btn--ghost" href="{{ url_for('home') }}">Clear Search</a>
+            <a class="fh-btn fh-btn--ghost" href="{{ url_for('home') }}?view=reports">Clear Filters</a>
           {% endif %}
         </div>
       </div>
@@ -719,12 +856,12 @@
 <script>
   (function () {
     var params = new URLSearchParams(window.location.search);
-    var hasSearch = params.has('q') || params.has('type') || params.has('status');
+    var hasSearch = params.has('q') || params.has('type') || params.has('status') || params.has('category');
     var isReportsView = params.get('view') === 'reports';
     var backBtn = document.getElementById('fh-back-btn');
     var reportsSection = document.getElementById('reports-section');
 
-    /* when searching, add body.search-active → CSS hides the hero */
+    /* when searching/filtering, add body.search-active → CSS hides the hero + stats */
     if (hasSearch) {
       document.body.classList.add('search-active');
     }
@@ -770,6 +907,13 @@
         document.title = 'Home | SLSU JGE FindHub';
       });
     }
+
+    /* Auto-submit filters when a dropdown changes (no extra click needed) */
+    document.querySelectorAll('.fh-filter-row select').forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        sel.closest('form').submit();
+      });
+    });
 
     /* Subtle fade-in on scroll for report cards */
     var observer = new IntersectionObserver(function (entries) {
