@@ -40,62 +40,10 @@
     }
     .skip-link:focus { top: 0; outline: 3px solid #86efac; }
 
-    /* === Dark mode toggle button === */
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 38px;
-      height: 38px;
-      margin-right: 6px;
-      border: 1.5px solid var(--border, rgba(0,0,0,.12));
-      border-radius: 10px;
-      background: var(--surface-alt, rgba(0,0,0,.04));
-      color: var(--text, #1a1a1a);
-      cursor: pointer;
-      transition: background .2s ease, transform .2s ease;
-    }
-    .theme-toggle:hover { transform: translateY(-1px); }
-    .theme-toggle svg { width: 18px; height: 18px; }
-    .theme-toggle .icon-moon { display: none; }
-    html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
-    html[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
-
-    /* === Dark theme palette (tune in style.css if desired) === */
-    html[data-theme="dark"] {
-      color-scheme: dark;
-      --surface: #111814;
-      --surface-alt: #1a2420;
-      --text: #e8f0ec;
-      --muted: #9db3a9;
-      --border: #2a3a32;
-      --primary: #34d399;
-      --primary-dark: #10b981;
-      --primary-soft: rgba(16,185,129,.14);
-      --shadow: 0 10px 30px rgba(0,0,0,.45);
-    }
-    html[data-theme="dark"] body { background: #0b110e; }
-    html[data-theme="dark"] .site-header,
-    html[data-theme="dark"] .site-footer { background: #0f1a15 !important; }
-    html[data-theme="dark"] img { opacity: .92; }
-
     @media (prefers-reduced-motion: reduce) {
       .skip-link { transition: none; }
-      .theme-toggle { transition: none; }
     }
   </style>
-
-  <!-- Apply saved theme before paint to avoid flash -->
-  <script>
-    (function () {
-      try {
-        var saved = localStorage.getItem("fh-theme");
-        if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-          document.documentElement.setAttribute("data-theme", "dark");
-        }
-      } catch (e) {}
-    })();
-  </script>
 
   {% block head %}{% endblock %}
 </head>
@@ -116,17 +64,6 @@
                 <small>Lost and Found Portal</small>
             </span>
         </a>
-
-        <button
-            class="theme-toggle"
-            type="button"
-            id="theme-toggle"
-            aria-label="Toggle dark mode"
-            title="Toggle dark mode"
-        >
-            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-        </button>
 
         <button
             class="menu-toggle"
@@ -255,21 +192,6 @@
         document.addEventListener("keydown", function (e) {
             if (e.key === "Escape") hideModal();
         });
-
-        // === Dark mode toggle (persisted in localStorage) ===
-        var themeToggle = document.getElementById("theme-toggle");
-        if (themeToggle) {
-            themeToggle.addEventListener("click", function () {
-                var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-                if (isDark) {
-                    document.documentElement.removeAttribute("data-theme");
-                    try { localStorage.setItem("fh-theme", "light"); } catch (e) {}
-                } else {
-                    document.documentElement.setAttribute("data-theme", "dark");
-                    try { localStorage.setItem("fh-theme", "dark"); } catch (e) {}
-                }
-            });
-        }
     });
 </script>
 {% block scripts %}{% endblock %}
