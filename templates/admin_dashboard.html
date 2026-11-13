@@ -6,6 +6,7 @@
   /* ============================================================
      ADMIN DASHBOARD — Clean, minimal boxes
      Header (no box) → slim stats strip → single panel (toolbar + table)
+     ENHANCED: live search, edit button, clearer headers
   ============================================================ */
   .ad-wrap {
     max-width: 1400px;
@@ -208,12 +209,45 @@
     border-radius: 999px;
   }
 
+  /* ---------- Search input (ENHANCED) ---------- */
+  .ad-search {
+    position: relative;
+    min-width: 200px;
+    flex: 1;
+    max-width: 320px;
+  }
+  .ad-search input {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .ad-search input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
+  }
+  .ad-search svg {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px; height: 15px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
   /* ---------- Table ---------- */
   .ad-scroll { overflow-x: auto; }
-  .ad-table { min-width: 900px; width: 100%; }
+  .ad-table { min-width: 960px; width: 100%; }
   .ad-row {
     display: grid;
-    grid-template-columns: 60px minmax(170px, 2fr) 85px 125px 155px 105px 140px;
+    grid-template-columns: 60px minmax(170px, 2fr) 85px 125px 155px 105px 180px;
     gap: 12px;
     align-items: center;
     padding: 13px 22px;
@@ -293,7 +327,7 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  .ad-actions { display: flex; gap: 5px; }
+  .ad-actions { display: flex; gap: 5px; flex-wrap: wrap; }
   .ad-actions form { margin: 0; }
 
   .ad-empty {
@@ -313,6 +347,15 @@
   .ad-empty p { margin: 0 0 3px; font-size: 15px; font-weight: 700; color: var(--text); }
   .ad-empty span { font-size: 13px; }
 
+  .ad-no-results {
+    display: none;
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
   @media (max-width: 700px) {
     .ad-wrap { padding: 14px 12px 56px; gap: 16px; }
     .ad-top { flex-direction: column; align-items: stretch; }
@@ -321,6 +364,7 @@
     .ad-toolbar { flex-direction: column; align-items: stretch; }
     .ad-toolbar__right { justify-content: stretch; }
     .ad-toolbar__right .ad-btn { flex: 1; }
+    .ad-search { max-width: none; }
     .ad-pills { width: 100%; justify-content: space-between; }
     .ad-pill { flex: 1; text-align: center; }
     .ad-row { padding: 12px 16px; }
@@ -430,12 +474,18 @@
            class="ad-pill {% if request.args.get('filter') == 'Found' %}active{% endif %}">Found</a>
       </nav>
 
+      <!-- ENHANCED: live search box -->
+      <div class="ad-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="ad-report-search" placeholder="Search item, location, or ID..." aria-label="Search reports">
+      </div>
+
       <div class="ad-toolbar__right">
         <h2 class="ad-panel-title">
           {% if request.args.get('filter') == 'Lost' %}Lost Reports
           {% elif request.args.get('filter') == 'Found' %}Found Reports
           {% else %}All Reports{% endif %}
-          {% if reports %}<span class="ad-count">{{ reports|length }}</span>{% endif %}
+          {% if reports %}<span class="ad-count" id="ad-visible-count">{{ reports|length }}</span>{% endif %}
         </h2>
         <a href="{{ url_for('admin_claims') }}" class="ad-btn ad-btn--primary ad-btn--sm">
           <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
@@ -454,9 +504,10 @@
         <div class="ad-table">
           <div class="ad-row ad-row--head">
             <span>ID</span><span>Item</span><span>Type</span><span>Status</span>
-            <span>Update</span><span>Date</span><span>Actions</span>
+            <span>Set Status</span><span>Date</span><span>Actions</span>
           </div>
 
+          <div id="ad-rows">
           {% for report in reports %}
             {% set current_filter = request.args.get('filter') %}
             {% if not current_filter or current_filter == report.report_type %}
@@ -467,6 +518,9 @@
                 <a href="{{ url_for('report_detail', report_id=report.id) }}" class="ad-item-link">
                   {{ report.item_name }}
                 </a>
+                {% if report.category and report.category != 'General' %}
+                  <span style="display:block;font-size:11.5px;color:var(--muted);margin-top:2px;">{{ report.category }}</span>
+                {% endif %}
               </span>
 
               <span>
@@ -494,13 +548,17 @@
               <span class="ad-date">{{ report.created_at.strftime('%Y-%m-%d') }}</span>
 
               <span class="ad-actions">
-                <a href="{{ url_for('report_detail', report_id=report.id) }}" class="ad-btn ad-btn--ghost ad-btn--sm">
+                <a href="{{ url_for('report_detail', report_id=report.id) }}" class="ad-btn ad-btn--ghost ad-btn--sm" title="View full report">
                   <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                   View
                 </a>
+                <a href="{{ url_for('report_detail', report_id=report.id) }}#fh-claim-panel" class="ad-btn ad-btn--ghost ad-btn--sm" title="Edit report details (coming soon)" style="opacity:.55;cursor:not-allowed;" onclick="return false;">
+                  <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  Edit
+                </a>
                 <form action="{{ url_for('admin_delete_report', report_id=report.id) }}" method="POST"
                       onsubmit="return confirm('Delete this report? It will be saved to Deleted history.');">
-                  <button type="submit" class="ad-btn ad-btn--danger ad-btn--sm">
+                  <button type="submit" class="ad-btn ad-btn--danger ad-btn--sm" title="Move to deleted history">
                     <svg class="ad-icon ad-icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     Delete
                   </button>
@@ -509,6 +567,9 @@
             </div>
             {% endif %}
           {% endfor %}
+          </div>
+
+          <p class="ad-no-results" id="ad-no-results">No reports match your search.</p>
         </div>
       </div>
     {% else %}
@@ -523,4 +584,29 @@
   </div>
 
 </div>
+
+{% if reports %}
+<script>
+  (function () {
+    var search = document.getElementById('ad-report-search');
+    var rows = Array.prototype.slice.call(document.querySelectorAll('#ad-rows .ad-row--data'));
+    var noResults = document.getElementById('ad-no-results');
+    var countEl = document.getElementById('ad-visible-count');
+    var total = rows.length;
+
+    function filterRows() {
+      var q = (search.value || '').trim().toLowerCase();
+      var visible = 0;
+      rows.forEach(function (row) {
+        var show = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+      if (countEl) countEl.textContent = visible;
+    }
+    if (search) search.addEventListener('input', filterRows);
+  })();
+</script>
+{% endif %}
 {% endblock %}
