@@ -1,560 +1,724 @@
+
 {% extends "base.html" %}
 {# MUST be outside any {% block %} so both head and content blocks can see them (Jinja2 block scoping) #}
 {% set is_lost = report.report_type|lower == 'lost' %}
 {% set is_closed = report.status in ['Returned', 'Archived'] %}
 {% block title %}{{ report.item_name }} | SLSU JGE FindHub{% endblock %}
+
 {% block head %}
 <style>
-  :root {
-    --fh-accent-lost: #c2410c;
-    --fh-accent-lost-soft: #fff7ed;
-    --fh-accent-lost-border: #fdba74;
-    --fh-accent-found: #15803d;
-    --fh-accent-found-soft: #f0fdf4;
-    --fh-accent-found-border: #86efac;
-    --fh-radius: 16px;
-    --fh-radius-sm: 12px;
-  }
-  html[data-theme="dark"] {
-    --fh-accent-lost-soft: rgba(194,65,12,.18);
-    --fh-accent-lost-border: rgba(253,186,116,.4);
-    --fh-accent-found-soft: rgba(21,128,61,.2);
-    --fh-accent-found-border: rgba(134,239,172,.35);
-  }
-  .fh-detail-page {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 12px 20px 72px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-  .fh-back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 4px;
-    transition: gap .2s ease;
-  }
-  .fh-back-link:hover { gap: 10px; text-decoration: underline; }
-  .fh-top-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 24px;
-    align-items: start;
-  }
-  .fh-photo-card {
-    border: 1px solid var(--border);
-    border-radius: var(--fh-radius);
-    background: var(--surface);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    position: relative;
-  }
-  .fh-photo-card img { width: 100%; height: 320px; object-fit: cover; display: block; }
-  .fh-photo-card__ph {
-    width: 100%; height: 320px;
-    display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, var(--primary-soft), var(--surface-alt));
-    color: var(--primary);
-  }
-  .fh-photo-card__ph svg { width: 56px; height: 56px; opacity: .5; }
-  .fh-badge {
-    position: absolute; top: 16px; left: 16px;
-    padding: 6px 14px; border-radius: 999px;
-    font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
-    backdrop-filter: blur(4px);
-  }
-  .fh-badge--lost { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); border: 1px solid var(--fh-accent-lost-border); }
-  .fh-badge--found { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); border: 1px solid var(--fh-accent-found-border); }
-  .fh-info-card {
-    border: 1px solid var(--border);
-    border-radius: var(--fh-radius);
-    background: var(--surface);
-    padding: 24px;
-    box-shadow: var(--shadow);
-  }
-  .fh-info-card h1 { margin: 0 0 12px; font-size: 26px; font-weight: 800; line-height: 1.25; color: var(--text); }
-  .fh-status-line {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 14px; border-radius: 999px;
-    font-size: 13px; font-weight: 700; margin-bottom: 18px;
-  }
-  .fh-status-line::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-  .fh-status--open { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); }
-  .fh-status--pending { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); }
-  .fh-status--closed { background: var(--surface-alt); color: var(--muted); }
-  .fh-meta-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 14px 20px; margin-bottom: 18px;
-  }
-  .fh-meta-item { display: flex; gap: 8px; font-size: 14px; color: var(--muted); }
-  .fh-meta-item svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: var(--primary); opacity: .8; }
-  .fh-meta-item strong { color: var(--text); font-weight: 600; }
-  .fh-actions-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; align-items: center; }
-  .fh-btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 44px; padding: 0 20px;
-    border-radius: var(--fh-radius-sm); border: 1.5px solid transparent;
-    font-size: 14.5px; font-weight: 700; text-decoration: none; cursor: pointer;
-    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-    font-family: inherit;
-  }
-  .fh-btn:hover { transform: translateY(-2px); }
-  .fh-btn:active { transform: translateY(0); }
-  .fh-btn--primary { background: var(--primary); color: #fff; }
-  .fh-btn--primary:hover { background: var(--primary-dark); box-shadow: 0 8px 20px rgba(7,92,59,.25); color: #fff; }
-  .fh-btn--ghost { background: transparent; color: var(--text); border-color: var(--border); }
-  .fh-btn--ghost:hover { background: var(--surface-alt); }
-  .fh-btn--sm { min-height: 38px; padding: 0 16px; font-size: 13.5px; }
-  .fh-btn--active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
-  .fh-closed-note {
-    font-size: 13px; color: var(--muted); font-weight: 600;
-    padding: 8px 14px; border-radius: 10px;
-    background: var(--surface-alt); border: 1px dashed var(--border);
-  }
-  .fh-reveal {
-    display: none;
-    margin-top: 16px;
-    padding: 18px 20px;
-    border: 1px solid var(--border);
-    border-radius: var(--fh-radius-sm);
-    background: var(--surface-alt);
-    animation: fhSlideDown .3s ease both;
-  }
-  .fh-reveal.open { display: block; }
-  @keyframes fhSlideDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .fh-reveal h3 { margin: 0 0 6px; font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
-  .fh-reveal h3 svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; }
-  .fh-hint-line { margin: 0 0 14px; font-size: 13px; color: var(--muted); line-height: 1.55; }
-  .fh-contact-row { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text); margin-bottom: 8px; }
-  .fh-contact-row:last-child { margin-bottom: 0; }
-  .fh-contact-row svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; }
-  .fh-contact-row a { color: var(--primary); font-weight: 600; text-decoration: none; border-bottom: 1px dashed currentColor; }
-  .fh-contact-row a:hover { border-bottom-style: solid; }
-  .fh-contact-private { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0; }
-  .fh-claim-form { display: flex; flex-direction: column; gap: 12px; }
-  .fh-claim-form .fh-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .fh-claim-form label { font-size: 13px; font-weight: 700; color: var(--text); display: flex; flex-direction: column; gap: 6px; }
-  .fh-claim-form input, .fh-claim-form textarea {
-    padding: 10px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    color: var(--text);
-    font-size: 14px;
-    font-family: inherit;
-    transition: border-color .2s ease, box-shadow .2s ease;
-    box-sizing: border-box;
-    width: 100%;
-  }
-  .fh-claim-form input:focus, .fh-claim-form textarea:focus {
-    outline: none; border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(7,92,59,.12);
-  }
-  .fh-claim-form textarea { resize: vertical; min-height: 90px; }
-  .fh-claim-form input[type="file"] {
-    padding: 8px;
-    font-size: 13px;
-    background: var(--surface);
-  }
-  .fh-claim-form .fh-hint { font-size: 12px; color: var(--muted); font-weight: 400; }
-  .fh-claim-form button { align-self: flex-start; }
-  .fh-section-card {
-    border: 1px solid var(--border);
-    border-radius: var(--fh-radius);
-    background: var(--surface);
-    padding: 22px 24px;
-    box-shadow: var(--shadow);
-  }
-  .fh-section-card h2 {
-    display: flex; align-items: center; gap: 10px;
-    margin: 0 0 16px; font-size: 17px; font-weight: 700; color: var(--text);
-    padding-bottom: 10px; border-bottom: 1px solid var(--border);
-  }
-  .fh-section-card h2 svg { width: 18px; height: 18px; color: var(--primary); flex-shrink: 0; }
-  .fh-section-card p { font-size: 14.5px; line-height: 1.65; color: var(--text); margin: 0 0 8px; }
-  .fh-section-card p:last-child { margin-bottom: 0; }
-  .fh-section-card strong { color: var(--text); font-weight: 600; }
-  .fh-two-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-  .fh-claim-item {
-    padding: 14px 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--fh-radius-sm);
-    background: var(--surface-alt);
-    margin-bottom: 12px;
-    transition: border-color .2s ease;
-  }
-  .fh-claim-item:last-child { margin-bottom: 0; }
-  .fh-claim-item:hover { border-color: var(--primary); }
-  .fh-claim-item__head {
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 8px; margin-bottom: 6px;
-  }
-  .fh-claim-item__name { font-weight: 700; font-size: 14.5px; }
-  .fh-claim-item__date { font-size: 12.5px; color: var(--muted); }
-  .fh-claim-item__badges { display: inline-flex; gap: 6px; flex-wrap: wrap; }
-  .fh-claim-item__status { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
-  .fh-claim-item__status--pending { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); }
-  .fh-claim-item__status--approved { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); }
-  .fh-claim-item__status--rejected { background: var(--surface-alt); color: var(--muted); }
-  .fh-claim-item__kind { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); letter-spacing: .02em; }
-  .fh-claim-item__desc { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 4px 0 0; white-space: pre-wrap; }
-  .fh-proof-photo-link {
-    display: inline-flex; align-items: center; gap: 6px;
-    margin-top: 8px; font-size: 12.5px; font-weight: 600;
-    color: var(--primary); text-decoration: none;
-  }
-  .fh-proof-photo-link:hover { text-decoration: underline; }
-  .fh-proof-photo-link svg { width: 14px; height: 14px; }
-  /* Admin review note — visible to the user on the report page */
-  .fh-admin-note {
-    margin-top: 10px;
-    padding: 10px 14px;
-    border-left: 3px solid var(--primary);
-    background: var(--primary-soft);
-    border-radius: 0 10px 10px 0;
-    font-size: 13px;
-    color: var(--text);
-    line-height: 1.55;
-  }
-  .fh-admin-note strong { color: var(--primary); display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
-  .fh-empty-state { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
-  @media (max-width: 900px) {
-    .fh-top-grid, .fh-two-col { grid-template-columns: 1fr; }
-    .fh-meta-grid { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 600px) {
-    .fh-detail-page { padding: 8px 14px 48px; gap: 20px; }
-    .fh-info-card, .fh-section-card { padding: 18px 16px; }
-    .fh-photo-card img, .fh-photo-card__ph { height: 240px; }
-    .fh-info-card h1 { font-size: 22px; }
-    .fh-actions-bar { flex-direction: column; align-items: stretch; }
-    .fh-actions-bar .fh-btn { width: 100%; }
-    .fh-claim-form .fh-row { grid-template-columns: 1fr; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .fh-btn:hover, .fh-claim-item:hover, .fh-reveal { transform: none; animation: none; }
-  }
+:root {
+--fh-accent-lost: #c2410c;
+--fh-accent-lost-soft: #fff7ed;
+--fh-accent-lost-border: #fdba74;
+--fh-accent-found: #15803d;
+--fh-accent-found-soft: #f0fdf4;
+--fh-accent-found-border: #86efac;
+
+--fh-radius: 16px;
+--fh-radius-sm: 12px;
+}
+html[data-theme="dark"] {
+--fh-accent-lost-soft: rgba(194,65,12,.18);
+--fh-accent-lost-border: rgba(253,186,116,.4);
+--fh-accent-found-soft: rgba(21,128,61,.2);
+--fh-accent-found-border: rgba(134,239,172,.35);
+}
+.fh-detail-page {
+max-width: 1120px; margin: 0 auto; padding: 12px 20px 72px;
+display: flex; flex-direction: column; gap: 24px;
+}
+
+/* ---------- Visible Back Button (top + bottom) ---------- */
+.fh-back-btn {
+display: inline-flex; align-items: center; gap: 8px;
+min-height: 40px; padding: 0 18px;
+
+border-radius: 11px; border: 1.5px solid var(--border);
+background: var(--surface); color: var(--text);
+font-size: 13.5px; font-weight: 700; text-decoration: none;
+cursor: pointer; font-family: inherit; align-self: flex-start;
+transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+box-shadow: var(--shadow);
+}
+.fh-back-btn:hover {
+transform: translateY(-1px); background: var(--surface-alt);
+border-color: var(--primary); color: var(--primary);
+text-decoration: none;
+}
+.fh-back-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.fh-top-grid {
+display: grid; grid-template-columns: 1fr 1.1fr; gap: 24px; align-items: start;
+}
+.fh-photo-card {
+border: 1px solid var(--border); border-radius: var(--fh-radius);
+background: var(--surface); overflow: hidden; box-shadow: var(--shadow); position: relative;
+}
+.fh-photo-card img { width: 100%; height: 320px; object-fit: cover; display: block; }
+.fh-photo-card__ph {
+width: 100%; height: 320px; display: flex; align-items: center; justify-content: center;
+background: linear-gradient(135deg, var(--primary-soft), var(--surface-alt)); color: var(--primary);
+}
+.fh-photo-card__ph svg { width: 56px; height: 
+
+56px; opacity: .5; }
+.fh-badge {
+position: absolute; top: 16px; left: 16px; padding: 6px 14px; border-radius: 999px;
+font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+backdrop-filter: blur(4px);
+}
+.fh-badge--lost { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); border: 1px solid var(--fh-accent-lost-border); }
+.fh-badge--found { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); border: 1px solid var(--fh-accent-found-border); }
+
+.fh-info-card {
+border: 1px solid var(--border); border-radius: var(--fh-radius);
+background: var(--surface); padding: 24px; box-shadow: var(--shadow);
+
+}
+.fh-info-card h1 { margin: 0 0 12px; font-size: 26px; font-weight: 800; line-height: 1.25; color: var(--text); }
+.fh-ref-line {
+display: block; font-size: 12.5px; font-weight: 700; color: var(--primary);
+letter-spacing: .04em; margin-bottom: 8px; font-variant-numeric: tabular-nums;
+}
+.fh-status-line {
+display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px;
+border-radius: 999px; font-size: 13px; font-weight: 700; margin-bottom: 18px;
+}
+.fh-status-line::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.fh-status--open { background: var(--fh-accent-
+
+found-soft); color: var(--fh-accent-found); }
+.fh-status--pending { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); }
+.fh-status--closed { background: var(--surface-alt); color: var(--muted); }
+
+.fh-meta-grid {
+display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 20px; margin-bottom: 18px;
+}
+.fh-meta-item { display: flex; gap: 8px; font-size: 14px; color: var(--muted); }
+.fh-meta-item svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: var(--primary); opacity: .8; }
+.fh-meta-item strong { color: var(--text); font-weight: 600; }
+
+.fh-actions-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; align-items: center; }
+
+.fh-btn {
+display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+min-height: 44px; padding: 0 20px; border-radius: var(--fh-radius-sm);
+border: 1.5px solid transparent; font-size: 14.5px; font-weight: 700;
+text-decoration: none; cursor: pointer;
+transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+font-family: inherit;
+}
+.fh-btn:hover { transform: translateY(-2px); }
+.fh-btn:active { transform: translateY(0); }
+.fh-btn--primary { background: var(--primary); color: #fff; }
+.fh-btn--primary:hover { background: var(--primary-dark); box-shadow: 0 8px 20px rgba(7,92,59,.25); color: #fff; }
+.fh-btn--ghost { background: transparent; color: 
+
+var(--text); border-color: var(--border); }
+.fh-btn--ghost:hover { background: var(--surface-alt); }
+.fh-btn--sm { min-height: 38px; padding: 0 16px; font-size: 13.5px; }
+.fh-btn--active { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
+.fh-closed-note {
+font-size: 13px; color: var(--muted); font-weight: 600; padding: 8px 14px;
+border-radius: 10px; background: var(--surface-alt); border: 1px dashed var(--border);
+}
+
+.fh-reveal {
+display: none; margin-top: 16px; padding: 18px 20px;
+border: 1px solid var(--border); border-radius: var(--fh-radius-sm);
+
+background: var(--surface-alt); animation: fhSlideDown .3s ease both;
+}
+.fh-reveal.open { display: block; }
+@keyframes fhSlideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.fh-reveal h3 {
+margin: 0 0 6px; font-size: 15px; font-weight: 700; color: var(--text);
+display: flex; align-items: center; gap: 8px;
+}
+.fh-reveal h3 svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; }
+.fh-hint-line { margin: 0 0 14px; font-size: 13px; color: var(--muted); line-height: 1.55; }
+.fh-contact-row { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text); margin-bottom: 8px; }
+.fh-contact-row:last-child { margin-bottom: 0; }
+
+.fh-contact-row svg { width: 16px; height: 16px; color: var(--primary); flex-shrink: 0; }
+.fh-contact-row a { color: var(--primary); font-weight: 600; text-decoration: none; border-bottom: 1px dashed currentColor; }
+.fh-contact-row a:hover { border-bottom-style: solid; }
+.fh-contact-private { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0; }
+
+.fh-claim-form { display: flex; flex-direction: column; gap: 12px; }
+.fh-claim-form .fh-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fh-claim-form label {
+font-size: 13px; font-weight: 700; color: var(--text);
+display: flex; flex-direction: column; gap: 6px;
+}
+.fh-claim-form input, .fh-claim-form textarea {
+
+padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+background: var(--surface); color: var(--text); font-size: 14px; font-family: inherit;
+transition: border-color .2s ease, box-shadow .2s ease; box-sizing: border-box; width: 100%;
+}
+.fh-claim-form input:focus, .fh-claim-form textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(7,92,59,.12); }
+.fh-claim-form textarea { resize: vertical; min-height: 90px; }
+.fh-claim-form input[type="file"] { padding: 8px; font-size: 13px; background: var(--surface); }
+.fh-claim-form .fh-hint { font-size: 12px; color: var(--muted); font-weight: 400; }
+.fh-claim-form button { align-self: flex-start; }
+
+/* ---------- Formal Report Information section (full 
+
+width) ---------- */
+.fh-section-card {
+border: 1px solid var(--border); border-radius: var(--fh-radius);
+background: var(--surface); padding: 22px 24px; box-shadow: var(--shadow);
+}
+.fh-section-card > h2 {
+display: flex; align-items: center; gap: 10px; margin: 0 0 18px;
+font-size: 16px; font-weight: 700; color: var(--text);
+padding-bottom: 12px; border-bottom: 1px solid var(--border);
+letter-spacing: .01em;
+}
+.fh-section-card > h2 svg { width: 18px; height: 18px; color: var(--primary); flex-shrink: 0; }
+
+.fh-def-grid {
+
+display: grid; grid-template-columns: repeat(2, 1fr); gap: 0;
+border: 1px solid var(--border); border-radius: var(--fh-radius-sm); overflow: hidden;
+}
+.fh-def-item {
+display: flex; flex-direction: column; gap: 3px;
+padding: 14px 18px; border-bottom: 1px solid var(--border);
+border-right: 1px solid var(--border); background: var(--surface);
+}
+.fh-def-item:nth-child(2n) { border-right: none; }
+.fh-def-item:nth-last-child(-n+2) { border-bottom: none; }
+.fh-def-label {
+font-size: 11px; font-weight: 700; text-transform: uppercase;
+letter-spacing: .06em; color: var(--muted);
+}
+
+.fh-def-value { font-size: 14px; color: var(--text); font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
+.fh-def-value--muted { color: var(--muted); }
+.fh-def-desc {
+grid-column: 1 / -1; border-right: none; border-bottom: none;
+background: var(--surface-alt);
+}
+.fh-def-desc .fh-def-value { white-space: pre-wrap; line-height: 1.7; }
+
+/* ---------- Collapsible Submitted Information / Claims ---------- */
+.fh-collapsible-header {
+display: flex; align-items: center; justify-content: space-between;
+gap: 12px; flex-wrap: wrap; cursor: pointer; user-select: none;
+padding: 0; margin: 0; border: none; background: 
+
+none; width: 100%;
+font-family: inherit; text-align: left;
+}
+.fh-collapsible-header h2 {
+display: flex; align-items: center; gap: 10px; margin: 0;
+font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: .01em;
+}
+.fh-collapsible-header h2 svg { width: 18px; height: 18px; color: var(--primary); flex-shrink: 0; }
+.fh-collapse-count {
+font-size: 12px; font-weight: 700; color: var(--primary);
+background: var(--primary-soft); padding: 4px 12px; border-radius: 999px;
+}
+.fh-collapse-toggle {
+display: inline-flex; align-items: center; gap: 6px;
+min-height: 36px; padding: 0 14px; border-radius: 
+
+10px;
+border: 1.5px solid var(--border); background: var(--surface);
+color: var(--text); font-size: 12.5px; font-weight: 700; cursor: pointer;
+font-family: inherit; transition: all .2s ease;
+}
+.fh-collapse-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.fh-collapse-toggle svg {
+width: 14px; height: 14px; transition: transform .25s ease;
+}
+.fh-collapsible.open .fh-collapse-toggle svg { transform: rotate(180deg); }
+
+.fh-collapsible-body {
+display: none; margin-top: 18px; padding-top: 18px;
+border-top: 1px solid var(--border); animation: 
+
+fhSlideDown .3s ease both;
+}
+.fh-collapsible.open .fh-collapsible-body { display: block; }
+
+.fh-claim-item {
+padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--fh-radius-sm);
+background: var(--surface-alt); margin-bottom: 12px; transition: border-color .2s ease;
+}
+.fh-claim-item:last-child { margin-bottom: 0; }
+.fh-claim-item:hover { border-color: var(--primary); }
+.fh-claim-item__head {
+display: flex; justify-content: space-between; align-items: center;
+flex-wrap: wrap; gap: 8px; margin-bottom: 6px;
+}
+.fh-claim-item__name { font-weight: 700; font-
+
+size: 14.5px; }
+.fh-claim-item__date { font-size: 12.5px; color: var(--muted); }
+.fh-claim-item__badges { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.fh-claim-item__status { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.fh-claim-item__status--pending { background: var(--fh-accent-lost-soft); color: var(--fh-accent-lost); }
+.fh-claim-item__status--approved { background: var(--fh-accent-found-soft); color: var(--fh-accent-found); }
+.fh-claim-item__status--rejected { background: var(--surface-alt); color: var(--muted); }
+.fh-claim-item__kind {
+font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+background: var(--primary-soft); color: var(--
+
+primary); letter-spacing: .02em;
+}
+.fh-claim-item__desc {
+font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 4px 0 0; white-space: pre-wrap;
+}
+.fh-proof-photo-link {
+display: inline-flex; align-items: center; gap: 6px; margin-top: 8px;
+font-size: 12.5px; font-weight: 600; color: var(--primary); text-decoration: none;
+}
+.fh-proof-photo-link:hover { text-decoration: underline; }
+.fh-proof-photo-link svg { width: 14px; height: 14px; }
+
+/* Admin review note — visible to the user on the report page */
+.fh-admin-note {
+
+margin-top: 10px; padding: 10px 14px; border-left: 3px solid var(--primary);
+background: var(--primary-soft); border-radius: 0 10px 10px 0;
+font-size: 13px; color: var(--text); line-height: 1.55;
+}
+.fh-admin-note strong {
+color: var(--primary); display: block; font-size: 11px;
+text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px;
+}
+.fh-empty-state { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
+
+/* Bottom back button row */
+.fh-bottom-actions {
+display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+padding-top: 4px;
+
+}
+
+@media (max-width: 900px) {
+.fh-top-grid { grid-template-columns: 1fr; }
+.fh-meta-grid { grid-template-columns: 1fr; }
+.fh-def-grid { grid-template-columns: 1fr; }
+.fh-def-item { border-right: none !important; }
+.fh-def-item:nth-last-child(-n+2) { border-bottom: 1px solid var(--border); }
+.fh-def-item:last-child { border-bottom: none; }
+}
+@media (max-width: 600px) {
+.fh-detail-page { padding: 8px 14px 48px; gap: 20px; }
+.fh-info-card, .fh-section-card { padding: 18px 16px; }
+.fh-photo-card img, .fh-photo-card__ph { height: 240px; }
+.fh-info-card h1 { font-size: 22px; }
+.fh-actions-bar { flex-direction: column; align-
+
+items: stretch; }
+.fh-actions-bar .fh-btn { width: 100%; }
+.fh-claim-form .fh-row { grid-template-columns: 1fr; }
+.fh-back-btn { width: 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+.fh-btn:hover, .fh-claim-item:hover, .fh-reveal, .fh-collapsible-body { transform: none; animation: none; }
+.fh-collapse-toggle svg { transition: none; }
+}
 </style>
 {% endblock %}
+
 {% block content %}
 <div class="fh-detail-page">
-  <a href="{{ request.referrer or url_for('home') }}" class="fh-back-link">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="m15 18-6-6 6-6"/>
-    </svg>
-    Back to Reports
-  </a>
 
-  <div class="fh-top-grid">
-    <div class="fh-photo-card">
-      {% if report.photo %}
-        <img src="{{ photo_src(report.photo) }}" alt="Photo of {{ report.item_name }}">
-      {% else %}
-        <div class="fh-photo-card__ph" aria-label="No photo available">
-          {% if is_lost %}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 9v4"/><path d="M12 17h.01"/>
-              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            </svg>
-          {% else %}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-            </svg>
-          {% endif %}
-        </div>
-      {% endif %}
-      <span class="fh-badge {% if is_lost %}fh-badge--lost{% else %}fh-badge--found{% endif %}">
-        {{ report.report_type }}
-      </span>
-    </div>
+{# ===== Visible Back Button (top) ===== #}
 
-    <div class="fh-info-card">
-      <h1>{{ report.item_name }}</h1>
-      <span class="fh-status-line
-        {% if report.status == 'Pending Claim' %}fh-status--pending
-        {% elif is_closed %}fh-status--closed
-        {% else %}fh-status--open{% endif %}">
-        {{ report.status or 'Open' }}
-      </span>
+<a href="{{ request.referrer or url_for('home') }}" class="fh-back-btn">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m15 18-6-6 6-6"/>
+</svg>
+Back to Reports
+</a>
 
-      <div class="fh-meta-grid">
-        <div class="fh-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-          <span><strong>Location</strong><br>{{ report.location or 'Not specified' }}</span>
-        </div>
-        {% if report.incident_date %}
-        <div class="fh-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
-          </svg>
-          <span><strong>Date</strong><br>{{ report.incident_date }}</span>
-        </div>
-        {% endif %}
-        <div class="fh-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-          </svg>
-          <span><strong>Reported by</strong><br>{{ report.contact_name or 'Anonymous' }}</span>
-        </div>
-        <div class="fh-meta-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-          </svg>
-          <span><strong>Posted</strong><br>{{ report.created_at.strftime('%b %d, %Y') if report.created_at else '—' }}</span>
-        </div>
-      </div>
+<div class="fh-top-grid">
+<div class="fh-photo-card">
+{% if report.photo %}
+<img src="{{ photo_src(report.photo) }}" alt="Photo of {{ report.item_name }}">
+{% else %}
+<div class="fh-photo-card__ph" aria-label="No photo available">
+{% if is_lost %}
 
-      <div class="fh-actions-bar">
-        <button type="button" class="fh-btn fh-btn--ghost fh-btn--sm" id="fh-contact-btn" aria-expanded="false" aria-controls="fh-contact-panel">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <path d="m22 6-10 7L2 6"/>
-          </svg>
-          Contact Reporter
-        </button>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M12 9v4"/><path d="M12 17h.01"/>
+<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+</svg>
+{% else %}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+</svg>
+{% endif %}
+</div>
+{% endif %}
 
-        {% if not is_closed %}
-          {% if is_lost %}
-          {# ===== LOST REPORT: people who saw / found the item submit information ===== #}
-          <button type="button" class="fh-btn fh-btn--primary fh-btn--sm" id="fh-claim-btn" aria-expanded="false" aria-controls="fh-claim-panel">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            Submit Information
-          </button>
-          {% else %}
-          {# ===== FOUND REPORT: only here can the owner submit a claim ===== #}
-          <button type="button" class="fh-btn fh-btn--primary fh-btn--sm" id="fh-claim-btn" aria-expanded="false" aria-controls="fh-claim-panel">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 11 4.77 5.07 5.07 0 0 0 7 5c-2.23.68-3.86 3.16-3.5 6.28.07.64.24 1.31.5 1.88"/>
-            </svg>
-            Submit a Claim
-          </button>
-          {% endif %}
-        {% else %}
-          <span class="fh-closed-note">This report is closed and no longer accepting submissions.</span>
-        {% endif %}
-      </div>
+<span class="fh-badge {% if is_lost %}fh-badge--lost{% else %}fh-badge--found{% endif %}">
+{{ report.report_type }}
+</span>
+</div>
 
-      <!-- ===== CONTACT REPORTER PANEL (revealed on click) ===== -->
-      <div class="fh-reveal" id="fh-contact-panel" role="region" aria-label="Reporter contact details">
-        <h3>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-          </svg>
-          Contact the Reporter
-        </h3>
-        {% if report.contact_public %}
-          {% if report.contact_name %}
-          <div class="fh-contact-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-            <span>{{ report.contact_name }}</span>
-          </div>
-          {% endif %}
-          <div class="fh-contact-row">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/>
-            </svg>
-            {% set c = report.contact or '' %}
-            {% if '@' in c %}
-              <a href="mailto:{{ c }}">{{ c }}</a>
-            {% else %}
-              <span>{{ c or 'No contact provided' }}</span>
-            {% endif %}
-          </div>
-        {% else %}
-          <p class="fh-contact-private">
-            The reporter chose to keep their contact details private. Please use the
-            <strong>submission button above</strong> and an administrator will connect
-            you with the reporter.
-          </p>
-        {% endif %}
-      </div>
+<div class="fh-info-card">
+<span class="fh-ref-line">Reference: {{ report_reference(report) }} · Report #{{ report.id }}</span>
+<h1>{{ report.item_name }}</h1>
+<span class="fh-status-line {% if report.status == 'Pending Claim' %}fh-status--pending {% elif is_closed %}fh-status--closed {% else %}fh-status--open{% endif %}">
+{{ report.status or 'Open' }}
+</span>
+<div class="fh-meta-grid">
+<div class="fh-meta-item">
+<svg viewBox="0 0 24 24" fill="none" 
 
-      <!-- ===== SUBMISSION PANEL (claim OR information — same POST route) ===== -->
-      {% if not is_closed %}
-      <div class="fh-reveal" id="fh-claim-panel" role="region" aria-label="{% if is_lost %}Submit information form{% else %}Submit a claim form{% endif %}">
-        <h3>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>
-          </svg>
-          {% if is_lost %}Provide Information About This Item{% else %}Claim This Found Item{% endif %}
-        </h3>
-        <p class="fh-hint-line">
-          {% if is_lost %}
-            Have you seen this item? Please share what you know — where and when you found it, any distinguishing marks, and other relevant details — so it can be returned to its owner.
-          {% else %}
-            If this item belongs to you, please prove ownership by describing unique details that only the true owner would know.
-          {% endif %}
-        </p>
+stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+</svg>
+<span><strong>Location</strong><br>{{ report.location or 'Not specified' }}</span>
+</div>
+{% if report.incident_date %}
+<div class="fh-meta-item">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
+</svg>
+<span><strong>Date {{ 'Lost' if is_lost else 
 
-        <form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}" enctype="multipart/form-data" class="fh-claim-form">
-          {# Honeypot — bots fill this; server silently drops the submission #}
-          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;">
-          {# Tells the server whether this is a claim (Found report) or information (Lost report) #}
-          <input type="hidden" name="claim_type" value="{% if is_lost %}information{% else %}claim{% endif %}">
+'Found' }}</strong><br>{{ report.incident_date }}</span>
+</div>
+{% endif %}
+<div class="fh-meta-item">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+</svg>
+<span><strong>Reported by</strong><br>{{ report.contact_name or 'Anonymous' }}</span>
+</div>
+<div class="fh-meta-item">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 
-          <div class="fh-row">
-            <label>Your Full Name <span class="fh-hint">(required)</span>
-              <input type="text" name="claimant_name" maxlength="120" required placeholder="Juan Dela Cruz">
-            </label>
-            <label>Your Contact <span class="fh-hint">(required — phone / email / Facebook)</span>
-              <input type="text" name="claimant_contact" maxlength="150" required placeholder="09XX XXX XXXX or email">
-            </label>
-          </div>
+<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+</svg>
+<span><strong>Posted</strong><br>{{ report.created_at.strftime('%b %d, %Y') if report.created_at else '—' }}</span>
+</div>
+</div>
 
-          <label>
-            {% if is_lost %}
-              What details can you share about this item? <span class="fh-hint">(required — where you saw it, distinguishing marks, etc.)</span>
-              <textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., I saw it at the JGE library on November 10; it is black with a name written on the back of the case."></textarea>
-            {% else %}
-              Proof of Ownership <span class="fh-hint">(required — describe unique details only the owner would know)</span>
-              <textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., Black wallet with a small tear on the top-right corner, contains an SLSU ID ending in 2024."></textarea>
-            {% endif %}
-          </label>
+<div class="fh-actions-bar">
+<button type="button" class="fh-btn fh-btn--ghost fh-btn--sm" id="fh-contact-btn" aria-expanded="false" aria-controls="fh-contact-panel">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
 
-          <label>Photo <span class="fh-hint">(optional — max 5 MB)</span>
-            <input type="file" name="proof_photo" accept="image/png, image/jpeg, image/jpg, image/gif, image/webp">
-          </label>
+<path d="m22 6-10 7L2 6"/>
+</svg>
+Contact Reporter
+</button>
 
-          <button type="submit" class="fh-btn fh-btn--primary fh-btn--sm">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>
-            </svg>
-            {% if is_lost %}Send Information{% else %}Send Claim{% endif %}
-          </button>
-        </form>
-      </div>
-      {% endif %}
-    </div>
-  </div>
+{% if not is_closed %}
+{% if is_lost %}
+{# ===== LOST REPORT: people who saw / found the item submit information ===== #}
+<button type="button" class="fh-btn fh-btn--primary fh-btn--sm" id="fh-claim-btn" aria-expanded="false" aria-controls="fh-claim-panel">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+</svg>
+Submit Information
 
-  <div class="fh-two-col">
-    <section class="fh-section-card">
-      <h2>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>
-        </svg>
-        Report Information
-      </h2>
-      <p><strong>Report Type:</strong> {{ report.report_type }}</p>
-      <p><strong>Status:</strong> {{ report.status or 'Open' }}</p>
-      <p><strong>Reference ID:</strong> {{ report_reference(report) }} (#{{ report.id }})</p>
-      <p><strong>Description:</strong><br>{{ report.description or 'No additional details provided.' }}</p>
-    </section>
+</button>
+{% else %}
+{# ===== FOUND REPORT: only here can the owner submit a claim ===== #}
+<button type="button" class="fh-btn fh-btn--primary fh-btn--sm" id="fh-claim-btn" aria-expanded="false" aria-controls="fh-claim-panel">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 11 4.77 5.07 5.07 0 0 0 7 5c-2.23.68-3.86 3.16-3.5 6.28.07.64.24 1.31.5 1.88"/>
+</svg>
+Submit a Claim
+</button>
+{% endif %}
 
-    <section class="fh-section-card">
-      <h2>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
-        </svg>
-        Item Details
-      </h2>
-      <p><strong>Item Name:</strong> {{ report.item_name }}</p>
-      <p><strong>Category:</strong> {{ report.category or 'Not specified' }}</p>
-      <p><strong>Location:</strong> {{ report.location or 'Not specified' }}</p>
-      <p><strong>Date {{ 'Lost' if is_lost else 'Found' }}:</strong> {{ report.incident_date or 'Not specified' }}</p>
-      <p><strong>Reported By:</strong> {{ report.contact_name or 'Anonymous' }}</p>
-    </section>
-  </div>
+{% else %}
+<span class="fh-closed-note">This report is closed and no longer accepting submissions.</span>
+{% endif %}
+</div>
 
-  <section class="fh-section-card">
-    <h2>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-      {% if is_lost %}Submitted Information{% else %}Submitted Claims{% endif %} ({{ report.claims|length }})
-    </h2>
+<div class="fh-reveal" id="fh-contact-panel" role="region" aria-label="Reporter contact details">
+<h3>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 
 
-    {% if report.claims %}
-      {% for claim in report.claims %}
-        <div class="fh-claim-item">
-          <div class="fh-claim-item__head">
-            <span class="fh-claim-item__name">{{ claim.claimant_name or 'Anonymous' }}</span>
-            <span class="fh-claim-item__badges">
-              <span class="fh-claim-item__kind">{{ 'Information' if is_lost else 'Claim' }}</span>
-              <span class="fh-claim-item__status
-                {% if claim.status == 'Approved' %}fh-claim-item__status--approved
-                {% elif claim.status == 'Rejected' %}fh-claim-item__status--rejected
-                {% else %}fh-claim-item__status--pending{% endif %}">
-                {{ claim.status or 'Pending' }}
-              </span>
-            </span>
-          </div>
-          <div class="fh-claim-item__date">{{ claim.created_at.strftime('%b %d, %Y · %H:%M') if claim.created_at else '—' }}</div>
-          <p class="fh-claim-item__desc">{{ claim.proof or 'No details provided.' }}</p>
-          {% if claim.proof_photo %}
-          <a class="fh-proof-photo-link" href="{{ photo_src(claim.proof_photo) }}" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-            </svg>
-            View attached photo
-          </a>
-          {% endif %}
-          {% if claim.review_note %}
-          <div class="fh-admin-note">
-            <strong>Admin review note</strong>
-            {{ claim.review_note }}
-          </div>
-          {% endif %}
-        </div>
-      {% endfor %}
-    {% else %}
-      <div class="fh-empty-state">
-        {% if is_lost %}No information has been submitted for this item yet.{% else %}No claims have been submitted for this item yet.{% endif %}
-      </div>
-    {% endif %}
-  </section>
+0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+</svg>
+Contact the Reporter
+</h3>
+{% if report.contact_public %}
+{% if report.contact_name %}
+<div class="fh-contact-row">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+</svg>
+<span>{{ report.contact_name }}</span>
+</div>
+{% endif %}
+<div class="fh-contact-row">
+<svg viewBox="0 0 24 24" fill="none" 
+
+stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/>
+</svg>
+{% set c = report.contact or '' %}
+{% if '@' in c %}
+<a href="mailto:{{ c }}">{{ c }}</a>
+{% else %}
+<span>{{ c or 'No contact provided' }}</span>
+{% endif %}
+</div>
+{% else %}
+<p class="fh-contact-private">
+The reporter chose to keep their contact details private. Please use the
+<strong>submission button above</strong> and an administrator will connect you with the 
+
+reporter.
+</p>
+{% endif %}
+</div>
+
+{% if not is_closed %}
+<div class="fh-reveal" id="fh-claim-panel" role="region" aria-label="{% if is_lost %}Submit information form{% else %}Submit a claim form{% endif %}">
+<h3>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>
+</svg>
+{% if is_lost %}Provide Information About This 
+
+Item{% else %}Claim This Found Item{% endif %}
+</h3>
+<p class="fh-hint-line">
+{% if is_lost %}
+Have you seen this item? Please share what you know — where and when you found it, any distinguishing marks, and other relevant details — so it can be returned to its owner.
+{% else %}
+If this item belongs to you, please prove ownership by describing unique details that only the true owner would know.
+{% endif %}
+</p>
+<form method="POST" action="{{ url_for('submit_claim', report_id=report.id) }}" enctype="multipart/form-data" class="fh-claim-form">
+{# Honeypot — bots fill this; server silently drops the submission #}
+
+<input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;">
+{# Tells the server whether this is a claim (Found report) or information (Lost report) #}
+<input type="hidden" name="claim_type" value="{% if is_lost %}information{% else %}claim{% endif %}">
+<div class="fh-row">
+<label>Your Full Name <span class="fh-hint">(required)</span>
+<input type="text" name="claimant_name" maxlength="120" required placeholder="Juan Dela Cruz">
+</label>
+<label>Your Contact <span class="fh-hint">(required — phone / email / Facebook)</span>
+<input type="text" name="claimant_contact" 
+
+maxlength="150" required placeholder="09XX XXX XXXX or email">
+</label>
+</div>
+<label>
+{% if is_lost %}
+What details can you share about this item? <span class="fh-hint">(required — where you saw it, distinguishing marks, etc.)</span>
+<textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., I saw it at the JGE library on November 10; it is black with a name written on the back of the case."></textarea>
+{% else %}
+Proof of Ownership <span class="fh-hint">(required — describe unique details only the owner would know)</span>
+<textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., Black wallet 
+
+with a small tear on the top-right corner, contains an SLSU ID ending in 2024."></textarea>
+{% endif %}
+</label>
+<label>Photo (optional — max 5 MB)
+<input type="file" name="proof_photo" accept="image/png, image/jpeg, image/jpg, image/gif, image/webp">
+</label>
+<button type="submit" class="fh-btn fh-btn--primary fh-btn--sm">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>
+</svg>
+{% if is_lost %}Send Information{% else %}Send Claim{% endif %}
+
+</button>
+</form>
+</div>
+{% endif %}
+</div>
+</div>
+
+{# ===== Formal Report Information (full width — merged, Item Details box removed) ===== #}
+<section class="fh-section-card">
+<h2>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>
+</svg>
+Report Information
+
+</h2>
+<div class="fh-def-grid">
+<div class="fh-def-item">
+<span class="fh-def-label">Report Type</span>
+<span class="fh-def-value">{{ report.report_type }}</span>
+</div>
+<div class="fh-def-item">
+<span class="fh-def-label">Status</span>
+<span class="fh-def-value">{{ report.status or 'Open' }}</span>
+</div>
+<div class="fh-def-item">
+<span class="fh-def-label">Reference ID</span>
+<span class="fh-def-value">{{ report_reference(report) }} (#{{ report.id }})</span>
+</div>
+<div class="fh-def-item">
+<span class="fh-def-label">Category</span>
+
+<span class="fh-def-value">{{ report.category or 'Not specified' }}</span>
+</div>
+<div class="fh-def-item">
+<span class="fh-def-label">Location</span>
+<span class="fh-def-value">{{ report.location or 'Not specified' }}</span>
+</div>
+<div class="fh-def-item">
+<span class="fh-def-label">Date {{ 'Lost' if is_lost else 'Found' }}</span>
+<span class="fh-def-value">{{ report.incident_date or 'Not specified' }}</span>
+</div>
+<div class="fh-def-item">
+<span class="fh-def-label">Reported By</span>
+<span class="fh-def-value">{{ report.contact_name or 'Anonymous' }}</span>
+</div>
+<div class="fh-def-item">
+
+<span class="fh-def-label">Date Posted</span>
+<span class="fh-def-value">{{ report.created_at.strftime('%B %d, %Y') if report.created_at else '—' }}</span>
+</div>
+<div class="fh-def-item fh-def-desc">
+<span class="fh-def-label">Description</span>
+<span class="fh-def-value">{{ report.description or 'No additional details provided.' }}</span>
+</div>
+</div>
+</section>
+
+{# ===== Collapsible Submitted Information / Claims ===== #}
+<section class="fh-section-card fh-collapsible" id="fh-claims-section">
+<button type="button" class="fh-collapsible-header" id="fh-claims-toggle" aria-expanded="false" aria-controls="fh-claims-body">
+
+<h2>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+<path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+</svg>
+{% if is_lost %}Submitted Information{% else %}Submitted Claims{% endif %}
+{% if report.claims %}<span class="fh-collapse-count">{{ report.claims|length }}</span>{% endif %}
+</h2>
+<span class="fh-collapse-toggle">
+<span id="fh-claims-toggle-text">View Submissions</span>
+<svg viewBox="0 0 24 24" fill="none" 
+
+stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m6 9 6 6 6-6"/>
+</svg>
+</span>
+</button>
+
+<div class="fh-collapsible-body" id="fh-claims-body">
+{% if report.claims %}
+{% for claim in report.claims %}
+<div class="fh-claim-item">
+<div class="fh-claim-item__head">
+<span class="fh-claim-item__name">{{ claim.claimant_name or 'Anonymous' }}</span>
+<span class="fh-claim-item__badges">
+<span class="fh-claim-item__kind">{{ 'Information' if is_lost else 'Claim' }}</span>
+<span class="fh-claim-item__status {% if 
+
+claim.status == 'Approved' %}fh-claim-item__status--approved {% elif claim.status == 'Rejected' %}fh-claim-item__status--rejected {% else %}fh-claim-item__status--pending{% endif %}">
+{{ claim.status or 'Pending' }}
+</span>
+</span>
+</div>
+<div class="fh-claim-item__date">{{ claim.created_at.strftime('%b %d, %Y · %H:%M') if claim.created_at else '—' }}</div>
+<p class="fh-claim-item__desc">{{ claim.proof or 'No details provided.' }}</p>
+{% if claim.proof_photo %}
+<a class="fh-proof-photo-link" href="{{ photo_src(claim.proof_photo) }}" target="_blank" rel="noopener">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-
+
+linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+</svg>
+View attached photo
+</a>
+{% endif %}
+{% if claim.review_note %}
+<div class="fh-admin-note">
+<strong>Admin review note</strong>
+{{ claim.review_note }}
+</div>
+{% endif %}
+</div>
+{% endfor %}
+{% else %}
+<div class="fh-empty-state">
+{% if is_lost %}No information has been 
+
+submitted for this item yet.{% else %}No claims have been submitted for this item yet.{% endif %}
+</div>
+{% endif %}
+</div>
+</section>
+
+{# ===== Visible Back Button (bottom, centered) ===== #}
+<div class="fh-bottom-actions">
+<a href="{{ request.referrer or url_for('home') }}" class="fh-back-btn">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="m15 18-6-6 6-6"/>
+</svg>
+Back to Reports
+</a>
+
+</div>
 
 </div>
 
 <script>
 (function () {
-  var contactBtn = document.getElementById('fh-contact-btn');
-  var claimBtn   = document.getElementById('fh-claim-btn');
-  var contactPanel = document.getElementById('fh-contact-panel');
-  var claimPanel   = document.getElementById('fh-claim-panel');
+var contactBtn = document.getElementById('fh-contact-btn');
+var claimBtn = document.getElementById('fh-claim-btn');
+var contactPanel = document.getElementById('fh-contact-panel');
+var claimPanel = document.getElementById('fh-claim-panel');
 
-  function toggle(btn, panel, otherBtn, otherPanel) {
-    var open = panel.classList.toggle('open');
-    btn.classList.toggle('fh-btn--active', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open && otherPanel) {
-      otherPanel.classList.remove('open');
-      otherBtn.classList.remove('fh-btn--active');
-      otherBtn.setAttribute('aria-expanded', 'false');
-    }
-  }
+function toggle(btn, panel, otherBtn, otherPanel) {
+var open = panel.classList.toggle('open');
+btn.classList.toggle('fh-btn--active', open);
+btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 
-  if (contactBtn && contactPanel) {
-    contactBtn.addEventListener('click', function () {
-      toggle(contactBtn, contactPanel, claimBtn, claimPanel);
-    });
-  }
-  if (claimBtn && claimPanel) {
-    claimBtn.addEventListener('click', function () {
-      toggle(claimBtn, claimPanel, contactBtn, contactPanel);
-      if (claimPanel.classList.contains('open')) {
-        var first = claimPanel.querySelector('input:not([type=hidden]):not([name=website]), textarea');
-        if (first) first.focus();
-      }
-    });
-  }
+if (open && otherPanel) {
+otherPanel.classList.remove('open');
+otherBtn.classList.remove('fh-btn--active');
+otherBtn.setAttribute('aria-expanded', 'false');
+}
+}
+if (contactBtn && contactPanel) {
+contactBtn.addEventListener('click', function () {
+toggle(contactBtn, contactPanel, claimBtn, claimPanel);
+});
+}
+if (claimBtn && claimPanel) {
+claimBtn.addEventListener('click', function () {
+toggle(claimBtn, claimPanel, contactBtn, contactPanel);
+if (claimPanel.classList.contains('open')) {
+var first = claimPanel.querySelector('input:not([type=hidden]):not([name=website]), textarea');
+
+if (first) first.focus();
+}
+});
+}
+
+/* Collapsible Submitted Information / Claims section */
+var claimsSection = document.getElementById('fh-claims-section');
+var claimsToggle = document.getElementById('fh-claims-toggle');
+var claimsBody = document.getElementById('fh-claims-body');
+var toggleText = document.getElementById('fh-claims-toggle-text');
+if (claimsToggle && claimsSection) {
+claimsToggle.addEventListener('click', function () {
+var open = claimsSection.classList.toggle('open');
+claimsToggle.setAttribute('aria-expanded', open 
+
+? 'true' : 'false');
+if (toggleText) toggleText.textContent = open ? 'Hide Submissions' : 'View Submissions';
+});
+}
 })();
 </script>
 {% endblock %}
-
