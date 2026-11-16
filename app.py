@@ -642,14 +642,19 @@ def report_detail(report_id):
     return render_template("report_detail.html", report=report)
 
 # ==================================================
-# CLAIM SUBMISSION
+# CLAIM / INFORMATION SUBMISSION
+#   - Found report  -> "Submit a Claim"  (claim_type = "claim")
+#   - Lost report   -> "Submit Information" (claim_type = "information")
+#   Both POST here. Field names MUST match the form:
+#     claimant_name, claimant_contact, proof, proof_photo (file),
+#     website (honeypot), claim_type (hidden).
 # ==================================================
 @app.route("/report/<int:report_id>/claim", methods=["POST"])
 def submit_claim(report_id):
     report = db.get_or_404(Report, report_id)
     if report.status in {"Returned", "Archived"}:
         flash(
-            "This report is no longer accepting claim requests.",
+            "This report is no longer accepting submissions.",
             "warning",
         )
         return redirect(url_for("report_detail", report_id=report.id))
@@ -658,13 +663,19 @@ def submit_claim(report_id):
     if request.form.get("website"):
         return redirect(url_for("report_detail", report_id=report.id))
 
+    # Determine submission kind. Explicit hidden field is preferred;
+    # otherwise infer from the report type (Lost => information, Found => claim).
+    claim_type = (request.form.get("claim_type") or "").strip().lower()
+    if claim_type not in {"claim", "information"}:
+        claim_type = "information" if report.report_type == "Lost" else "claim"
+
     claimant_name = get_report_form_value("claimant_name")
     claimant_contact = get_report_form_value("claimant_contact")
     proof = get_report_form_value("proof")
 
     if not all([claimant_name, claimant_contact, proof]):
         flash(
-            "Complete your name, contact details, and information about the item.",
+            "Please complete your name, contact details, and the information or proof field.",
             "danger",
         )
         return redirect(url_for("report_detail", report_id=report.id))
@@ -700,31 +711,52 @@ def submit_claim(report_id):
 
     try:
         db.session.add(claim)
-        report.status = "Pending Claim"
+        # Only a real claim (on a Found report) moves the report to "Pending Claim".
+        # Information submissions on a Lost report keep it "Open" so more people can reply.
+        if claim_type == "claim" and report.status == "Open":
+            report.status = "Pending Claim"
         db.session.flush()
-        create_notification(
-            title="New Item Claim",
-            message=(
-                f'{claim.claimant_name} submitted a claim for '
-                f'"{report.item_name}" (report #{report.id}).'
-            ),
-            notification_type="claim",
-            report_id=report.id,
-        )
+        if claim_type == "information":
+            create_notification(
+                title="New Item Information",
+                message=(
+                    f'{claim.claimant_name} provided information about '
+                    f'"{report.item_name}" (Lost report #{report.id}).'
+                ),
+                notification_type="claim",
+                report_id=report.id,
+            )
+        else:
+            create_notification(
+                title="New Item Claim",
+                message=(
+                    f'{claim.claimant_name} submitted a claim for '
+                    f'"{report.item_name}" (report #{report.id}).'
+                ),
+                notification_type="claim",
+                report_id=report.id,
+            )
         db.session.commit()
     except Exception:
         db.session.rollback()
         if saved_proof_photo:
             delete_photo(saved_proof_photo)
-        app.logger.exception("Unable to save claim")
-        flash("Unable to submit your claim. Please try again.", "danger")
+        app.logger.exception("Unable to save claim/information")
+        flash("Unable to submit your request. Please try again.", "danger")
         return redirect(url_for("report_detail", report_id=report.id))
 
-    flash(
-        "Your claim request was submitted successfully "
-        "and is waiting for administrator review.",
-        "success",
-    )
+    if claim_type == "information":
+        flash(
+            "Salamat! Your information was submitted successfully "
+            "and is waiting for administrator review.",
+            "success",
+        )
+    else:
+        flash(
+            "Your claim request was submitted successfully "
+            "and is waiting for administrator review.",
+            "success",
+        )
     return redirect(url_for("report_detail", report_id=report.id))
 
 # ==================================================
