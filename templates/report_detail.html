@@ -214,6 +214,18 @@
   }
   .fh-proof-photo-link:hover { text-decoration: underline; }
   .fh-proof-photo-link svg { width: 14px; height: 14px; }
+  /* Admin review note — visible to the user on the report page */
+  .fh-admin-note {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--primary);
+    background: var(--primary-soft);
+    border-radius: 0 10px 10px 0;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .fh-admin-note strong { color: var(--primary); display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
   .fh-empty-state { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
   @media (max-width: 900px) {
     .fh-top-grid, .fh-two-col { grid-template-columns: 1fr; }
@@ -399,7 +411,7 @@
             <label>Your Full Name <span class="fh-hint">(required)</span>
               <input type="text" name="claimant_name" maxlength="120" required placeholder="Juan Dela Cruz">
             </label>
-            <label>Your Contact <span class="fh-hint">( phone / email / Facebook)</span>
+            <label>Your Contact <span class="fh-hint">(required — phone / email / Facebook)</span>
               <input type="text" name="claimant_contact" maxlength="150" required placeholder="09XX XXX XXXX or email">
             </label>
           </div>
@@ -493,6 +505,12 @@
             View attached photo
           </a>
           {% endif %}
+          {% if claim.review_note %}
+          <div class="fh-admin-note">
+            <strong>Admin review note</strong>
+            {{ claim.review_note }}
+          </div>
+          {% endif %}
         </div>
       {% endfor %}
     {% else %}
@@ -539,3 +557,4 @@
 })();
 </script>
 {% endblock %}
+
