@@ -29,7 +29,7 @@ from werkzeug.utils import secure_filename
 # ==================================================
 # APP CONFIGURATION
 # ==================================================
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(_file_).resolve().parent
 IS_VERCEL = os.environ.get("VERCEL", "").lower() == "1"
 DATA_DIR = Path(
     os.environ.get(
@@ -41,7 +41,7 @@ UPLOAD_FOLDER = DATA_DIR / "uploads"
 if not IS_VERCEL:
     UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
-app = Flask(__name__)
+app = Flask(_name_)
 secret_key = os.environ.get("SECRET_KEY", "").strip()
 if IS_VERCEL and not secret_key:
     raise RuntimeError(
@@ -228,36 +228,12 @@ with app.app_context():
     ensure_claim_columns()
 
 # ==================================================
-# TEMPLATE CONTEXT
-# ==================================================
-@app.context_processor
-def inject_global_template_values():
-    return {
-        "today": date.today(),
-        "site_name": SITE_NAME,
-        "site_tagline": SITE_TAGLINE,
-        "campus_logo": CAMPUS_LOGO,
-        "campus_photo": CAMPUS_PHOTO,
-        "item_categories": ITEM_CATEGORIES,
-        "report_statuses": sorted(REPORT_STATUSES),
-        "admin_logged_in": bool(session.get("admin_logged_in")),
-    }
-
-@app.context_processor
-def inject_notification_count():
-    count = 0
-    if session.get("admin_logged_in"):
-        count = Notification.query.filter_by(is_read=False).count()
-    return {"unread_notification_count": count}
-
-# ==================================================
 # CONSTANTS AND HELPERS
 # ==================================================
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 REPORT_STATUSES = {"Open", "Pending Claim", "Returned", "Archived"}
 CLAIM_STATUSES = {"Pending", "Approved", "Rejected"}
 
-# === ENHANCEMENT: standard category list for the report form + filters ===
 ITEM_CATEGORIES = [
     "School ID / ID Card",
     "Wallet",
@@ -274,7 +250,6 @@ ITEM_CATEGORIES = [
     "Other",
 ]
 
-# === ENHANCEMENT: simple in-memory rate limiter (per IP) ===
 _RATE_BUCKETS = {
     "report": defaultdict(deque),
     "login": defaultdict(deque),
@@ -301,13 +276,8 @@ def create_notification(title, message, notification_type="info", report_id=None
     db.session.add(notification)
     return notification
 
-# === ENHANCEMENT: human-friendly reference number, e.g. FH-0042 ===
 def report_reference(report):
     return f"FH-{int(report.id):04d}"
-
-@app.context_processor
-def inject_helpers():
-    return {"photo_src": photo_src, "report_reference": report_reference}
 
 def admin_required(view_function):
     @wraps(view_function)
@@ -379,7 +349,6 @@ def parse_incident_date(value):
 def get_report_form_value(name, default=""):
     return (request.form.get(name, default) or "").strip()
 
-# === ENHANCEMENT: auto-match — notify admin of possible opposite-type matches ===
 def create_match_notifications(report):
     try:
         opposite = "Found" if report.report_type == "Lost" else "Lost"
@@ -425,6 +394,33 @@ def create_match_notifications(report):
     except Exception:
         db.session.rollback()
         app.logger.exception("Auto-match notification failed")
+
+# ==================================================
+# TEMPLATE CONTEXT
+# ==================================================
+@app.context_processor
+def inject_global_template_values():
+    return {
+        "today": date.today(),
+        "site_name": SITE_NAME,
+        "site_tagline": SITE_TAGLINE,
+        "campus_logo": CAMPUS_LOGO,
+        "campus_photo": CAMPUS_PHOTO,
+        "item_categories": ITEM_CATEGORIES,
+        "report_statuses": sorted(REPORT_STATUSES),
+        "admin_logged_in": bool(session.get("admin_logged_in")),
+    }
+
+@app.context_processor
+def inject_notification_count():
+    count = 0
+    if session.get("admin_logged_in"):
+        count = Notification.query.filter_by(is_read=False).count()
+    return {"unread_notification_count": count}
+
+@app.context_processor
+def inject_helpers():
+    return {"photo_src": photo_src, "report_reference": report_reference}
 
 # ==================================================
 # HOME AND SEARCH
@@ -509,11 +505,9 @@ def home():
 @app.route("/report/new", methods=["GET", "POST"])
 def new_report():
     if request.method == "POST":
-        # === ENHANCEMENT: honeypot — bots fill this hidden field; silently drop ===
         if request.form.get("website"):
             return redirect(url_for("home"))
 
-        # === ENHANCEMENT: rate limit — max 3 submissions per IP per 10 minutes ===
         client_ip = request.remote_addr or "unknown"
         if _rate_limited("report", client_ip, 3, 600):
             flash(
@@ -610,10 +604,8 @@ def new_report():
             flash("Unable to save your report. Please try again.", "danger")
             return redirect(url_for("new_report"))
 
-        # === ENHANCEMENT: scan for possible matches after commit ===
         create_match_notifications(report)
 
-        # === ENHANCEMENT: give the reporter a tracking reference ===
         flash(
             f"Submitted successfully! Your reference number is "
             f"{report_reference(report)}. Save it to track your report.",
@@ -645,9 +637,6 @@ def report_detail(report_id):
 # CLAIM / INFORMATION SUBMISSION
 #   - Found report  -> "Submit a Claim"  (claim_type = "claim")
 #   - Lost report   -> "Submit Information" (claim_type = "information")
-#   Both POST here. Field names MUST match the form:
-#     claimant_name, claimant_contact, proof, proof_photo (file),
-#     website (honeypot), claim_type (hidden).
 # ==================================================
 @app.route("/report/<int:report_id>/claim", methods=["POST"])
 def submit_claim(report_id):
@@ -659,15 +648,16 @@ def submit_claim(report_id):
         )
         return redirect(url_for("report_detail", report_id=report.id))
 
-    # === ENHANCEMENT: honeypot on claim form too ===
     if request.form.get("website"):
         return redirect(url_for("report_detail", report_id=report.id))
 
-    # Determine submission kind. Explicit hidden field is preferred;
-    # otherwise infer from the report type (Lost => information, Found => claim).
-    claim_type = (request.form.get("claim_type") or "").strip().lower()
-    if claim_type not in {"claim", "information"}:
-        claim_type = "information" if report.report_type == "Lost" else "claim"
+    # Server-side enforcement: a Lost report only accepts "information",
+    # a Found report only accepts "claim". This cannot be tampered with
+    # via the hidden form field.
+    if report.report_type == "Lost":
+        claim_type = "information"
+    else:
+        claim_type = "claim"
 
     claimant_name = get_report_form_value("claimant_name")
     claimant_contact = get_report_form_value("claimant_contact")
@@ -712,7 +702,7 @@ def submit_claim(report_id):
     try:
         db.session.add(claim)
         # Only a real claim (on a Found report) moves the report to "Pending Claim".
-        # Information submissions on a Lost report keep it "Open" so more people can reply.
+        # Information submissions on a Lost report keep it "Open".
         if claim_type == "claim" and report.status == "Open":
             report.status = "Pending Claim"
         db.session.flush()
@@ -780,7 +770,6 @@ def admin_login():
     if session.get("admin_logged_in"):
         return redirect(url_for("admin_dashboard"))
     if request.method == "POST":
-        # === ENHANCEMENT: login throttle — max 5 attempts per IP per 5 minutes ===
         client_ip = request.remote_addr or "unknown"
         if _rate_limited("login", client_ip, 5, 300):
             flash(
@@ -849,9 +838,6 @@ def admin_dashboard():
         stats=stats,
     )
 
-# ==================================================
-# ADMIN: UPDATE REPORT STATUS
-# ==================================================
 @app.route("/admin/report/<int:report_id>/status", methods=["POST"])
 @admin_required
 def admin_update_report_status(report_id):
@@ -870,9 +856,6 @@ def admin_update_report_status(report_id):
         flash("Unable to update report status.", "danger")
     return redirect(url_for("admin_dashboard"))
 
-# ==================================================
-# ADMIN: DELETE REPORT — SAVE TO HISTORY
-# ==================================================
 @app.route("/admin/report/<int:report_id>/delete", methods=["POST"])
 @admin_required
 def admin_delete_report(report_id):
@@ -911,9 +894,6 @@ def admin_delete_report(report_id):
         flash("Unable to delete report. Please check the deployment logs.", "danger")
     return redirect(url_for("admin_dashboard"))
 
-# ==================================================
-# ADMIN: DELETED REPORTS HISTORY
-# ==================================================
 @app.route("/admin/history")
 @admin_required
 def admin_history():
@@ -961,9 +941,6 @@ def export_history_csv():
     )
     return response
 
-# ==================================================
-# ADMIN: VIEW CLAIMS
-# ==================================================
 @app.route("/admin/claims")
 @admin_required
 def admin_claims():
@@ -972,9 +949,6 @@ def admin_claims():
     ).all()
     return render_template("admin_claims.html", claims=claims)
 
-# ==================================================
-# ADMIN: UPDATE CLAIM STATUS
-# ==================================================
 @app.route("/admin/claim/<int:claim_id>/status", methods=["POST"])
 @admin_required
 def admin_update_claim_status(claim_id):
@@ -1037,9 +1011,6 @@ def admin_update_claim_status(claim_id):
         flash("Unable to update claim status.", "danger")
     return redirect(url_for("admin_claims"))
 
-# ==================================================
-# ADMIN: NOTIFICATIONS
-# ==================================================
 @app.route("/notifications")
 @admin_required
 def notifications_page():
@@ -1097,9 +1068,6 @@ def delete_notification(notification_id):
         flash("Unable to delete notification.", "danger")
     return redirect(url_for("notifications_page"))
 
-# ==================================================
-# ADMIN: CSV EXPORT
-# ==================================================
 @app.route("/admin/export.csv")
 @admin_required
 def export_reports():
@@ -1133,18 +1101,12 @@ def export_reports():
     )
     return response
 
-# ==================================================
-# ADMIN LOGOUT
-# ==================================================
 @app.route("/admin/logout")
 def admin_logout():
     session.clear()
     flash("You have been logged out.", "success")
     return redirect(url_for("home"))
 
-# ==================================================
-# ERROR HANDLERS
-# ==================================================
 @app.errorhandler(413)
 def file_too_large(_error):
     flash("The uploaded file is too large. Maximum size is 5 MB.", "danger")
@@ -1156,9 +1118,6 @@ def page_not_found(_error):
         return render_template("404.html"), 404
     return "Page not found.", 404
 
-# ==================================================
-# SECURITY HEADERS
-# ==================================================
 @app.after_request
 def add_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -1167,10 +1126,7 @@ def add_security_headers(response):
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     return response
 
-# ==================================================
-# RUN
-# ==================================================
-if __name__ == "__main__":
+if _name_ == "_main_":
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 5000)),
