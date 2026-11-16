@@ -737,8 +737,8 @@ def submit_claim(report_id):
 
     if claim_type == "information":
         flash(
-            "Salamat! Your information was submitted successfully "
-            "and is waiting for administrator review.",
+            "Thank you! Your information was submitted successfully "
+            "and is now awaiting administrator review.",
             "success",
         )
     else:
@@ -963,12 +963,24 @@ def admin_update_claim_status(claim_id):
         flash("Cannot approve a claim for an archived report.", "warning")
         return redirect(url_for("admin_claims"))
 
+    # A rejection must include a reason so the claimant is told why.
+    if new_status == "Rejected" and not review_note:
+        flash(
+            "A review note is required when rejecting a claim. "
+            "Please explain the reason for rejection.",
+            "danger",
+        )
+        return redirect(url_for("admin_claims"))
+
     old_status = claim.status
     report = claim.report
 
     try:
         claim.status = new_status
-        claim.review_note = review_note or None
+        # Only overwrite the note when a new one is provided; otherwise keep
+        # the previously saved note so it is not wiped out by an empty resubmit.
+        if review_note:
+            claim.review_note = review_note
         if new_status == "Approved":
             report.status = "Returned"
             other_pending = Claim.query.filter(
