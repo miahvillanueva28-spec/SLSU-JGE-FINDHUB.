@@ -383,9 +383,9 @@
         </h3>
         <p class="fh-hint-line">
           {% if is_lost %}
-            Nakita mo ba ang item na ito? Ibahagi ang alam mo (saan at kailan mo nakita, itsura, atbp.) para maibalik ito sa may-ari.
+            Have you seen this item? Please share what you know — where and when you found it, any distinguishing marks, and other relevant details — so it can be returned to its owner.
           {% else %}
-            Kung sa iyo ang item na ito, patunayan sa pamamagitan ng paglalarawan ng mga detalye na tanging ikaw lang ang nakakaalam.
+            If this item belongs to you, please prove ownership by describing unique details that only the true owner would know.
           {% endif %}
         </p>
 
@@ -406,8 +406,8 @@
 
           <label>
             {% if is_lost %}
-              Share your information <span class="fh-hint">(required — saan mo nakita, natatanging marka, atbp.)</span>
-              <textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., Nakita ko ito sa JGE library noong Nov 10, kulay itim at may pangalan sa likod ng takip."></textarea>
+              What details can you share about this item? <span class="fh-hint">(required — where you saw it, distinguishing marks, etc.)</span>
+              <textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., I saw it at the JGE library on November 10; it is black with a name written on the back of the case."></textarea>
             {% else %}
               Proof of Ownership <span class="fh-hint">(required — describe unique details only the owner would know)</span>
               <textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., Black wallet with a small tear on the top-right corner, contains an SLSU ID ending in 2024."></textarea>
@@ -497,7 +497,7 @@
       {% endfor %}
     {% else %}
       <div class="fh-empty-state">
-        {% if is_lost %}Walang nag-submit pa ng impormasyon para sa item na ito.{% else %}No claims submitted yet for this item.{% endif %}
+        {% if is_lost %}No information has been submitted for this item yet.{% else %}No claims have been submitted for this item yet.{% endif %}
       </div>
     {% endif %}
   </section>
