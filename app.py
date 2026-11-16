@@ -29,7 +29,7 @@ from werkzeug.utils import secure_filename
 # ==================================================
 # APP CONFIGURATION
 # ==================================================
-BASE_DIR = Path(_file_).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent
 IS_VERCEL = os.environ.get("VERCEL", "").lower() == "1"
 DATA_DIR = Path(
     os.environ.get(
@@ -41,7 +41,7 @@ UPLOAD_FOLDER = DATA_DIR / "uploads"
 if not IS_VERCEL:
     UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
-app = Flask(_name_)
+app = Flask(__name__)
 secret_key = os.environ.get("SECRET_KEY", "").strip()
 if IS_VERCEL and not secret_key:
     raise RuntimeError(
@@ -1126,7 +1126,7 @@ def add_security_headers(response):
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     return response
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 5000)),
