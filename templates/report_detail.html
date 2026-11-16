@@ -1,18 +1,10 @@
 {% extends "base.html" %}
-{% block title %}{{ report.item_name }} | SLSU JGE FindHub{% endblock %}
-{% block head %}
+{# MUST be outside any {% block %} so both head and content blocks can see them (Jinja2 block scoping) #}
 {% set is_lost = report.report_type|lower == 'lost' %}
 {% set is_closed = report.status in ['Returned', 'Archived'] %}
+{% block title %}{{ report.item_name }} | SLSU JGE FindHub{% endblock %}
+{% block head %}
 <style>
-  /* ============================================================
-     SLSU JGE FindHub — REPORT DETAIL (working buttons)
-     - Contact Reporter   → reveals contact panel (respects contact_public)
-     - LOST report        → "Submit Information" button (for people who saw the item)
-     - FOUND report       → "Submit a Claim" button (for the owner)
-     - Both POST to submit_claim with correct field names:
-         claimant_name, claimant_contact, proof, proof_photo (file),
-         website (honeypot), claim_type (hidden)
-  ============================================================ */
   :root {
     --fh-accent-lost: #c2410c;
     --fh-accent-lost-soft: #fff7ed;
@@ -49,7 +41,6 @@
     transition: gap .2s ease;
   }
   .fh-back-link:hover { gap: 10px; text-decoration: underline; }
-  /* ============ TOP: Photo + Main Info ============ */
   .fh-top-grid {
     display: grid;
     grid-template-columns: 1fr 1.1fr;
@@ -126,7 +117,6 @@
     padding: 8px 14px; border-radius: 10px;
     background: var(--surface-alt); border: 1px dashed var(--border);
   }
-  /* ============ REVEAL PANELS (contact + submission form) ============ */
   .fh-reveal {
     display: none;
     margin-top: 16px;
@@ -150,7 +140,6 @@
   .fh-contact-row a { color: var(--primary); font-weight: 600; text-decoration: none; border-bottom: 1px dashed currentColor; }
   .fh-contact-row a:hover { border-bottom-style: solid; }
   .fh-contact-private { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0; }
-  /* Inline submission form (claim OR information — same fields) */
   .fh-claim-form { display: flex; flex-direction: column; gap: 12px; }
   .fh-claim-form .fh-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .fh-claim-form label { font-size: 13px; font-weight: 700; color: var(--text); display: flex; flex-direction: column; gap: 6px; }
@@ -178,7 +167,6 @@
   }
   .fh-claim-form .fh-hint { font-size: 12px; color: var(--muted); font-weight: 400; }
   .fh-claim-form button { align-self: flex-start; }
-  /* ============ SECTION CARDS ============ */
   .fh-section-card {
     border: 1px solid var(--border);
     border-radius: var(--fh-radius);
@@ -196,7 +184,6 @@
   .fh-section-card p:last-child { margin-bottom: 0; }
   .fh-section-card strong { color: var(--text); font-weight: 600; }
   .fh-two-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-  /* Claim / information items list */
   .fh-claim-item {
     padding: 14px 16px;
     border: 1px solid var(--border);
@@ -228,7 +215,6 @@
   .fh-proof-photo-link:hover { text-decoration: underline; }
   .fh-proof-photo-link svg { width: 14px; height: 14px; }
   .fh-empty-state { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
-  /* ============ RESPONSIVE ============ */
   @media (max-width: 900px) {
     .fh-top-grid, .fh-two-col { grid-template-columns: 1fr; }
     .fh-meta-grid { grid-template-columns: 1fr; }
@@ -249,7 +235,6 @@
 {% endblock %}
 {% block content %}
 <div class="fh-detail-page">
-  <!-- Back Link -->
   <a href="{{ request.referrer or url_for('home') }}" class="fh-back-link">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="m15 18-6-6 6-6"/>
@@ -257,7 +242,6 @@
     Back to Reports
   </a>
 
-  <!-- ============ TOP: Photo + Main Info ============ -->
   <div class="fh-top-grid">
     <div class="fh-photo-card">
       {% if report.photo %}
@@ -446,7 +430,6 @@
     </div>
   </div>
 
-  <!-- ============ MIDDLE: Report Information + Item Details ============ -->
   <div class="fh-two-col">
     <section class="fh-section-card">
       <h2>
@@ -476,7 +459,6 @@
     </section>
   </div>
 
-  <!-- ============ BOTTOM: Submitted Claims / Information ============ -->
   <section class="fh-section-card">
     <h2>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
