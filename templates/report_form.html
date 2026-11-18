@@ -23,22 +23,7 @@
     </div>
 
     <div class="form-grid">
-      <!-- Item Name -->
-      <div class="form-group">
-        <label for="item_name">Item Name <span class="required">*</span></label>
-        <input
-          id="item_name"
-          name="item_name"
-          type="text"
-          maxlength="150"
-          required
-          autocomplete="off"
-          placeholder="e.g., Black Leather Wallet, ID Card, Blue Backpack"
-          class="form-input"
-        >
-      </div>
-
-      <!-- Category (NEW) -->
+      <!-- Category -->
       <div class="form-group">
         <label for="category">Category <span class="required">*</span></label>
         <select id="category" name="category" required class="form-input">
@@ -79,19 +64,35 @@
         >
       </div>
 
-      <!-- Your Contact Details -->
+      <!-- Incident Time (NEW) -->
       <div class="form-group">
-        <label for="contact">Preferred Contact Method <span class="required">*</span></label>
+        <label for="incident_time" id="incident-time-label">
+          Time of Occurrence <span class="required">*</span>
+        </label>
+        <input
+          id="incident_time"
+          name="incident_time"
+          type="time"
+          required
+          class="form-input"
+        >
+        <p class="input-hint">Anong oras nawala o napulot ang item? (HH:MM, 24-hour)</p>
+      </div>
+
+      <!-- Contact: email OR phone number only -->
+      <div class="form-group">
+        <label for="contact">Email or Phone Number <span class="required">*</span></label>
         <input
           id="contact"
           name="contact"
           type="text"
           maxlength="150"
           required
-          autocomplete="email"
-          placeholder="Email address, phone number, or social media handle"
+          autocomplete="off"
+          placeholder="e.g., you@example.com or 0912 345 6789"
           class="form-input"
         >
+        <p class="input-hint">Gamitin lang para ma-contact ka tungkol sa report. Hindi ipapakita publicly maliban na lang kung i-opt in mo sa ibaba.</p>
       </div>
 
       <!-- Your Full Name -->
@@ -118,7 +119,7 @@
           accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
           class="form-input file-input"
         >
-        <p class="input-hint">Supports JPG, PNG, WebP • Maximum file size: 5 MB</p>
+        <p class="input-hint">Supports JPG, PNG, WebP • Maximum file size: 30 MB</p>
         <div id="photo-preview-wrap" hidden style="margin-top:10px;">
           <img id="photo-preview" alt="Selected photo preview"
                style="max-width:100%;max-height:180px;border-radius:12px;border:1.5px solid var(--border);object-fit:cover;">
@@ -146,18 +147,19 @@
         >
       </div>
 
-      <!-- Description -->
+      <!-- Description — primary identifier now that Item Name is removed -->
       <div class="form-group full-width">
-        <label for="description">Detailed Description <span class="required">*</span></label>
+        <label for="description">Detailed Description &amp; Identifying Marks <span class="required">*</span></label>
         <textarea
           id="description"
           name="description"
           maxlength="3000"
           required
           rows="5"
-          placeholder="Include distinctive features: color, brand, markings, contents, or any unique identifiers..."
+          placeholder="Be specific: brand, model, color, size, scratches, markings, stickers, engraving, and what is inside (e.g., cash amount, cards, keys). The first words become the report title..."
           class="form-textarea"
         ></textarea>
+        <p class="input-hint">Mas maraming detalye, mas mabilis ma-identify at ma-match ang item. Ang unang 8 salita ang magiging title ng report.</p>
       </div>
 
       <!-- Public Contact Toggle -->
@@ -508,6 +510,7 @@ html[data-theme="dark"] .form-note {
 document.addEventListener("DOMContentLoaded", function () {
   var reportType = document.getElementById("report_type").value;
   var dateLabel = document.getElementById("incident-date-label");
+  var timeLabel = document.getElementById("incident-time-label");
   var formTitle = document.querySelector(".form-title");
   var btnText = document.getElementById("btn-text");
 
@@ -522,10 +525,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (reportType === "Lost") {
     fadeUpdate(dateLabel, "Date Item Was Lost <span class='required'>*</span>");
+    fadeUpdate(timeLabel, "Time Item Was Lost <span class='required'>*</span>");
     fadeUpdate(formTitle, "Report a Lost Item");
     fadeUpdate(btnText, "Submit Lost Report");
   } else if (reportType === "Found") {
     fadeUpdate(dateLabel, "Date Item Was Found <span class='required'>*</span>");
+    fadeUpdate(timeLabel, "Time Item Was Found <span class='required'>*</span>");
     fadeUpdate(formTitle, "Report a Found Item");
     fadeUpdate(btnText, "Submit Found Report");
   }
@@ -539,7 +544,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // === Photo preview before upload ===
+  // === Photo preview before upload (30 MB limit) ===
   var photoInput = document.getElementById("photo");
   var previewWrap = document.getElementById("photo-preview-wrap");
   var previewImg = document.getElementById("photo-preview");
@@ -549,8 +554,8 @@ document.addEventListener("DOMContentLoaded", function () {
     photoInput.addEventListener("change", function () {
       var file = photoInput.files && photoInput.files[0];
       if (!file) { previewWrap.hidden = true; return; }
-      if (file.size > 5 * 1024 * 1024) {
-        alert("This image is larger than 5 MB. Please choose a smaller file.");
+      if (file.size > 30 * 1024 * 1024) {
+        alert("This image is larger than 30 MB. Please choose a smaller file.");
         photoInput.value = "";
         previewWrap.hidden = true;
         return;
