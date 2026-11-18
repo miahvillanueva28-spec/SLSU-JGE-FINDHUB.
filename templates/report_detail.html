@@ -1,10 +1,18 @@
 {% extends "base.html" %}
-{# MUST be outside any {% block %} so both head and content blocks can see them (Jinja2 block scoping) #}
+{% block title %}{{ report.category or 'Item' }} | SLSU JGE FindHub{% endblock %}
+{% block head %}
 {% set is_lost = report.report_type|lower == 'lost' %}
 {% set is_closed = report.status in ['Returned', 'Archived'] %}
-{% block title %}{{ report.item_name }} | SLSU JGE FindHub{% endblock %}
-{% block head %}
 <style>
+  /* ============================================================
+     SLSU JGE FindHub — REPORT DETAIL (working buttons)
+     - Contact Reporter   → reveals contact panel (respects contact_public)
+     - LOST report        → "Submit Information" button (for people who saw the item)
+     - FOUND report       → "Submit a Claim" button (for the owner)
+     - Both POST to submit_claim with correct field names:
+         claimant_name, claimant_contact, proof, proof_photo (file),
+         website (honeypot), claim_type (hidden)
+  ============================================================ */
   :root {
     --fh-accent-lost: #c2410c;
     --fh-accent-lost-soft: #fff7ed;
@@ -41,6 +49,7 @@
     transition: gap .2s ease;
   }
   .fh-back-link:hover { gap: 10px; text-decoration: underline; }
+  /* ============ TOP: Photo + Main Info ============ */
   .fh-top-grid {
     display: grid;
     grid-template-columns: 1fr 1.1fr;
@@ -117,6 +126,7 @@
     padding: 8px 14px; border-radius: 10px;
     background: var(--surface-alt); border: 1px dashed var(--border);
   }
+  /* ============ REVEAL PANELS (contact + submission form) ============ */
   .fh-reveal {
     display: none;
     margin-top: 16px;
@@ -140,6 +150,7 @@
   .fh-contact-row a { color: var(--primary); font-weight: 600; text-decoration: none; border-bottom: 1px dashed currentColor; }
   .fh-contact-row a:hover { border-bottom-style: solid; }
   .fh-contact-private { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0; }
+  /* Inline submission form (claim OR information — same fields) */
   .fh-claim-form { display: flex; flex-direction: column; gap: 12px; }
   .fh-claim-form .fh-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .fh-claim-form label { font-size: 13px; font-weight: 700; color: var(--text); display: flex; flex-direction: column; gap: 6px; }
@@ -167,6 +178,7 @@
   }
   .fh-claim-form .fh-hint { font-size: 12px; color: var(--muted); font-weight: 400; }
   .fh-claim-form button { align-self: flex-start; }
+  /* ============ SECTION CARDS ============ */
   .fh-section-card {
     border: 1px solid var(--border);
     border-radius: var(--fh-radius);
@@ -184,6 +196,7 @@
   .fh-section-card p:last-child { margin-bottom: 0; }
   .fh-section-card strong { color: var(--text); font-weight: 600; }
   .fh-two-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  /* Claim / information items list */
   .fh-claim-item {
     padding: 14px 16px;
     border: 1px solid var(--border);
@@ -214,19 +227,8 @@
   }
   .fh-proof-photo-link:hover { text-decoration: underline; }
   .fh-proof-photo-link svg { width: 14px; height: 14px; }
-  /* Admin review note — visible to the user on the report page */
-  .fh-admin-note {
-    margin-top: 10px;
-    padding: 10px 14px;
-    border-left: 3px solid var(--primary);
-    background: var(--primary-soft);
-    border-radius: 0 10px 10px 0;
-    font-size: 13px;
-    color: var(--text);
-    line-height: 1.55;
-  }
-  .fh-admin-note strong { color: var(--primary); display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
   .fh-empty-state { padding: 24px; text-align: center; color: var(--muted); font-size: 14px; }
+  /* ============ RESPONSIVE ============ */
   @media (max-width: 900px) {
     .fh-top-grid, .fh-two-col { grid-template-columns: 1fr; }
     .fh-meta-grid { grid-template-columns: 1fr; }
@@ -247,6 +249,7 @@
 {% endblock %}
 {% block content %}
 <div class="fh-detail-page">
+  <!-- Back Link -->
   <a href="{{ request.referrer or url_for('home') }}" class="fh-back-link">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="m15 18-6-6 6-6"/>
@@ -254,10 +257,11 @@
     Back to Reports
   </a>
 
+  <!-- ============ TOP: Photo + Main Info ============ -->
   <div class="fh-top-grid">
     <div class="fh-photo-card">
       {% if report.photo %}
-        <img src="{{ photo_src(report.photo) }}" alt="Photo of {{ report.item_name }}">
+        <img src="{{ photo_src(report.photo) }}" alt="Photo of {{ report.category or 'item' }}">
       {% else %}
         <div class="fh-photo-card__ph" aria-label="No photo available">
           {% if is_lost %}
@@ -278,7 +282,7 @@
     </div>
 
     <div class="fh-info-card">
-      <h1>{{ report.item_name }}</h1>
+      <h1>{{ report.category or 'Item' }}</h1>
       <span class="fh-status-line
         {% if report.status == 'Pending Claim' %}fh-status--pending
         {% elif is_closed %}fh-status--closed
@@ -298,7 +302,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
           </svg>
-          <span><strong>Date</strong><br>{{ report.incident_date }}</span>
+          <span><strong>Date &amp; Time</strong><br>{{ report.incident_date }}{% if report.incident_time %} · {{ report.incident_time }}{% endif %}</span>
         </div>
         {% endif %}
         <div class="fh-meta-item">
@@ -395,9 +399,9 @@
         </h3>
         <p class="fh-hint-line">
           {% if is_lost %}
-            Have you seen this item? Please share what you know — where and when you found it, any distinguishing marks, and other relevant details — so it can be returned to its owner.
+            Nakita mo ba ang item na ito? Ibahagi ang alam mo (saan at kailan mo nakita, itsura, atbp.) para maibalik ito sa may-ari.
           {% else %}
-            If this item belongs to you, please prove ownership by describing unique details that only the true owner would know.
+            Kung sa iyo ang item na ito, patunayan sa pamamagitan ng paglalarawan ng mga detalye na tanging ikaw lang ang nakakaalam.
           {% endif %}
         </p>
 
@@ -418,8 +422,8 @@
 
           <label>
             {% if is_lost %}
-              What details can you share about this item? <span class="fh-hint">(required — where you saw it, distinguishing marks, etc.)</span>
-              <textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., I saw it at the JGE library on November 10; it is black with a name written on the back of the case."></textarea>
+              Ano ang alam mo tungkol sa item na ito? <span class="fh-hint">(required — saan mo nakita, natatanging marka, atbp.)</span>
+              <textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., Nakita ko ito sa JGE library noong Nov 10, kulay itim at may pangalan sa likod ng takip."></textarea>
             {% else %}
               Proof of Ownership <span class="fh-hint">(required — describe unique details only the owner would know)</span>
               <textarea name="proof" maxlength="2000" rows="4" required placeholder="e.g., Black wallet with a small tear on the top-right corner, contains an SLSU ID ending in 2024."></textarea>
@@ -442,6 +446,7 @@
     </div>
   </div>
 
+  <!-- ============ MIDDLE: Report Information + Item Details ============ -->
   <div class="fh-two-col">
     <section class="fh-section-card">
       <h2>
@@ -463,14 +468,14 @@
         </svg>
         Item Details
       </h2>
-      <p><strong>Item Name:</strong> {{ report.item_name }}</p>
       <p><strong>Category:</strong> {{ report.category or 'Not specified' }}</p>
       <p><strong>Location:</strong> {{ report.location or 'Not specified' }}</p>
-      <p><strong>Date {{ 'Lost' if is_lost else 'Found' }}:</strong> {{ report.incident_date or 'Not specified' }}</p>
+      <p><strong>Date {{ 'Lost' if is_lost else 'Found' }}:</strong> {{ report.incident_date or 'Not specified' }}{% if report.incident_date and report.incident_time %} · {{ report.incident_time }}{% endif %}</p>
       <p><strong>Reported By:</strong> {{ report.contact_name or 'Anonymous' }}</p>
     </section>
   </div>
 
+  <!-- ============ BOTTOM: Submitted Claims / Information ============ -->
   <section class="fh-section-card">
     <h2>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -505,17 +510,11 @@
             View attached photo
           </a>
           {% endif %}
-          {% if claim.review_note %}
-          <div class="fh-admin-note">
-            <strong>Admin review note</strong>
-            {{ claim.review_note }}
-          </div>
-          {% endif %}
         </div>
       {% endfor %}
     {% else %}
       <div class="fh-empty-state">
-        {% if is_lost %}No information has been submitted for this item yet.{% else %}No claims have been submitted for this item yet.{% endif %}
+        {% if is_lost %}Walang nag-submit pa ng impormasyon para sa item na ito.{% else %}No claims submitted yet for this item.{% endif %}
       </div>
     {% endif %}
   </section>
