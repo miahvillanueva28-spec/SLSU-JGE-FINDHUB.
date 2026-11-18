@@ -76,7 +76,7 @@
           required
           class="form-input"
         >
-        <p class="input-hint">Anong oras nawala o napulot ang item? (HH:MM, 24-hour)</p>
+        <p class="input-hint">What time did you lose or find the item? (HH:MM, 24-hour)</p>
       </div>
 
       <!-- Contact: email OR phone number only -->
@@ -92,7 +92,7 @@
           placeholder="e.g., you@example.com or 0912 345 6789"
           class="form-input"
         >
-        <p class="input-hint">Gamitin lang para ma-contact ka tungkol sa report. Hindi ipapakita publicly maliban na lang kung i-opt in mo sa ibaba.</p>
+        <p class="input-hint">Used only to contact you about this report. It will not be shown publicly unless you opt in below.</p>
       </div>
 
       <!-- Your Full Name -->
@@ -156,10 +156,10 @@
           maxlength="3000"
           required
           rows="5"
-          placeholder="Be specific: brand, model, color, size, scratches, markings, stickers, engraving, and what is inside (e.g., cash amount, cards, keys). The first words become the report title..."
+          placeholder="Be specific: brand, model, color, size, scratches, markings, stickers, engraving, and what is inside (e.g., cash amount, cards, keys)."
           class="form-textarea"
         ></textarea>
-        <p class="input-hint">Mas maraming detalye, mas mabilis ma-identify at ma-match ang item. Ang unang 8 salita ang magiging title ng report.</p>
+        <p class="input-hint">The more details you provide, the faster the item can be identified and matched.</p>
       </div>
 
       <!-- Public Contact Toggle -->
@@ -458,7 +458,7 @@ html[data-theme="dark"] .form-note {
 }
 
 /* ============================================================
-   RESPONSIVE — CELLPHONE (≤640px) — sakto lang, hindi lampas
+   RESPONSIVE — CELLPHONE (≤640px)
    ============================================================ */
 @media (max-width: 640px) {
   .form-panel { padding: 12px 0 32px; }
@@ -574,6 +574,30 @@ document.addEventListener("DOMContentLoaded", function () {
         previewWrap.hidden = true;
       });
     }
+  }
+
+  // === Contact field validation: valid email OR phone number only ===
+  var contactField = document.getElementById("contact");
+  var reportFormEl = document.querySelector(".form-container");
+  function isValidEmailOrPhone(value) {
+    value = (value || "").trim();
+    if (!value) return false;
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) return true;
+    if (/^\+?[\d\s\-\(\)]{7,20}$/.test(value)) {
+      var digits = value.replace(/\D/g, "");
+      if (digits.length >= 7 && digits.length <= 15) return true;
+    }
+    return false;
+  }
+  if (reportType && reportFormEl && contactField) {
+    reportFormEl.addEventListener("submit", function (e) {
+      if (!isValidEmailOrPhone(contactField.value)) {
+        e.preventDefault();
+        alert("Please enter a valid email address or phone number only (e.g., you@example.com or 0912 345 6789).");
+        contactField.focus();
+        contactField.select();
+      }
+    });
   }
 });
 </script>
