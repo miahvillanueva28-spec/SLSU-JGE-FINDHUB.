@@ -13,86 +13,102 @@
      - LOST report        → "Submit Information" button (for people who saw the item)
      - FOUND report       → "Submit a Claim" button (for the owner)
      - Both POST to submit_claim with correct field names:
-         claimant_name, claimant_contact, claim_details, report_id
+         claimant_name, claimant_contact, claim_description
   ============================================================ */
 
-  .report-button {
-    background-color: #4CAF50;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  .report-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid var(--fh-accent-lost-border);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
 
-  .report-button:hover {
-    background-color: #3e8e41;
+  .report-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .report-details {
+    padding: 20px;
+  }
+
+  .report-status {
+    background-color: var(--fh-accent-lost);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .report-status.closed {
+    background-color: var(--fh-accent-found);
+  }
+
+  .report-actions {
+    margin-top: 20px;
   }
 
   .contact-panel {
     display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #fff;
     padding: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--fh-accent-lost-border);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
 
   .contact-panel.show {
     display: block;
   }
 
-  .contact-panel .close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+  .submit-claim-button {
+    background-color: var(--fh-accent-lost);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
     cursor: pointer;
+  }
+
+  .submit-claim-button.lost {
+    background-color: var(--fh-accent-found);
+  }
+
+  .submit-claim-button:hover {
+    background-color: var(--fh-accent-lost-soft);
   }
 </style>
 
 {% block content %}
-  <h1>{{ report.category or 'Item' }}</h1>
-  <p>Status: {{ report.status }}</p>
-  <p>Date: {{ report.date }}</p>
-  <p>Location: {{ report.location }}</p>
-  <p>Description: {{ report.description }}</p>
-
-  {% if is_lost %}
-    <button class="report-button" onclick="submitInformation()">Submit Information</button>
-  {% elif is_closed %}
-    <p>This report is closed.</p>
-  {% else %}
-    <button class="report-button" onclick="submitClaim()">Submit a Claim</button>
-  {% endif %}
-
-  <button class="report-button" onclick="contactReporter()">Contact Reporter</button>
-
-  <div class="contact-panel" id="contact-panel">
-    <h2>Contact Reporter</h2>
-    <p>Reporter's Name: {{ report.reporter_name }}</p>
-    <p>Reporter's Contact: {{ report.reporter_contact }}</p>
-    <button class="close" onclick="hideContactPanel()">×</button>
+  <div class="report-card">
+    <img class="report-image" src="{{ report.image_url }}" alt="Report Image">
+    <div class="report-details">
+      <h2>{{ report.category or 'Item' }}</h2>
+      <p>Location: {{ report.location }}</p>
+      <p>Date: {{ report.date }}</p>
+      <p>Description: {{ report.description }}</p>
+    </div>
+    <div class="report-status {{ 'closed' if is_closed else 'open' }}">
+      {{ report.status }}
+    </div>
+    <div class="report-actions">
+      {% if is_lost %}
+        <button class="submit-claim-button lost">Submit Information</button>
+      {% else %}
+        <button class="submit-claim-button">Submit a Claim</button>
+      {% endif %}
+      <button class="contact-panel-button" onclick="toggleContactPanel()">Contact Reporter</button>
+      <div class="contact-panel {{ 'show' if contact_public else '' }}">
+        <p>Contact Information:</p>
+        <p>Name: {{ report.reporter_name }}</p>
+        <p>Phone: {{ report.reporter_phone }}</p>
+        <p>Email: {{ report.reporter_email }}</p>
+      </div>
+    </div>
   </div>
-
-  <script>
-    function submitInformation() {
-      // submit information form
-    }
-
-    function submitClaim() {
-      // submit claim form
-    }
-
-    function contactReporter() {
-      document.getElementById('contact-panel').classList.add('show');
-    }
-
-    function hideContactPanel() {
-      document.getElementById('contact-panel').classList.remove('show');
-    }
-  </script>
 {% endblock %}
