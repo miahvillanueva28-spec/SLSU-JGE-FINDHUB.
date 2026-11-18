@@ -1,4 +1,3 @@
-
 import os
 import re
 import csv
@@ -60,7 +59,7 @@ if IS_VERCEL and not secret_key:
     )
 
 app.config["SECRET_KEY"] = secret_key or secrets.token_hex(32)
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 30 * 1024 * 1024
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -182,6 +181,7 @@ class Report(db.Model):
     description = db.Column(db.Text, nullable=False)
     location = db.Column(db.String(200), nullable=False)
     incident_date = db.Column(db.Date, nullable=False)
+    incident_time = db.Column(db.String(10), nullable=True)
     contact_name = db.Column(db.String(120), nullable=False)
     contact = db.Column(db.String(150), nullable=False)
     contact_public = db.Column(
@@ -299,9 +299,41 @@ def ensure_claim_columns():
                 app.logger.exception("Failed to add review_note column")
 
 
+def ensure_report_columns():
+    """Add newer columns to an existing report table (auto-migration)."""
+    try:
+        inspector = sa_inspect(db.engine)
+
+        if "report" not in inspector.get_table_names():
+            return
+
+        existing = {
+            c["name"]
+            for c in inspector.get_columns("report")
+        }
+
+    except Exception:
+        app.logger.exception("Auto-migration inspection failed")
+        return
+
+    with db.engine.begin() as conn:
+        if "incident_time" not in existing:
+            try:
+                conn.execute(
+                    text(
+                        "ALTER TABLE report ADD COLUMN incident_time VARCHAR(10)"
+                    )
+                )
+                app.logger.info("Added column report.incident_time")
+
+            except Exception:
+                app.logger.exception("Failed to add incident_time column")
+
+
 with app.app_context():
     db.create_all()
     ensure_claim_columns()
+    ensure_report_columns()
 
 
 # ==================================================
@@ -477,6 +509,45 @@ def parse_incident_date(value):
 
     except (TypeError, ValueError):
         return None
+
+
+def parse_incident_time(value):
+    """Validate and normalize a time string to HH:MM (24-hour)."""
+    value = (value or "").strip()
+
+    match = re.match(r"^(\d{1,2}):(\d{2})$", value)
+
+    if not match:
+        return None
+
+    hour, minute = int(match.group(1)), int(match.group(2))
+
+    if hour > 23 or minute > 59:
+        return None
+
+    return f"{hour:02d}:{minute:02d}"
+
+
+def is_valid_email_or_phone(value):
+    """Accept either a valid email address or a phone number."""
+    value = (value or "").strip()
+
+    if not value:
+        return False
+
+    # Email: something@something.tld (tld at least 2 chars)
+    if re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]{2,}$", value):
+        return True
+
+    # Phone: optional leading +, digits with spaces / dashes / parentheses,
+    # between 7 and 15 actual digits (covers PH 09.., +63.., landline).
+    if re.match(r"^\+?[\d\s\-\(\)]{7,20}$", value):
+        digit_count = len(re.sub(r"\D", "", value))
+
+        if 7 <= digit_count <= 15:
+            return True
+
+    return False
 
 
 def get_report_form_value(name, default=""):
@@ -733,24 +804,20 @@ def new_report():
         if request.form.get("website"):
             return redirect(url_for("home"))
 
-        client_ip = request.remote_addr or "unknown"
-
-        if _rate_limited("report", client_ip, 3, 600):
-            flash(
-                "Too many submissions from this device. Please wait a few minutes.",
-                "danger",
-            )
-
-            return redirect(url_for("new_report"))
+        # NOTE: per-device submission limit removed — users may post
+        # as many reports as needed. (Login rate limit still applies.)
 
         report_type = get_report_form_value("report_type")
-        item_name = get_report_form_value("item_name")
         category = get_report_form_value("category")
         description = get_report_form_value("description")
         location = get_report_form_value("location")
 
         incident_date = parse_incident_date(
             get_report_form_value("incident_date")
+        )
+
+        incident_time = parse_incident_time(
+            get_report_form_value("incident_time")
         )
 
         contact_name = get_report_form_value("contact_name")
@@ -767,8 +834,20 @@ def new_report():
             flash("Please select Lost or Found.", "danger")
             return redirect(url_for("new_report"))
 
+        # Normalize category first so the auto-derived item name is accurate.
+        if category not in ITEM_CATEGORIES:
+            category = "Other"
+
+        # Item Name is no longer collected on the form; auto-derive a
+        # specific title from the category + the opening words of the
+        # description. The database column is required, and search /
+        # auto-match still rely on a meaningful item_name.
+        base = "Item" if category == "Other" else category
+        words = re.findall(r"\S+", description)
+        snippet = " ".join(words[:8])
+        item_name = (f"{base} — {snippet}" if snippet else base)[:150]
+
         if not all([
-            item_name,
             description,
             location,
             incident_date,
@@ -777,16 +856,26 @@ def new_report():
             flash("Please complete all required fields.", "danger")
             return redirect(url_for("new_report"))
 
+        if incident_time is None:
+            flash(
+                "Please enter the time (HH:MM) when the item was lost or found.",
+                "danger",
+            )
+            return redirect(url_for("new_report"))
+
+        if not is_valid_email_or_phone(contact):
+            flash(
+                "Please enter a valid email address or phone number for contact.",
+                "danger",
+            )
+            return redirect(url_for("new_report"))
+
         if incident_date > date.today():
             flash(
                 "The lost or found date cannot be in the future.",
                 "danger",
             )
 
-            return redirect(url_for("new_report"))
-
-        if len(item_name) > 150:
-            flash("Item name is too long.", "danger")
             return redirect(url_for("new_report"))
 
         if len(location) > 200:
@@ -800,9 +889,6 @@ def new_report():
         if len(contact_name) > 120:
             flash("Your name is too long.", "danger")
             return redirect(url_for("new_report"))
-
-        if category not in ITEM_CATEGORIES:
-            category = "Other"
 
         stored_contact_name = contact_name or "Not provided"
 
@@ -837,6 +923,7 @@ def new_report():
             description=description,
             location=location,
             incident_date=incident_date,
+            incident_time=incident_time,
             contact_name=stored_contact_name,
             contact=contact,
             contact_public=contact_public,
@@ -1682,6 +1769,7 @@ def export_reports():
         "Description",
         "Location",
         "Incident Date",
+        "Time",
         "Contact Name",
         "Contact",
         "Status",
@@ -1702,6 +1790,7 @@ def export_reports():
             report.description,
             report.location,
             report.incident_date.isoformat() if report.incident_date else "",
+            report.incident_time or "",
             report.contact_name,
             report.contact,
             report.status,
@@ -1744,7 +1833,7 @@ def admin_logout():
 @app.errorhandler(413)
 def file_too_large(_error):
     flash(
-        "The uploaded file is too large. Maximum size is 5 MB.",
+        "The uploaded file is too large. Maximum size is 30 MB.",
         "danger",
     )
 
